@@ -1,4 +1,4 @@
-name: Run start.sh (Manual)
+name: Run MusicMu Startup (Manual)
 
 on:
   workflow_dispatch:
@@ -12,8 +12,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Give execution permission to start.sh
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd server && npm install
+          cd ../client && npm install
+
+      - name: Make start.sh executable
         run: chmod +x ./start.sh
 
       - name: Run start.sh
         run: ./start.sh
+
+      - name: List running Node processes (for debug)
+        run: ps aux | grep node
+
