@@ -12,17 +12,14 @@
   "dependencies": {
     "@distube/ytdl-core": "^4.16.12",
     "@fastify/cors": "^8.5.0",
-    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/rate-limit": "^9.1.0",
     "axios": "^1.13.2",
     "dotenv": "^16.3.1",
     "fastify": "^4.25.2",
     "p-queue": "^9.0.0",
     "pino-pretty": "^10.3.1",
     "play-dl": "^1.9.7",
-    "youtube-audio-stream": "^0.3.61",
-    "youtube-ext": "^1.1.25",
-    "youtubei.js": "^9.1.0",
-    "ytdl-core": "^4.11.5"
+    "youtubei.js": "^9.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
