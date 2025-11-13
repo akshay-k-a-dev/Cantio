@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { cache, Track } from '../lib/cache';
 
-const API_BASE = '/api';
+// Use environment variable for API URL, fallback to /api for development proxy
+const API_BASE = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
 
 export type PlayerState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 
@@ -284,10 +287,10 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   },
 
   togglePlay: () => {
-    const { audio, state } = get();
+    const { audio, state, currentTrack } = get();
     const ytPlayer = (get() as any).ytPlayer;
     
-    if (!get().currentTrack) return;
+    if (!currentTrack) return;
 
     if (state === 'playing') {
       if (ytPlayer) {
@@ -296,6 +299,17 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
         audio.pause();
       }
     } else {
+      // Check if we have an active stream source
+      const hasActiveStream = (audio && audio.src) || ytPlayer;
+      
+      if (!hasActiveStream) {
+        // No active stream - need to reload the track
+        console.log('🔄 No active stream found, reloading track...');
+        get().play(currentTrack);
+        return;
+      }
+      
+      // Resume playback
       if (ytPlayer) {
         ytPlayer.playVideo();
       } else if (audio) {
