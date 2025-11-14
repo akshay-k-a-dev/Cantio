@@ -6,7 +6,6 @@ import searchRoutes from './routes/search.js';
 import trackRoutes from './routes/track.js';
 import guestRoutes from './routes/guest.js';
 import { getQueueStats } from './lib/queue.js';
-import { resetStreamMethodCache } from './lib/youtube.js';
 
 // Load environment variables
 config();
@@ -64,12 +63,6 @@ fastify.get('/api/stats', async (request, reply) => {
     uptime: process.uptime(),
     memory: process.memoryUsage(),
   };
-});
-
-// Reset stream method cache (for debugging/forcing retry of extraction methods)
-fastify.post('/api/reset-stream-cache', async (request, reply) => {
-  resetStreamMethodCache();
-  return { message: 'Stream method cache reset successfully' };
 });
 
 // Register routes

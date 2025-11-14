@@ -1,5 +1,4 @@
 import { Innertube } from 'youtubei.js';
-import { searchQueue } from './queue.js';
 
 export interface TrackMetadata {
   videoId: string;
@@ -17,7 +16,7 @@ export interface SearchResult {
   thumbnail: string;
 }
 
-// Cache for Innertube instance (web client mode only)
+// Cache for Innertube instance (serverless functions reuse this)
 let innertubeInstance: Innertube | null = null;
 
 async function getInnertubeInstance(): Promise<Innertube> {
@@ -71,9 +70,9 @@ export async function getMetadata(videoId: string): Promise<TrackMetadata> {
 }
 
 /**
- * Internal search function
+ * Search for videos
  */
-async function performSearch(query: string, limit: number = 10): Promise<SearchResult[]> {
+export async function search(query: string, limit: number = 10): Promise<SearchResult[]> {
   try {
     const yt = await getInnertubeInstance();
     
@@ -97,12 +96,4 @@ async function performSearch(query: string, limit: number = 10): Promise<SearchR
     // Return empty array instead of throwing to prevent 500 errors
     return [];
   }
-}
-
-/**
- * Search with queue management
- * Queued to prevent server overload (max 5 concurrent searches)
- */
-export async function search(query: string, limit: number = 10): Promise<SearchResult[]> {
-  return searchQueue.add(() => performSearch(query, limit));
 }

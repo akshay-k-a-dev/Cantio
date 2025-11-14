@@ -52,17 +52,29 @@ A modern, full-stack music streaming platform with **unlimited skips**, **no ads
 
 ## 🚀 Quick Start
 
-### Prerequisites
+**MusicMu offers two deployment options:**
+
+### Option 1: Self-Hosted (Traditional)
+Full control, runs on your own server with systemd/PM2.
+
+### Option 2: Serverless (Vercel) ⭐ NEW
+Auto-scaling, zero server management, free tier available.
+
+---
+
+### Self-Hosted Deployment
+
+#### Prerequisites
 - Node.js 18+ (or Bun)
 - npm/yarn/pnpm/bun
 
-### 1. Clone & Setup
+#### 1. Clone & Setup
 
 ```bash
 cd musicmu
 ```
 
-### 2. Backend Setup
+#### 2. Backend Setup
 
 ```bash
 cd server
@@ -78,7 +90,7 @@ npm run dev
 
 Backend runs on **http://localhost:3001**
 
-### 3. Frontend Setup
+#### 3. Frontend Setup
 
 ```bash
 cd ../client
@@ -90,7 +102,7 @@ npm run dev
 
 Frontend runs on **http://localhost:5173**
 
-### Quick Start (Both servers)
+#### Quick Start (Both servers)
 
 ```bash
 # From project root
@@ -101,15 +113,53 @@ This script starts both backend and frontend in tmux (or background if tmux not 
 
 ---
 
+### Serverless Deployment (Vercel)
+
+#### Prerequisites
+- Vercel account (free tier available)
+- Vercel CLI: `npm install -g vercel`
+
+#### 1. Deploy Backend
+
+```bash
+cd vercelhost/backend
+cp .env.example .env
+npm install
+vercel --prod
+# Copy the deployment URL
+```
+
+#### 2. Deploy Frontend
+
+```bash
+cd ../frontend
+cp .env.example .env
+# Edit .env and update VITE_API_URL with your backend URL
+npm install
+vercel --prod
+```
+
+#### Local Development (Serverless)
+
+```bash
+cd vercelhost
+./start.sh  # Starts both on ports 4001 (backend) and 4173 (frontend)
+```
+
+📖 **See [vercelhost/README.md](./vercelhost/README.md) for detailed serverless setup.**
+
+---
+
 ## 📁 Project Structure
 
 ```
 musicmu/
-├── server/                 # Backend (Fastify)
+├── server/                 # Backend (Fastify) - Self-Hosted
 │   ├── src/
 │   │   ├── index.ts       # Main server
 │   │   ├── lib/
-│   │   │   └── youtube.ts # Stream resolver with fallbacks
+│   │   │   ├── youtube.ts # Stream resolver with fallbacks
+│   │   │   └── queue.ts   # Request queue management
 │   │   └── routes/
 │   │       ├── search.ts  # Search endpoint
 │   │       ├── track.ts   # Track metadata & streams
@@ -117,23 +167,52 @@ musicmu/
 │   ├── package.json
 │   └── .env
 │
-└── client/                 # Frontend (React + Vite)
-    ├── src/
-    │   ├── main.tsx       # Entry point
-    │   ├── App.tsx        # Router & navigation
-    │   ├── components/
-    │   │   └── MusicPlayerCard.tsx  # Main player UI
-    │   ├── pages/
-    │   │   ├── HomePage.tsx         # Home page
-    │   │   ├── SearchPage.tsx       # Search interface
-    │   │   └── LikedPage.tsx        # Liked songs
-    │   ├── services/
-    │   │   └── player.ts  # Zustand player state
-    │   └── lib/
-    │       └── cache.ts   # IndexedDB cache manager
-    ├── index.html
-    ├── package.json
-    └── vite.config.ts
+├── client/                 # Frontend (React + Vite) - Self-Hosted
+│   ├── src/
+│   │   ├── main.tsx       # Entry point
+│   │   ├── App.tsx        # Router & navigation
+│   │   ├── components/
+│   │   │   └── MusicPlayerCard.tsx  # Main player UI
+│   │   ├── pages/
+│   │   │   ├── HomePage.tsx         # Home page
+│   │   │   ├── SearchPage.tsx       # Search interface
+│   │   │   └── LikedPage.tsx        # Liked songs
+│   │   ├── services/
+│   │   │   └── player.ts  # Zustand player state
+│   │   └── lib/
+│   │       └── cache.ts   # IndexedDB cache manager
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.ts
+│
+└── vercelhost/             # Serverless Deployment (Vercel) ⭐ NEW
+    ├── backend/            # Serverless API Functions
+    │   ├── api/           # Vercel serverless functions
+    │   │   ├── health.ts
+    │   │   ├── search.ts
+    │   │   ├── guest.ts
+    │   │   └── track/
+    │   │       ├── [id].ts
+    │   │       └── [id]/
+    │   │           ├── stream.ts
+    │   │           └── full.ts
+    │   ├── lib/
+    │   │   └── youtube.ts # YouTube utilities
+    │   ├── dev-server.ts  # Local development server
+    │   ├── package.json
+    │   ├── vercel.json    # Vercel configuration
+    │   └── .env
+    │
+    ├── frontend/          # Static React App for Vercel
+    │   ├── src/          # Same as client/src
+    │   ├── package.json
+    │   ├── vercel.json   # Vercel configuration
+    │   └── .env
+    │
+    ├── start.sh          # Start both servers (dev)
+    ├── stop.sh           # Stop both servers
+    ├── README.md         # Serverless deployment guide
+    └── ENV_VARS.md       # Environment variables guide
 ```
 
 ---
@@ -236,17 +315,37 @@ IDLE → LOADING → PLAYING ⇄ PAUSED
 ## 🛠️ Tech Stack
 
 ### Backend
+
+**Self-Hosted (server/):**
 - **Framework**: Fastify (fast, low-overhead)
 - **Language**: TypeScript
+- **Rate Limiting**: @fastify/rate-limit
+- **Queue Management**: p-queue
 - **YouTube Libraries**:
   - `youtubei.js` - Primary (Innertube API)
-  - `play-dl` - Fallback #1
-  - `ytdl-core` - Fallback #2
-  - `yt-stream` - Fallback #3
+
+**Serverless (vercelhost/backend/):**
+- **Platform**: Vercel Serverless Functions
+- **Runtime**: Node.js 18+
+- **Language**: TypeScript
+- **YouTube Library**: `youtubei.js` only
+- **Features**: Auto-scaling, edge deployment, zero config
 
 ### Frontend
+
+**Self-Hosted (client/):**
 - **Framework**: React 18
 - **Build Tool**: Vite
+- **Server**: Express (static file serving)
+- **Port**: 5173
+
+**Serverless (vercelhost/frontend/):**
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Deployment**: Static site on Vercel CDN
+- **Port**: 4173 (dev)
+
+**Common Frontend Stack:**
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
@@ -258,7 +357,9 @@ IDLE → LOADING → PLAYING ⇄ PAUSED
 
 ## 📝 Environment Variables
 
-### Server (.env)
+### Self-Hosted
+
+**Server (.env)**
 ```bash
 PORT=3001
 HOST=0.0.0.0
@@ -267,6 +368,26 @@ CORS_ORIGIN=*
 NODE_ENV=development
 YT_API_KEY=your_youtube_api_key  # Optional for MVP
 ```
+
+### Serverless (Vercel)
+
+**Backend (vercelhost/backend/.env)**
+```bash
+PORT=4001
+HOST=0.0.0.0
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:4173
+LOG_LEVEL=info
+```
+
+**Frontend (vercelhost/frontend/.env)**
+```bash
+VITE_API_URL=http://localhost:4001
+VITE_APP_NAME=MusicMu
+VITE_APP_VERSION=1.0.0
+```
+
+📖 **See [vercelhost/ENV_VARS.md](./vercelhost/ENV_VARS.md) for complete environment variables guide.**
 
 ---
 

@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/api/health.ts"
+    },
+    {
+      "src": "/api/search",
+      "dest": "/api/search.ts"
+    },
+    {
+      "src": "/api/track/([^/]+)",
+      "dest": "/api/track/$1.ts"
+    },
+    {
+      "src": "/api/track/([^/]+)/stream",
+      "dest": "/api/track/$1/stream.ts"
+    },
+    {
+      "src": "/api/track/([^/]+)/full",
+      "dest": "/api/track/$1/full.ts"
+    },
+    {
+      "src": "/api/guest",
+      "dest": "/api/guest.ts"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["iad1"]
+}
