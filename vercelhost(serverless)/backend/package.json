@@ -5,7 +5,6 @@
   "main": "api/health.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
     "dev": "tsx dev-server.ts",
     "vercel-dev": "vercel dev",
     "deploy": "vercel --prod"

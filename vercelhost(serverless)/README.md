@@ -58,6 +58,24 @@ npm run dev
 
 ### Production Deployment
 
+#### Option 1: Automated Deployment (Recommended)
+
+Use the provided deployment script that handles everything automatically:
+
+```bash
+# From vercelhost(serverless) directory
+./deploy-all.sh
+```
+
+This script will:
+1. Deploy backend to Vercel
+2. Get the backend URL
+3. Update frontend configuration automatically
+4. Deploy frontend with correct backend URL
+5. Test both deployments
+
+#### Option 2: Manual Deployment
+
 **Step 1: Deploy Backend**
 ```bash
 cd backend
@@ -66,18 +84,13 @@ vercel --prod
 # Copy the deployment URL (e.g., https://musicmu-api.vercel.app)
 ```
 
-**Step 2: Update Frontend API URL**
+**Step 2: Update Frontend Configuration**
 
-Edit `frontend/vercel.json` and replace the backend URL:
-```json
-{
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://your-actual-backend-url.vercel.app/api/:path*"
-    }
-  ]
-}
+Edit `frontend/.env.production`:
+```bash
+VITE_API_URL=https://your-actual-backend-url.vercel.app
+VITE_APP_NAME=MusicMu
+VITE_APP_VERSION=1.0.0
 ```
 
 **Step 3: Deploy Frontend**
@@ -86,6 +99,10 @@ cd frontend
 npm install
 vercel --prod
 ```
+
+> ⚠️ **Important:** Always deploy backend first, then update frontend with the backend URL
+
+> 📖 **Troubleshooting:** See `DEPLOYMENT_FIX.md` for common issues and solutions
 
 ## 🔧 Configuration
 
