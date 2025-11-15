@@ -1,0 +1,29 @@
+{
+  "name": "musicmu-serverless-backend",
+  "version": "1.0.0",
+  "description": "MusicMu serverless backend for Vercel",
+  "main": "api/health.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx dev-server.ts",
+    "vercel-dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "build": "echo 'No build step required for serverless functions'"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.5.0",
+    "dotenv": "^16.6.1",
+    "fastify": "^4.29.1",
+    "youtubei.js": "^10.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vercel/node": "^3.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vercel": "^48.10.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

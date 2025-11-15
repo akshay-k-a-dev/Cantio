@@ -3,18 +3,14 @@
   "name": "musicmu-backend",
   "builds": [
     {
-      "src": "vercelhost(serverless)/backend/api/index.ts",
+      "src": "api/index.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "vercelhost(serverless)/backend/api/index.ts"
-    },
-    {
       "src": "/(.*)",
-      "dest": "vercelhost(serverless)/backend/api/index.ts"
+      "dest": "/api/index.ts"
     }
   ]
 }
