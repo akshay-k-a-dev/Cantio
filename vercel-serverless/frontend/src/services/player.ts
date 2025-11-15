@@ -3,16 +3,13 @@ import { cache, Track } from '../lib/cache';
 
 // Determine API base URL dynamically
 const getApiBase = () => {
-  if (!import.meta.env.VITE_API_URL) {
-    return '/api'; // Use proxy in dev mode
+  // In production, use VITE_API_URL from .env.production
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
   
-  // Use current origin to construct API URL (works for localhost and network)
-  const protocol = window.location.protocol;
-  const hostname = window.location.hostname;
-  const apiPort = '3001';
-  
-  return `${protocol}//${hostname}:${apiPort}/api`;
+  // In development, use proxy
+  return '/api';
 };
 
 const API_BASE = getApiBase();
