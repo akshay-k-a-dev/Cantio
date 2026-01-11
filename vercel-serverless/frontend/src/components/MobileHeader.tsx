@@ -22,7 +22,7 @@ export default function MobileHeader() {
             <>
               <User size={16} className="text-white" />
               <span className="text-xs text-white font-medium truncate max-w-[80px]">
-                {user?.username || 'Profile'}
+                {user?.name || 'Profile'}
               </span>
             </>
           ) : (
