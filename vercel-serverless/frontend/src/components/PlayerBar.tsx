@@ -259,7 +259,7 @@ export default function PlayerBar() {
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="fixed bottom-14 left-0 right-0 z-50 md:hidden"
+            className="fixed bottom-14 left-0 right-0 z-30 md:hidden"
           >
             {/* Progress bar */}
             <div className="h-0.5 w-full bg-white/10">

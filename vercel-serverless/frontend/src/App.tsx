@@ -12,6 +12,7 @@ import ProfilePage from './pages/ProfilePage';
 import Sidebar from './components/Sidebar';
 import PlayerBar from './components/PlayerBar';
 import MobileNav from './components/MobileNav';
+import MobileHeader from './components/MobileHeader';
 
 function AppContent() {
   const isPlayerVisible = usePlayer((state) => state.isPlayerVisible);
@@ -31,14 +32,17 @@ function AppContent() {
 
   return (
     <div className="h-screen flex flex-col bg-black text-white overflow-hidden">
+      {/* Mobile Header - Login/Profile button */}
+      <MobileHeader />
+      
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Hidden on mobile, shown on desktop */}
         <div className="hidden md:block">
           <Sidebar />
         </div>
 
-        {/* Main Content - extra padding at bottom for nav + mini player on mobile */}
-        <div className={`flex-1 overflow-y-auto bg-gradient-to-b from-gray-900 to-black p-3 sm:p-4 md:p-8 ${isPlayerVisible ? 'pb-40 md:pb-24' : 'pb-16 md:pb-4'}`}>
+        {/* Main Content - padding for header (top), nav + mini player (bottom) */}
+        <div className={`flex-1 overflow-y-auto bg-gradient-to-b from-gray-900 to-black pt-16 md:pt-8 p-3 sm:p-4 md:p-8 ${isPlayerVisible ? 'pb-32 md:pb-24' : 'pb-16 md:pb-4'}`}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
