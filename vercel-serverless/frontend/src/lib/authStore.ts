@@ -41,6 +41,17 @@ export const useAuth = create<AuthState>((set) => ({
     // Save to IndexedDB for persistence
     await authStorage.setItem<AuthData>(AUTH_KEY, { token, user });
     set({ token, user, isAuthenticated: true });
+    
+    // Trigger database → IndexedDB sync after login
+    setTimeout(async () => {
+      try {
+        const { usePlayer } = await import('../services/player');
+        await usePlayer.getState().syncFromDatabase();
+        console.log('✅ Post-login sync complete');
+      } catch (error) {
+        console.error('Post-login sync failed:', error);
+      }
+    }, 100);
   },
   
   logout: async () => {

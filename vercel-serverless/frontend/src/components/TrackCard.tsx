@@ -21,8 +21,9 @@ export default function TrackCard({ track, index }: TrackCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="group relative bg-gray-800/40 rounded-lg p-3 hover:bg-gray-700/60 transition-all duration-200 cursor-pointer"
+      transition={{ delay: index * 0.03 }}
+      whileHover={{ scale: 1.02 }}
+      className="group relative bg-white/[0.03] rounded-xl p-3 hover:bg-white/[0.08] border border-white/5 hover:border-white/10 transition-all duration-200 cursor-pointer"
       onClick={handlePlay}
     >
       <div className="flex items-center gap-3">

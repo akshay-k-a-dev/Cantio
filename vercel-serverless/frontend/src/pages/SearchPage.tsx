@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search as SearchIcon, Play, Pause, Plus, Heart } from 'lucide-react';
+import { Search as SearchIcon, Plus, Heart } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { Track } from '../lib/cache';
 
@@ -73,12 +73,6 @@ export function SearchPage() {
     }
   };
 
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Search Header */}
@@ -117,88 +111,67 @@ export function SearchPage() {
         </div>
       )}
 
-      {/* Results Grid */}
+      {/* Results List */}
       {!loading && results.length > 0 && (
         <div>
           <h2 className="text-xl md:text-2xl font-bold mb-4">Top Results</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+          <div className="space-y-1">
             {results.map((track, index) => {
               const isPlaying =
                 currentTrack?.videoId === track.videoId && state === 'playing';
               const liked = isLiked(track.videoId);
 
               return (
-                  <motion.div
-                    key={track.videoId}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white/5 hover:bg-white/10 active:bg-white/15 rounded-lg p-3 md:p-4 cursor-pointer group transition-all"
-                  >
-                    <div className="relative mb-3 md:mb-4" onClick={() => handlePlay(track, index)}>
-                      <img
-                        src={track.thumbnail}
-                        alt={track.title}
-                        className="w-full aspect-square object-cover rounded shadow-lg"
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        whileHover={{ opacity: 1, y: 0 }}
-                        whileTap={{ opacity: 1, y: 0 }}
-                        className="absolute bottom-2 right-2"
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-500 flex items-center justify-center shadow-xl hover:bg-green-400 active:bg-green-600 transition-colors"
-                        >
-                          {isPlaying ? (
-                            <Pause size={18} fill="black" className="text-black md:w-5 md:h-5" />
-                          ) : (
-                            <Play
-                              size={18}
-                              fill="black"
-                              className="text-black ml-0.5 md:w-5 md:h-5"
-                            />
-                          )}
-                        </motion.button>
-                      </motion.div>
+                <motion.div
+                  key={track.videoId}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.03 }}
+                  onClick={() => handlePlay(track, index)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 active:bg-white/15 cursor-pointer group"
+                >
+                  {/* Thumbnail */}
+                  <img
+                    src={track.thumbnail}
+                    alt={track.title}
+                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                  />
+
+                  {/* Track info */}
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                      {track.title}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">
+                      {track.artist}
+                    </p>
+                  </div>
+
+                  {/* Playing indicator */}
+                  {isPlaying && (
+                    <div className="flex gap-0.5 items-center flex-shrink-0">
+                      <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
+                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
+                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
                     </div>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate mb-1 text-sm md:text-base">{track.title}</h3>
-                        <p className="text-xs md:text-sm text-gray-400 truncate">{track.artist}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatDuration(track.duration)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => handleToggleLike(e, track)}
-                          className="p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors flex-shrink-0"
-                          title={liked ? "Remove from liked" : "Add to liked"}
-                        >
-                          <Heart 
-                            size={18} 
-                            className={`md:w-5 md:h-5 transition-colors ${
-                              liked ? 'fill-green-500 text-green-500' : 'text-gray-400 hover:text-white'
-                            }`}
-                          />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => handleAddToQueue(e, track)}
-                          className="p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors flex-shrink-0"
-                          title="Add to queue"
-                        >
-                          <Plus size={18} className="text-gray-400 hover:text-white md:w-5 md:h-5" />
-                        </motion.button>
-                      </div>
-                    </div>
-                  </motion.div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={(e) => handleToggleLike(e, track)}
+                      className={`p-2 rounded-full transition-colors ${liked ? 'text-green-500' : 'text-gray-400'}`}
+                    >
+                      <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+                    </button>
+                    <button
+                      onClick={(e) => handleAddToQueue(e, track)}
+                      className="p-2 rounded-full text-gray-400 hover:text-white transition-colors"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </motion.div>
               );
             })}
           </div>

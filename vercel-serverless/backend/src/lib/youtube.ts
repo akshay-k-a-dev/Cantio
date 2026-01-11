@@ -19,18 +19,26 @@ export interface VideoResult {
 
 export async function search(query: string, limit: number = 10): Promise<VideoResult[]> {
   const yt = await getYouTube();
+  
   const results = await yt.search(query, { type: 'video' });
   
-  return results.videos
-    .filter((video: any) => video && video.id && video.title) // Filter out invalid videos
-    .slice(0, limit)
+  // Filter duration: 1 min (60s) to 10 min (600s)
+  const MIN_DURATION = 60;   // 1 minute
+  const MAX_DURATION = 600;  // 10 minutes
+  
+  const videos = results.videos
+    .filter((video: any) => video && video.id && video.title)
     .map((video: any) => ({
       videoId: video.id,
       title: video.title?.text || video.title || 'Unknown Title',
       artist: video.author?.name || 'Unknown',
       duration: video.duration?.seconds || 0,
       thumbnail: video.best_thumbnail?.url || ''
-    }));
+    }))
+    .filter((video) => video.duration >= MIN_DURATION && video.duration <= MAX_DURATION)
+    .slice(0, limit);
+  
+  return videos;
 }
 
 export async function getMetadata(videoId: string) {

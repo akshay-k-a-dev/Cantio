@@ -8,6 +8,7 @@ import likesRoutes from './routes/likes.js';
 import playlistsRoutes from './routes/playlists.js';
 import historyRoutes from './routes/history.js';
 import recommendationsRoutes from './routes/recommendations.js';
+import syncRoutes from './routes/sync.js';
 
 // Load environment variables
 config();
@@ -22,147 +23,159 @@ const app = Fastify({
   }
 });
 
-// Register CORS
-await app.register(cors, {
-  origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
-});
+// Track initialization state
+let initialized = false;
 
-// Register JWT
-await app.register(jwt, {
-  secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
-});
+// Initialize app (plugins, routes, etc.)
+async function initializeApp() {
+  if (initialized) return;
+  
+  // Register CORS
+  await app.register(cors, {
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+  });
 
-// Add authentication decorator
-app.decorate('authenticate', async function(request, reply) {
-  try {
-    await request.jwtVerify();
-  } catch (err) {
-    reply.send(err);
-  }
-});
+  // Register JWT
+  await app.register(jwt, {
+    secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
+  });
 
-// Register authentication routes
-await app.register(authRoutes, { prefix: '/api/auth' });
-await app.register(likesRoutes, { prefix: '/api/likes' });
-await app.register(playlistsRoutes, { prefix: '/api/playlists' });
-await app.register(historyRoutes, { prefix: '/api/history' });
-await app.register(recommendationsRoutes, { prefix: '/api/recommendations' });
-
-// Root health endpoint (homepage)
-app.get('/', async (request, reply) => {
-  return {
-    service: 'MusicMu Serverless Backend',
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    mode: 'fastify',
-    endpoints: {
-      health: '/api/health',
-      search: '/api/search?q=query',
-      guest: '/api/guest',
-      track: '/api/track/:id',
-      stream: '/api/track/:id/stream',
-      full: '/api/track/:id/full',
-      auth: {
-        register: '/api/auth/register',
-        login: '/api/auth/login',
-        me: '/api/auth/me'
-      },
-      likes: '/api/likes',
-      playlists: '/api/playlists',
-      history: '/api/history'
+  // Add authentication decorator
+  app.decorate('authenticate', async function(request: any, reply: any) {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
     }
-  };
-});
+  });
 
-// Health check
-app.get('/api/health', async (request, reply) => {
-  return {
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    service: 'musicmu-serverless'
-  };
-});
+  // Register authentication routes
+  await app.register(authRoutes, { prefix: '/api/auth' });
+  await app.register(likesRoutes, { prefix: '/api/likes' });
+  await app.register(playlistsRoutes, { prefix: '/api/playlists' });
+  await app.register(historyRoutes, { prefix: '/api/history' });
+  await app.register(recommendationsRoutes, { prefix: '/api/recommendations' });
+  await app.register(syncRoutes, { prefix: '/api/sync' });
 
-// Search endpoint
-app.get('/api/search', async (request, reply) => {
-  const { q, limit } = request.query as { q?: string; limit?: string };
-  
-  if (!q) {
-    reply.code(400);
-    return { error: 'Missing search query parameter "q"' };
-  }
+  // Root health endpoint (homepage)
+  app.get('/', async (request, reply) => {
+    return {
+      service: 'MusicMu Serverless Backend',
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      mode: 'fastify',
+      endpoints: {
+        health: '/api/health',
+        search: '/api/search?q=query',
+        guest: '/api/guest',
+        track: '/api/track/:id',
+        stream: '/api/track/:id/stream',
+        full: '/api/track/:id/full',
+        auth: {
+          register: '/api/auth/register',
+          login: '/api/auth/login',
+          me: '/api/auth/me'
+        },
+        likes: '/api/likes',
+        playlists: '/api/playlists',
+        history: '/api/history'
+      }
+    };
+  });
 
-  try {
-    const resultLimit = limit ? parseInt(limit, 10) : 10;
-    const results = await search(q, resultLimit);
-    return { results };
-  } catch (error: any) {
-    request.log.error(error);
-    reply.code(500);
-    return { error: 'Search failed', message: error.message };
-  }
-});
+  // Health check
+  app.get('/api/health', async (request, reply) => {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'musicmu-serverless'
+    };
+  });
 
-// Guest session endpoint
-app.get('/api/guest', async (request, reply) => {
-  return {
-    sessionId: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    expiresIn: 3600000,
-    createdAt: new Date().toISOString()
-  };
-});
+  // Search endpoint
+  app.get('/api/search', async (request, reply) => {
+    const { q, limit } = request.query as { q?: string; limit?: string };
+    
+    if (!q) {
+      reply.code(400);
+      return { error: 'Missing search query parameter "q"' };
+    }
 
-// Track metadata endpoint
-app.get('/api/track/:id', async (request, reply) => {
-  const { id } = request.params as { id: string };
+    try {
+      const resultLimit = limit ? parseInt(limit, 10) : 10;
+      const results = await search(q, resultLimit);
+      return { results };
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(500);
+      return { error: 'Search failed', message: error.message };
+    }
+  });
 
-  try {
-    const metadata = await getMetadata(id);
-    return metadata;
-  } catch (error: any) {
-    request.log.error(error);
-    reply.code(404);
-    return { error: 'Track not found', message: error.message };
-  }
-});
+  // Guest session endpoint
+  app.get('/api/guest', async (request, reply) => {
+    return {
+      sessionId: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      expiresIn: 3600000,
+      createdAt: new Date().toISOString()
+    };
+  });
 
-// Track streaming endpoint - iframe only
-app.get('/api/track/:id/stream', async (request, reply) => {
-  const { id } = request.params as { id: string };
-  
-  return {
-    mode: 'iframe',
-    url: `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`
-  };
-});
+  // Track metadata endpoint
+  app.get('/api/track/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
 
-// Full track info (metadata + stream)
-app.get('/api/track/:id/full', async (request, reply) => {
-  const { id } = request.params as { id: string };
+    try {
+      const metadata = await getMetadata(id);
+      return metadata;
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(404);
+      return { error: 'Track not found', message: error.message };
+    }
+  });
 
-  try {
-    const metadata = await getMetadata(id);
-    const stream = {
+  // Track streaming endpoint - iframe only
+  app.get('/api/track/:id/stream', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    
+    return {
       mode: 'iframe',
       url: `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`
     };
+  });
 
-    return {
-      metadata,
-      stream
-    };
-  } catch (error: any) {
-    request.log.error(error);
-    reply.code(404);
-    return { error: 'Track not found', message: error.message };
-  }
-});
+  // Full track info (metadata + stream)
+  app.get('/api/track/:id/full', async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    try {
+      const metadata = await getMetadata(id);
+      const stream = {
+        mode: 'iframe',
+        url: `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`
+      };
+
+      return {
+        metadata,
+        stream
+      };
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(404);
+      return { error: 'Track not found', message: error.message };
+    }
+  });
+
+  initialized = true;
+}
 
 // Start server (for local dev)
 const start = async () => {
   try {
+    await initializeApp();
     await app.listen({ port: PORT, host: HOST });
     console.log(`\n🎵 MusicMu Serverless Backend`);
     console.log(`📡 Running on http://${HOST}:${PORT}`);
@@ -181,4 +194,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 // Export for Vercel
+export { initializeApp };
 export default app;

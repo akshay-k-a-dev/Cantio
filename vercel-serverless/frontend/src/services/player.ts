@@ -57,6 +57,9 @@ interface PlayerStore {
   like: (track: Track) => Promise<void>;
   unlike: (videoId: string) => Promise<void>;
   isLiked: (videoId: string) => boolean;
+  checkIsLiked: (videoId: string) => Promise<boolean>;
+  syncLikesFromDatabase: () => Promise<void>;
+  syncFromDatabase: () => Promise<void>;
   init: () => Promise<void>;
   initYouTubePlayer: () => Promise<void>;
 }
@@ -76,6 +79,8 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
   init: async () => {
     await cache.init();
+    
+    // Now load from local cache first (for fast startup)
     const cached = cache.getCache();
     
     // Restore queue and last played song, but don't auto-play
@@ -85,8 +90,20 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
       state: 'idle', // Keep it idle, don't auto-play
     });
 
-    // Initialize YouTube IFrame API
+    // Initialize YouTube IFrame API first (critical for playback)
     await get().initYouTubePlayer();
+    
+    // For logged-in users: Sync from database in background (non-blocking)
+    const { useAuth } = await import('../lib/authStore');
+    const token = useAuth.getState().token;
+    
+    if (token) {
+      console.log('🔄 Logged in: Starting background sync from database...');
+      // Fire and forget - don't block player initialization
+      get().syncFromDatabase().catch(err => {
+        console.error('Background sync failed:', err);
+      });
+    }
     
     // Register media session handlers for background playback
     mediaSessionManager.setHandlers({
@@ -100,6 +117,9 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
         }
       },
     });
+    
+    // Sync liked tracks from database for logged-in users
+    get().syncLikesFromDatabase();
     
     // 🔥 WATCHDOG: Continuously monitor and force resume if paused in background
     setInterval(() => {
@@ -286,7 +306,11 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
   search: async (query: string, limit: number = 10) => {
     try {
-      const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+      const params = new URLSearchParams({
+        q: query,
+        limit: limit.toString()
+      });
+      const response = await fetch(`${API_BASE}/search?${params}`);
       const data = await response.json();
       return data.results || [];
     } catch (error) {
@@ -311,40 +335,48 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
     // 🔄 REVERSE QUEUE LOGIC: Push previous track to reverse queue (history stack)
     // BUT skip if we're navigating backwards (skipReverseQueue = true)
+    // NOTE: This is NON-BLOCKING to not delay playback
     if (!skipReverseQueue && previousTrack && previousTrack.videoId !== track.videoId) {
-      await cache.pushToReverseQueue(previousTrack);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('⬅️  PUSHED TO REVERSE QUEUE:', previousTrack.title);
-      const reverseQueue = await cache.getReverseQueue();
-      console.log('📚 Reverse queue length:', reverseQueue.length);
-      console.log('📋 Reverse queue:', reverseQueue.map(t => t.title).join(' ← '));
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-      // 📝 AUTO-RECORD PLAY HISTORY FOR LOGGED-IN USERS
-      const { useAuth } = await import('../lib/authStore');
-      const token = useAuth.getState().token;
-      if (token) {
+      // Fire and forget - don't await to avoid blocking playback
+      (async () => {
         try {
-          await fetch(`${API_BASE}/api/history`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              trackId: previousTrack.videoId,
-              title: previousTrack.title,
-              artist: previousTrack.artist,
-              thumbnail: previousTrack.thumbnail,
-              duration: previousTrack.duration
-            })
-          });
-          console.log('✅ Play history recorded for logged-in user');
+          const { useAuth } = await import('../lib/authStore');
+          const token = useAuth.getState().token;
+          
+          if (token) {
+            // LOGGED IN: Database first (non-blocking)
+            fetch(`${API_BASE}/history`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                trackId: previousTrack.videoId,
+                title: previousTrack.title,
+                artist: previousTrack.artist,
+                thumbnail: previousTrack.thumbnail,
+                duration: previousTrack.duration
+              })
+            }).then(async (response) => {
+              if (response.ok) {
+                await cache.pushToReverseQueue(previousTrack);
+                console.log('✅ History: Database → IndexedDB synced');
+              }
+            }).catch(error => {
+              console.error('❌ Failed to record history:', error);
+            });
+          } else {
+            // GUEST: IndexedDB only
+            await cache.pushToReverseQueue(previousTrack);
+            console.log('✅ Guest: History saved to IndexedDB');
+          }
+          
+          console.log('⬅️  PUSHED TO REVERSE QUEUE:', previousTrack.title);
         } catch (error) {
-          console.error('Failed to record play history:', error);
-          // Don't block playback if recording fails
+          console.error('History recording error:', error);
         }
-      }
+      })();
     }
 
     // Remove track from queue if it exists (normal queue behavior)
@@ -551,15 +583,13 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   },
 
   like: async (track: Track) => {
-    // Save to local cache first
-    await cache.likeSong(track);
-    
-    // Sync to backend if authenticated
     const { useAuth } = await import('../lib/authStore');
     const token = useAuth.getState().token;
+    
     if (token) {
+      // LOGGED IN: Push to database FIRST, then sync to IndexedDB
       try {
-        await fetch(`${API_BASE}/api/likes`, {
+        const response = await fetch(`${API_BASE}/likes`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -573,38 +603,195 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
             duration: track.duration
           })
         });
-        console.log('✅ Liked track synced to backend');
+        
+        if (response.ok) {
+          // Success: Now sync to local IndexedDB
+          await cache.likeSong(track);
+          console.log('✅ Liked: Database → IndexedDB synced');
+        } else {
+          console.error('❌ Failed to like on database');
+        }
       } catch (error) {
-        console.error('Failed to sync like to backend:', error);
-        // Keep local like even if backend fails
+        console.error('❌ Failed to like:', error);
       }
+    } else {
+      // GUEST: Use IndexedDB only
+      await cache.likeSong(track);
+      console.log('✅ Guest: Liked saved to IndexedDB');
     }
   },
 
   unlike: async (videoId: string) => {
-    // Remove from local cache first
-    await cache.unlikeSong(videoId);
-    
-    // Sync to backend if authenticated
     const { useAuth } = await import('../lib/authStore');
     const token = useAuth.getState().token;
+    
     if (token) {
+      // LOGGED IN: Push to database FIRST, then sync to IndexedDB
       try {
-        await fetch(`${API_BASE}/api/likes/${videoId}`, {
+        const response = await fetch(`${API_BASE}/likes/${videoId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        console.log('✅ Unlike synced to backend');
+        
+        if (response.ok) {
+          // Success: Now sync to local IndexedDB
+          await cache.unlikeSong(videoId);
+          console.log('✅ Unliked: Database → IndexedDB synced');
+        } else {
+          console.error('❌ Failed to unlike on database');
+        }
       } catch (error) {
-        console.error('Failed to sync unlike to backend:', error);
-        // Keep local unlike even if backend fails
+        console.error('❌ Failed to unlike:', error);
       }
+    } else {
+      // GUEST: Use IndexedDB only
+      await cache.unlikeSong(videoId);
+      console.log('✅ Guest: Unlike saved to IndexedDB');
+    }
+  },
+
+  // Sync liked tracks from database to local cache for logged-in users
+  syncLikesFromDatabase: async () => {
+    const { useAuth } = await import('../lib/authStore');
+    const token = useAuth.getState().token;
+    
+    if (!token) return; // Only sync for logged-in users
+    
+    try {
+      const response = await fetch(`${API_BASE}/likes`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      const dbLikes = data.likedTracks || [];
+      
+      // Update local cache with database likes
+      for (const like of dbLikes) {
+        const track: Track = {
+          videoId: like.trackId,
+          title: like.title,
+          artist: like.artist,
+          thumbnail: like.thumbnail || '',
+          duration: like.duration || 0
+        };
+        
+        // Add to local cache if not already there
+        if (!cache.isLiked(track.videoId)) {
+          await cache.likeSong(track);
+        }
+      }
+      
+      console.log('✅ Synced', dbLikes.length, 'liked tracks from database');
+    } catch (error) {
+      console.error('Failed to sync likes from database:', error);
     }
   },
 
   isLiked: (videoId: string) => {
+    // Always check local cache for immediate UI feedback
     return cache.isLiked(videoId);
+  },
+
+  // Check if a track is liked (async version for database check)
+  checkIsLiked: async (videoId: string): Promise<boolean> => {
+    const { useAuth } = await import('../lib/authStore');
+    const token = useAuth.getState().token;
+    
+    if (token) {
+      try {
+        const response = await fetch(`${API_BASE}/likes/${videoId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        return data.isLiked || false;
+      } catch (error) {
+        // Fallback to local cache
+        return cache.isLiked(videoId);
+      }
+    }
+    
+    return cache.isLiked(videoId);
+  },
+
+  // Full sync from database to IndexedDB (on login/session start)
+  syncFromDatabase: async () => {
+    const { useAuth } = await import('../lib/authStore');
+    const token = useAuth.getState().token;
+    
+    if (!token) return;
+    
+    console.log('🔄 Starting full database → IndexedDB sync...');
+    
+    try {
+      // 1. Sync liked tracks
+      const likesResponse = await fetch(`${API_BASE}/likes`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (likesResponse.ok) {
+        const likesData = await likesResponse.json();
+        const dbLikes = likesData.likedTracks || [];
+        
+        // Clear local likes and replace with database likes
+        const currentLiked = cache.getLikedSongs();
+        for (const track of currentLiked) {
+          await cache.unlikeSong(track.videoId);
+        }
+        
+        // Add database likes to local cache
+        for (const like of dbLikes) {
+          const track: Track = {
+            videoId: like.trackId,
+            title: like.title,
+            artist: like.artist,
+            thumbnail: like.thumbnail || '',
+            duration: like.duration || 0
+          };
+          await cache.likeSong(track);
+        }
+        
+        console.log(`✅ Synced ${dbLikes.length} liked tracks from database`);
+      }
+      
+      // 2. Sync play history (recent 50 for reverse queue)
+      const historyResponse = await fetch(`${API_BASE}/history?limit=50`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
+        const dbHistory = historyData.history || [];
+        
+        // Clear reverse queue and rebuild from database history
+        await cache.clearReverseQueue();
+        
+        // Add history in reverse order (oldest first, so newest is at top of stack)
+        for (const item of dbHistory.reverse()) {
+          const track: Track = {
+            videoId: item.trackId,
+            title: item.title,
+            artist: item.artist,
+            thumbnail: item.thumbnail || '',
+            duration: item.duration || 0
+          };
+          await cache.pushToReverseQueue(track);
+        }
+        
+        console.log(`✅ Synced ${dbHistory.length} history entries from database`);
+      }
+      
+      console.log('✅ Full database → IndexedDB sync complete!');
+      
+    } catch (error) {
+      console.error('❌ Database sync failed:', error);
+    }
   },
 }));

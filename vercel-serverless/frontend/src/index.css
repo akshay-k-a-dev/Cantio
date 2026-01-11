@@ -30,20 +30,69 @@
       opacity: 1;
     }
   }
+
+  /* Safe area padding for notches and home indicators */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white min-h-screen;
+    @apply text-white min-h-screen;
+    background: linear-gradient(180deg, #0c0f14 0%, #0a0a0a 100%);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  /* Prevent text selection on touch */
+  button, a {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smooth touch scrolling */
+  .overflow-x-auto, .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
   }
   
   .glass-hover {
-    @apply glass hover:bg-white/20 transition-all duration-300;
+    @apply glass hover:bg-white/10 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white/[0.03] rounded-xl border border-white/5;
+  }
+
+  .card-hover {
+    @apply card hover:bg-white/[0.06] hover:border-white/10 transition-all duration-200;
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Touch-friendly tap target */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
   }
 }

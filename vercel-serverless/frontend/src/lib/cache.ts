@@ -164,6 +164,10 @@ export class CacheManager {
     return this.cache!.liked.some(t => t.videoId === videoId);
   }
 
+  getLikedSongs(): Track[] {
+    return [...this.cache!.liked];
+  }
+
   // Queue management
   async addToQueue(track: Track): Promise<void> {
     this.cache!.queue.push(track);

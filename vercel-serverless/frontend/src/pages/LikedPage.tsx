@@ -1,21 +1,48 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Play, Pause, Clock, Plus } from 'lucide-react';
+import { Heart, Play, Pause, Clock, Plus, Loader2 } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { cache, Track } from '../lib/cache';
+import { useAuth } from '../lib/authStore';
+import { getLikedTracks } from '../services/api';
 
 export function LikedPage() {
   const [likedSongs, setLikedSongs] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
   const { play, addToQueue, clearQueue, currentTrack, state, togglePlay } = usePlayer();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     loadLikedSongs();
-  }, []);
+  }, [isAuthenticated]);
 
-  const loadLikedSongs = () => {
-    const data = cache.getCache();
-    // Reverse the array so last added songs appear first
-    setLikedSongs([...data.liked].reverse());
+  const loadLikedSongs = async () => {
+    setLoading(true);
+    try {
+      if (isAuthenticated) {
+        // Fetch from database for logged-in users
+        const dbLikes = await getLikedTracks();
+        const tracks: Track[] = dbLikes.map(like => ({
+          videoId: like.trackId,
+          title: like.title,
+          artist: like.artist,
+          thumbnail: like.thumbnail || '',
+          duration: like.duration || 0
+        }));
+        setLikedSongs(tracks);
+      } else {
+        // Use local cache for guests
+        const data = cache.getCache();
+        setLikedSongs([...data.liked].reverse());
+      }
+    } catch (error) {
+      console.error('Failed to load liked songs:', error);
+      // Fallback to local cache
+      const data = cache.getCache();
+      setLikedSongs([...data.liked].reverse());
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePlay = async (track: Track) => {
@@ -62,14 +89,24 @@ export function LikedPage() {
   const totalHours = Math.floor(totalDuration / 3600);
   const totalMins = Math.floor((totalDuration % 3600) / 60);
 
-  if (likedSongs.length === 0) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Heart size={80} className="text-gray-700 mb-6" />
-        <h2 className="text-3xl font-bold text-gray-400 mb-2">
+        <Loader2 size={48} className="text-purple-500 animate-spin mb-4" />
+        <p className="text-gray-400">Loading liked songs...</p>
+      </div>
+    );
+  }
+
+  if (likedSongs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] md:min-h-[60vh] px-4">
+        <Heart size={60} className="md:hidden text-gray-700 mb-4" />
+        <Heart size={80} className="hidden md:block text-gray-700 mb-6" />
+        <h2 className="text-xl md:text-3xl font-bold text-gray-400 mb-2 text-center">
           No liked songs yet
         </h2>
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm md:text-base text-center">
           Songs you like will appear here
         </p>
       </div>
@@ -78,15 +115,16 @@ export function LikedPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Playlist Header */}
-      <div className="flex items-end gap-6 mb-8">
-        <div className="w-60 h-60 bg-gradient-to-br from-purple-500 to-pink-500 rounded shadow-2xl flex items-center justify-center flex-shrink-0">
-          <Heart size={100} fill="white" className="text-white" />
+      {/* Playlist Header - responsive */}
+      <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 mb-6 md:mb-8">
+        <div className="w-32 h-32 md:w-60 md:h-60 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg md:rounded shadow-2xl flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
+          <Heart size={48} className="md:hidden" fill="white" />
+          <Heart size={100} className="hidden md:block" fill="white" />
         </div>
-        <div className="flex-1 pb-4">
-          <p className="text-sm font-semibold uppercase mb-2">Playlist</p>
-          <h1 className="text-6xl font-black mb-6">Liked Songs</h1>
-          <div className="flex items-center gap-2 text-sm">
+        <div className="flex-1 text-center md:text-left md:pb-4">
+          <p className="text-xs md:text-sm font-semibold uppercase mb-1 md:mb-2 text-white/60">Playlist</p>
+          <h1 className="text-2xl md:text-6xl font-black mb-2 md:mb-6">Liked Songs</h1>
+          <div className="flex items-center justify-center md:justify-start gap-2 text-xs md:text-sm">
             <span className="font-semibold">{likedSongs.length} songs</span>
             {totalDuration > 0 && (
               <>
@@ -102,21 +140,21 @@ export function LikedPage() {
       </div>
 
       {/* Play Button */}
-      <div className="mb-8">
+      <div className="mb-4 md:mb-8 flex justify-center md:justify-start">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handlePlayAll}
-          className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-xl hover:bg-green-400 transition-colors"
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-green-500 flex items-center justify-center shadow-xl hover:bg-green-400 transition-colors"
         >
-          <Play size={24} fill="black" className="text-black ml-1" />
+          <Play size={22} fill="black" className="text-black ml-1" />
         </motion.button>
       </div>
 
       {/* Song List */}
       <div className="space-y-1">
-        {/* Header */}
-        <div className="grid grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-2 text-sm text-gray-400 border-b border-gray-800">
+        {/* Header - hidden on mobile */}
+        <div className="hidden md:grid grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-2 text-sm text-gray-400 border-b border-gray-800">
           <div>#</div>
           <div>Title</div>
           <div>Artist</div>
@@ -137,9 +175,10 @@ export function LikedPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: index * 0.02 }}
               onClick={() => handlePlay(track)}
-              className="grid grid-cols-[16px_4fr_2fr_1fr_40px] gap-4 px-4 py-2 rounded hover:bg-white/10 cursor-pointer group items-center"
+              className="flex items-center gap-3 px-3 md:px-4 py-2 md:py-2 rounded-lg md:rounded hover:bg-white/10 active:bg-white/15 cursor-pointer group md:grid md:grid-cols-[16px_4fr_2fr_1fr_40px] md:gap-4"
             >
-              <div className="text-gray-400 text-sm group-hover:hidden">
+              {/* Index/Play indicator - desktop only */}
+              <div className="hidden md:block text-gray-400 text-sm group-hover:hidden">
                 {isPlaying ? (
                   <div className="flex gap-0.5">
                     <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
@@ -150,11 +189,38 @@ export function LikedPage() {
                   index + 1
                 )}
               </div>
-              <div className="hidden group-hover:block">
+              <div className="hidden md:hidden md:group-hover:block">
                 <Play size={14} fill="white" className="text-white" />
               </div>
 
-              <div className="flex items-center gap-3 min-w-0">
+              {/* Thumbnail */}
+              <img
+                src={track.thumbnail}
+                alt={track.title}
+                className="w-12 h-12 md:w-10 md:h-10 rounded-lg md:rounded object-cover flex-shrink-0 md:hidden"
+              />
+
+              {/* Title + Artist (mobile layout) */}
+              <div className="flex-1 min-w-0 md:hidden">
+                <p className={`truncate text-sm font-medium ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                  {track.title}
+                </p>
+                <p className="text-xs text-gray-400 truncate mt-0.5">
+                  {track.artist}
+                </p>
+              </div>
+
+              {/* Playing indicator - mobile */}
+              {isPlaying && (
+                <div className="flex gap-0.5 items-center md:hidden">
+                  <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
+                  <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
+                  <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                </div>
+              )}
+
+              {/* Desktop: Title with thumbnail */}
+              <div className="hidden md:flex items-center gap-3 min-w-0">
                 <img
                   src={track.thumbnail}
                   alt={track.title}
@@ -167,15 +233,18 @@ export function LikedPage() {
                 </div>
               </div>
 
-              <div className="text-gray-400 text-sm truncate">
+              {/* Desktop: Artist */}
+              <div className="hidden md:block text-gray-400 text-sm truncate">
                 {track.artist}
               </div>
 
-              <div className="text-gray-400 text-sm text-right">
+              {/* Desktop: Duration */}
+              <div className="hidden md:block text-gray-400 text-sm text-right">
                 {formatDuration(track.duration)}
               </div>
 
-              <div className="flex items-center justify-center">
+              {/* Desktop: Add to queue */}
+              <div className="hidden md:flex items-center justify-center">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}

@@ -24,33 +24,37 @@ export default function RecommendationSection({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-8"
+      className="mb-6"
     >
       {/* Section header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-xl font-bold text-white">{title}</h2>
+          <h2 className="text-lg font-semibold text-white">{title}</h2>
           {description && (
-            <p className="text-sm text-gray-400 mt-1">{description}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
           )}
         </div>
         
         {onViewAll && tracks.length > 6 && (
           <button
             onClick={onViewAll}
-            className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
           >
             View all
-            <ChevronRight size={16} />
+            <ChevronRight size={14} />
           </button>
         )}
       </div>
 
-      {/* Tracks grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {tracks.slice(0, 6).map((track, index) => (
-          <TrackCard key={`${track.videoId}-${index}`} track={track} index={index} />
-        ))}
+      {/* Horizontal scroll on mobile, grid on desktop */}
+      <div className="relative -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 scrollbar-hide">
+          {tracks.slice(0, 6).map((track, index) => (
+            <div key={`${track.videoId}-${index}`} className="flex-shrink-0 w-64 md:w-auto">
+              <TrackCard track={track} index={index} />
+            </div>
+          ))}
+        </div>
       </div>
     </motion.div>
   );

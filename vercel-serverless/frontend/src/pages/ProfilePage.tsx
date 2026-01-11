@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { User, LogOut, Lock, Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '../lib/authStore';
+import { SyncButton } from '../components/SyncButton';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -122,6 +123,11 @@ export default function ProfilePage() {
             <LogOut className="w-4 h-4" />
             Logout
           </button>
+        </div>
+
+        {/* Sync Data Section */}
+        <div className="mt-8 pt-8 border-t border-white/10">
+          <SyncButton />
         </div>
 
         {/* Password Change Section */}
