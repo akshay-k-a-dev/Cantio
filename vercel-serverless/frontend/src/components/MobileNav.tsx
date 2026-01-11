@@ -12,8 +12,8 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-40">
-      <div className="flex justify-around items-center h-14">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-40 pb-safe">
+      <div className="flex justify-around items-center h-14 px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -22,17 +22,17 @@ export default function MobileNav() {
             <Link
               key={item.path}
               to={item.path}
-              className="flex flex-col items-center justify-center flex-1 h-full py-2"
+              className="flex flex-col items-center justify-center flex-1 h-full py-2 touch-target active:bg-white/5"
             >
               <Icon 
-                size={22} 
-                className={`mb-0.5 transition-colors ${
+                size={20}
+                className={`mb-1 transition-colors ${
                   isActive ? 'text-white' : 'text-white/40'
                 }`}
                 fill={isActive ? 'currentColor' : 'none'}
               />
               <span 
-                className={`text-[10px] transition-colors ${
+                className={`text-[9px] xs:text-[10px] transition-colors ${
                   isActive ? 'text-white font-medium' : 'text-white/40'
                 }`}
               >

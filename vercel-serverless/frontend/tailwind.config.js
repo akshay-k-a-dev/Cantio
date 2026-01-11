@@ -6,6 +6,14 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '360px',      // Small to average phones
+        'sm': '390px',      // Large phones  
+        'md': '768px',      // Tablets (default md)
+        'lg': '1024px',     // Large tablets and desktops
+        'xl': '1280px',     // Desktops
+        '2xl': '1536px',    // Large desktops
+      },
       colors: {
         primary: {
           50: '#fdf4ff',

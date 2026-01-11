@@ -119,21 +119,21 @@ export function HomePage() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-8"
+      className="mb-6 sm:mb-8"
     >
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/40 via-purple-800/20 to-transparent border border-white/5 p-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-900/40 via-purple-800/20 to-transparent border border-white/5 p-5 sm:p-6 md:p-8">
+        <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles size={18} className="text-purple-400" />
-            <span className="text-xs font-medium text-purple-400 uppercase tracking-wider">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <Sparkles size={16} className="text-purple-400 sm:w-[18px] sm:h-[18px]" />
+            <span className="text-[10px] sm:text-xs font-medium text-purple-400 uppercase tracking-wider">
               Ad-Free Music
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             Welcome to MusicMu
           </h1>
-          <p className="text-gray-400 max-w-md">
+          <p className="text-sm sm:text-base text-gray-400 max-w-md">
             Search for songs to start listening. No ads, unlimited skips, no interruptions.
           </p>
         </div>
@@ -142,7 +142,7 @@ export function HomePage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Compact Now Playing (replaces giant hero) */}
       <NowPlayingMini />
 
@@ -153,29 +153,29 @@ export function HomePage() {
       )}
 
       {/* For You Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white">For You</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Personalized picks based on your taste</p>
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">For You</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">Personalized picks based on your taste</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={loadRecommendations}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all disabled:opacity-50 flex-shrink-0"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-          <span className="hidden sm:inline">Refresh</span>
+          <span className="hidden xs:inline">Refresh</span>
         </motion.button>
       </div>
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-16">
+        <div className="flex items-center justify-center py-12 sm:py-16">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 size={28} className="text-purple-400 animate-spin" />
-            <p className="text-sm text-gray-500">Loading your music...</p>
+            <Loader2 size={24} className="text-purple-400 animate-spin sm:w-7 sm:h-7" />
+            <p className="text-xs sm:text-sm text-gray-500">Loading your music...</p>
           </div>
         </div>
       )}
@@ -199,7 +199,7 @@ export function HomePage() {
 
       {/* Recommendations */}
       {!loading && !error && recommendations && (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Continue Listening / Recently Played */}
           {recommendations.recentlyPlayed.length > 0 && (
             <RecommendationSection
@@ -223,13 +223,13 @@ export function HomePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
             >
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">Top Artists</h3>
-                <p className="text-sm text-gray-500 mt-0.5">Artists you love most</p>
+              <div className="mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Top Artists</h3>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Artists you love most</p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                 {recommendations.topArtists.map((artist, index) => (
                   <ArtistCard key={artist.name} artist={artist} index={index} />
                 ))}
@@ -244,13 +244,13 @@ export function HomePage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-16 px-6 rounded-xl bg-white/5 border border-white/5"
+              className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-xl bg-white/5 border border-white/5"
             >
-              <Music size={48} className="text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-300 mb-2">
+              <Music size={40} className="text-gray-600 mx-auto mb-3 sm:mb-4 sm:w-12 sm:h-12" />
+              <h3 className="text-base sm:text-lg font-medium text-gray-300 mb-2">
                 No recommendations yet
               </h3>
-              <p className="text-gray-500 text-sm max-w-sm mx-auto">
+              <p className="text-gray-500 text-xs sm:text-sm max-w-sm mx-auto">
                 Start listening to build your personalized recommendations
               </p>
             </motion.div>

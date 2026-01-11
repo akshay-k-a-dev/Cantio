@@ -38,7 +38,7 @@ function AppContent() {
         </div>
 
         {/* Main Content - extra padding at bottom for nav + mini player on mobile */}
-        <div className={`flex-1 overflow-y-auto bg-gradient-to-b from-gray-900 to-black p-4 md:p-8 ${isPlayerVisible ? 'pb-40 md:pb-24' : 'pb-20 md:pb-4'}`}>
+        <div className={`flex-1 overflow-y-auto bg-gradient-to-b from-gray-900 to-black p-3 sm:p-4 md:p-8 ${isPlayerVisible ? 'pb-40 md:pb-24' : 'pb-16 md:pb-4'}`}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
@@ -51,16 +51,11 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Conditionally render Player Bar and Mobile Nav only when player is visible */}
-      {isPlayerVisible && (
-        <>
-          {/* Player Bar */}
-          <PlayerBar />
-          
-          {/* Mobile Navigation - Bottom */}
-          <MobileNav />
-        </>
-      )}
+      {/* Mobile Navigation - Always visible on mobile */}
+      <MobileNav />
+      
+      {/* Player Bar - Only when playing */}
+      {isPlayerVisible && <PlayerBar />}
     </div>
   );
 }
