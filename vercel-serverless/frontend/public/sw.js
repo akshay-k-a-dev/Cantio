@@ -1,9 +1,9 @@
 // Service Worker for MusicMu PWA
-const CACHE_NAME = 'musicmu-v1';
+const CACHE_VERSION = Date.now(); // Change on every deployment
+const CACHE_NAME = `musicmu-v${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
-  '/',
   '/offline.html',
   '/pwa-192.png',
   '/pwa-512.png',
@@ -18,10 +18,11 @@ self.addEventListener('install', (event) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
+  // Force new service worker to activate immediately
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and take control
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -33,9 +34,15 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Force refresh all clients
+      return self.clients.claim().then(() => {
+        return self.clients.matchAll().then((clients) => {
+          clients.forEach(client => client.navigate(client.url));
+        });
+      });
     })
   );
-  self.clients.claim();
 });
 
 // Fetch event - serve from cache, fallback to network
@@ -85,31 +92,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle all other requests
+  // Handle all other requests - Network First strategy
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request)
-        .then((response) => {
-          // Cache new responses
-          if (response && response.status === 200 && response.type === 'basic') {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
+    fetch(request)
+      .then((response) => {
+        // Cache successful responses
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Fallback to cache only if network fails
+        return caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
           }
-          return response;
-        })
-        .catch(() => {
           // Serve offline page for navigation requests
           if (request.mode === 'navigate') {
             return caches.match(OFFLINE_URL);
           }
         });
-    })
+      })
   );
 });
 

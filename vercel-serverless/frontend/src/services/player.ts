@@ -265,9 +265,6 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
         // App coming to foreground
         console.log('📱 App coming to foreground');
         
-        // Re-acquire wake lock
-        mediaSessionManager.acquireWakeLock();
-        
         // Check if we need to resume
         if (playerState === 'playing' && currentPlayer) {
           const ytState = currentPlayer.getPlayerState();
@@ -404,7 +401,6 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     // Update media session metadata for background playback
     mediaSessionManager.updateMetadata(track);
     mediaSessionManager.updatePlaybackState('playing');
-    await mediaSessionManager.acquireWakeLock();
 
     try {
       console.log('📺 Loading video:', track.videoId);
@@ -440,7 +436,6 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     } else if (state === 'paused') {
       ytPlayer.playVideo();
       mediaSessionManager.updatePlaybackState('playing');
-      mediaSessionManager.acquireWakeLock();
     } else if (state === 'idle' && currentTrack) {
       // Reload current track
       get().play(currentTrack);
@@ -474,9 +469,8 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
         duration: 0
       });
       
-      // Release wake lock and update media session
+      // Update media session
       mediaSessionManager.updatePlaybackState('none');
-      mediaSessionManager.releaseWakeLock();
       
       console.log('📭 Queue empty, stopped playback');
     }

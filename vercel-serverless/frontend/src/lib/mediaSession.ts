@@ -10,12 +10,9 @@ interface MediaSessionManager {
     previousTrack: () => void;
     seekTo: (details: any) => void;
   }) => void;
-  acquireWakeLock: () => Promise<void>;
-  releaseWakeLock: () => void;
 }
 
 class MediaSessionManagerImpl implements MediaSessionManager {
-  private wakeLock: any = null;
 
   updateMetadata(track: Track) {
     if ('mediaSession' in navigator) {
@@ -80,46 +77,6 @@ class MediaSessionManagerImpl implements MediaSessionManager {
       });
 
       console.log('📱 Media session handlers registered');
-    }
-  }
-
-  async acquireWakeLock() {
-    if ('wakeLock' in navigator) {
-      try {
-        this.wakeLock = await (navigator as any).wakeLock.request('screen');
-        console.log('🔒 Wake lock acquired - screen will stay on');
-
-        this.wakeLock.addEventListener('release', () => {
-          console.log('🔓 Wake lock was released');
-        });
-
-        // CRITICAL: Re-acquire wake lock when visibility changes back to visible
-        const handleVisibilityChange = async () => {
-          if (this.wakeLock !== null && document.visibilityState === 'visible') {
-            try {
-              this.wakeLock = await (navigator as any).wakeLock.request('screen');
-              console.log('🔒 Wake lock re-acquired after visibility change');
-            } catch (err) {
-              console.error('Failed to re-acquire wake lock:', err);
-            }
-          }
-        };
-
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-      } catch (err: any) {
-        console.error('❌ Failed to acquire wake lock:', err.message);
-      }
-    } else {
-      console.warn('⚠️ Wake Lock API not supported');
-    }
-  }
-
-  releaseWakeLock() {
-    if (this.wakeLock !== null) {
-      this.wakeLock.release();
-      this.wakeLock = null;
-      console.log('🔓 Wake lock released');
     }
   }
 }
