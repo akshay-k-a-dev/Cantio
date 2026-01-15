@@ -15,12 +15,19 @@ export interface Playlist {
   createdAt: number;
 }
 
+export interface LyricsCache {
+  trackKey: string; // "artist - title"
+  data: any; // LyricsData from lyrics service
+  timestamp: number;
+}
+
 export interface GuestCache {
   playlists: Playlist[];
   liked: Track[];
   queue: Track[]; // Forward queue - songs to play next
   reverseQueue: Track[]; // Reverse queue (stack) - songs already played
   lastPlayed: Track | null;
+  lyrics: { [key: string]: LyricsCache }; // Cached lyrics
   version: number;
 }
 
@@ -40,6 +47,7 @@ const defaultCache: GuestCache = {
   queue: [],
   reverseQueue: [],
   lastPlayed: null,
+  lyrics: {},
   version: CACHE_VERSION,
 };
 
@@ -226,6 +234,50 @@ export class CacheManager {
 
   async clearReverseQueue(): Promise<void> {
     this.cache!.reverseQueue = [];
+    await this.save();
+  }
+
+  // Lyrics cache methods
+  async getLyrics(trackTitle: string, artistName: string): Promise<any | null> {
+    const key = `${artistName.toLowerCase()} - ${trackTitle.toLowerCase()}`;
+    const cached = this.cache!.lyrics[key];
+    
+    if (!cached) return null;
+    
+    // Cache lyrics for 7 days
+    const LYRICS_CACHE_DAYS = 7;
+    const expiryTime = LYRICS_CACHE_DAYS * 24 * 60 * 60 * 1000;
+    
+    if (Date.now() - cached.timestamp > expiryTime) {
+      // Expired, remove it
+      delete this.cache!.lyrics[key];
+      await this.save();
+      return null;
+    }
+    
+    return cached.data;
+  }
+
+  async setLyrics(trackTitle: string, artistName: string, data: any): Promise<void> {
+    const key = `${artistName.toLowerCase()} - ${trackTitle.toLowerCase()}`;
+    this.cache!.lyrics[key] = {
+      trackKey: key,
+      data,
+      timestamp: Date.now(),
+    };
+    
+    // Keep only last 100 lyrics to avoid storage bloat
+    const lyricsKeys = Object.keys(this.cache!.lyrics);
+    if (lyricsKeys.length > 100) {
+      // Remove oldest entries
+      const sorted = lyricsKeys.sort((a, b) => 
+        this.cache!.lyrics[a].timestamp - this.cache!.lyrics[b].timestamp
+      );
+      for (let i = 0; i < sorted.length - 100; i++) {
+        delete this.cache!.lyrics[sorted[i]];
+      }
+    }
+    
     await this.save();
   }
 

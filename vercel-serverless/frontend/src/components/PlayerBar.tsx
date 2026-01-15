@@ -589,8 +589,26 @@ export default function PlayerBar() {
                     className="absolute bottom-0 left-0 right-0 bg-zinc-900 rounded-t-2xl z-30 pb-safe"
                   >
                     <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-3" />
-                    <div className="p-4">
-                      <button className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-xl transition">
+                    <div className="p-4 space-y-2">
+                      <div className="relative">
+                        <AddToPlaylistDropdown
+                          track={{
+                            videoId: currentTrack.videoId,
+                            title: currentTrack.title,
+                            artist: currentTrack.artist,
+                            thumbnail: currentTrack.thumbnail,
+                            duration: currentTrack.duration
+                          }}
+                          onAddToQueue={() => {}}
+                        />
+                      </div>
+                      <button 
+                        onClick={() => {
+                          setShowOverflow(false);
+                          // Share functionality would go here
+                        }}
+                        className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-xl transition"
+                      >
                         <Share2 size={22} className="text-white/70" />
                         <span className="text-white">Share</span>
                       </button>

@@ -8,6 +8,9 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
+// Import cache for lyrics caching
+import { cache } from '../lib/cache';
+
 export interface LyricsData {
   id: number;
   trackName: string;
@@ -48,7 +51,7 @@ export function parseSyncedLyrics(syncedLyrics: string): SyncedLine[] {
 
 /**
  * Get lyrics from LRCLIB API using search endpoint
- * Returns both synced and plain lyrics in single response
+ * Checks IndexedDB cache first to reduce API calls
  */
 export async function getLyrics(
   trackName: string,
@@ -56,6 +59,15 @@ export async function getLyrics(
   duration: number
 ): Promise<LyricsData | null> {
   try {
+    // Check cache first
+    const cached = await cache.getLyrics(trackName, artistName);
+    if (cached) {
+      console.log('📝 Lyrics: Cache hit for', trackName);
+      return cached;
+    }
+
+    console.log('📝 Lyrics: Cache miss, fetching from backend for', trackName);
+
     // Use backend proxy to bypass CORS
     const searchParams = new URLSearchParams({
       track_name: trackName,
@@ -80,6 +92,12 @@ export async function getLyrics(
     const bestMatch = results.find((r) => 
       Math.abs(r.duration - targetDuration) <= 5
     ) || results[0];
+    
+    // Cache the result for future use
+    if (bestMatch) {
+      await cache.setLyrics(trackName, artistName, bestMatch);
+      console.log('📝 Lyrics: Cached for', trackName);
+    }
     
     return bestMatch;
   } catch (error) {

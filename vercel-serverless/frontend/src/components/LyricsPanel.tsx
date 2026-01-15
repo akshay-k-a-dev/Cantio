@@ -70,12 +70,29 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime }: L
     }
   }, [currentTime, syncedLines, viewMode]);
 
-  // Auto-scroll to current line
+  // Auto-scroll to current line - more aggressive approach
   useEffect(() => {
-    if (currentLineRef.current && lyricsContainerRef.current && viewMode === 'synced') {
-      currentLineRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+    if (currentLineIndex >= 0 && lyricsContainerRef.current && viewMode === 'synced') {
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        const container = lyricsContainerRef.current;
+        const currentElement = currentLineRef.current;
+        
+        if (container && currentElement) {
+          const containerRect = container.getBoundingClientRect();
+          const elementRect = currentElement.getBoundingClientRect();
+          
+          // Calculate the scroll position to center the current line
+          const containerMiddle = containerRect.height / 2;
+          const elementMiddle = elementRect.height / 2;
+          const scrollOffset = elementRect.top - containerRect.top - containerMiddle + elementMiddle;
+          
+          // Smooth scroll to position
+          container.scrollBy({
+            top: scrollOffset,
+            behavior: 'smooth'
+          });
+        }
       });
     }
   }, [currentLineIndex, viewMode]);
@@ -153,29 +170,24 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime }: L
         )}
 
         {/* Lyrics Content */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6" ref={lyricsContainerRef}>
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 scroll-smooth" ref={lyricsContainerRef}>
           {viewMode === 'synced' ? (
-            <div className="max-w-2xl mx-auto space-y-3 sm:space-y-4">
-              <AnimatePresence mode="popLayout">
-                {syncedLines.map((line, index) => (
-                  <motion.div
-                    key={index}
-                    ref={index === currentLineIndex ? currentLineRef : null}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                    className={`text-center transition-all duration-300 ${
-                      index === currentLineIndex
-                        ? 'text-white text-xl sm:text-2xl font-bold scale-105'
-                        : index < currentLineIndex
-                        ? 'text-white/40 text-sm sm:text-base'
-                        : 'text-white/60 text-base sm:text-lg'
-                    }`}
-                  >
-                    {line.text || '♪'}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+            <div className="max-w-2xl mx-auto space-y-3 sm:space-y-4 py-[40vh]">
+              {syncedLines.map((line, index) => (
+                <div
+                  key={index}
+                  ref={index === currentLineIndex ? currentLineRef : null}
+                  className={`text-center transition-all duration-500 ease-out ${
+                    index === currentLineIndex
+                      ? 'text-white text-xl sm:text-2xl md:text-3xl font-bold scale-110 opacity-100'
+                      : index < currentLineIndex
+                      ? 'text-white/30 text-sm sm:text-base opacity-50'
+                      : 'text-white/60 text-base sm:text-lg opacity-70'
+                  }`}
+                >
+                  {line.text || '♪'}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="max-w-2xl mx-auto whitespace-pre-wrap text-white/80 text-sm sm:text-base leading-relaxed">

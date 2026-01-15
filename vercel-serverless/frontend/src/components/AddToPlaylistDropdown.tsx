@@ -91,10 +91,11 @@ export function AddToPlaylistDropdown({ track, onAddToQueue }: AddToPlaylistDrop
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="p-2 rounded-full text-gray-400 hover:text-white transition-colors active:scale-95"
+        className="p-2 sm:p-3 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-all active:scale-95"
         title="Add to playlist"
       >
-        <Plus size={18} />
+        <Plus size={20} className="sm:hidden" />
+        <Plus size={22} className="hidden sm:block" />
       </button>
 
       <AnimatePresence>
