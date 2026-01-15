@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Play, Music2 } from 'lucide-react';
 import { Track } from '../lib/cache';
 import { usePlayer } from '../services/player';
+import { AddToPlaylistDropdown } from './AddToPlaylistDropdown';
 
 interface TrackCardProps {
   track: Track;
@@ -9,12 +10,16 @@ interface TrackCardProps {
 }
 
 export default function TrackCard({ track, index }: TrackCardProps) {
-  const { currentTrack, state, play } = usePlayer();
+  const { currentTrack, state, play, addToQueue } = usePlayer();
   const isPlaying = state === 'playing';
   const isCurrentTrack = currentTrack?.videoId === track.videoId;
 
   const handlePlay = () => {
     play(track);
+  };
+
+  const handleAddToQueue = () => {
+    addToQueue(track);
   };
 
   return (
@@ -77,6 +82,14 @@ export default function TrackCard({ track, index }: TrackCardProps) {
             {track.title}
           </h3>
           <p className="text-xs text-gray-400 truncate">{track.artist}</p>
+        </div>
+
+        {/* Add to Playlist Dropdown */}
+        <div 
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <AddToPlaylistDropdown track={track} onAddToQueue={handleAddToQueue} />
         </div>
       </div>
     </motion.div>

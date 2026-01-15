@@ -17,10 +17,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  likedTracks      LikedTrack[]
-  playlists        Playlist[]
-  playHistory      PlayHistory[]
-  recommendations  Recommendation[]
+  likedTracks         LikedTrack[]
+  playlists           Playlist[]
+  playHistory         PlayHistory[]
+  recommendations     Recommendation[]
+  blendInvitesSent    BlendInvite[]    @relation("InviteSender")
+  blendInvitesReceived BlendInvite[]   @relation("InviteReceiver")
+  blendsAsUser1       Blend[]          @relation("BlendUser1")
+  blendsAsUser2       Blend[]          @relation("BlendUser2")
   
   @@index([email])
   @@index([username])
@@ -57,6 +61,7 @@ model Playlist {
   
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   tracks      PlaylistTrack[]
+  blend       Blend?          @relation("BlendPlaylist")
   
   @@index([userId])
   @@map("playlists")
@@ -124,4 +129,60 @@ model Recommendation {
   @@index([lastPlayedAt])
   @@index([createdAt])
   @@map("recommendations")
+}
+
+model BlendInvite {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      String   @default("pending") // pending, accepted, rejected
+  createdAt   DateTime @default(now())
+  respondedAt DateTime?
+  
+  sender      User     @relation("InviteSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("InviteReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+  @@index([senderId])
+  @@map("blend_invites")
+}
+
+model Blend {
+  id          String   @id @default(cuid())
+  name        String
+  user1Id     String
+  user2Id     String
+  playlistId  String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user1       User     @relation("BlendUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2       User     @relation("BlendUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  playlist    Playlist? @relation("BlendPlaylist", fields: [playlistId], references: [id], onDelete: SetNull)
+  tracks      BlendTrack[]
+  
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+  @@map("blends")
+}
+
+model BlendTrack {
+  id          String   @id @default(cuid())
+  blendId     String
+  trackId     String
+  title       String
+  artist      String
+  thumbnail   String?
+  duration    Int?
+  sourceUserId String  // Which user contributed this track
+  position    Int
+  addedAt     DateTime @default(now())
+  
+  blend       Blend    @relation(fields: [blendId], references: [id], onDelete: Cascade)
+  
+  @@unique([blendId, trackId])
+  @@index([blendId])
+  @@map("blend_tracks")
 }

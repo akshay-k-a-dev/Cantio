@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Volume1,
-  Heart, ListMusic, Share2, ChevronDown, MoreHorizontal, Plus, Music2
+  Heart, ListMusic, Share2, ChevronDown, MoreHorizontal, Plus, Music2, FileText
 } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { useNavigate } from 'react-router-dom';
+import { AddToPlaylistDropdown } from './AddToPlaylistDropdown';
+import { LyricsPanel } from './LyricsPanel';
 
 // Global state for full-screen player visibility
 let fullScreenListeners: Set<(val: boolean) => void> = new Set();
@@ -49,6 +51,7 @@ export default function PlayerBar() {
   const navigate = useNavigate();
   const [isFullScreen, setIsFullScreen] = useState(isFullScreenGlobal);
   const [showOverflow, setShowOverflow] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
   const [trackIsLiked, setTrackIsLiked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [prevVolume, setPrevVolume] = useState(1);
@@ -71,11 +74,22 @@ export default function PlayerBar() {
     return () => { fullScreenListeners.delete(handler); };
   }, []);
 
-  // Handle progress bar seek
-  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  // Handle progress bar seek - support both mouse and touch
+  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!progressRef.current || !duration) return;
+    
     const rect = progressRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    let x: number;
+    
+    // Handle both mouse and touch events
+    if ('touches' in e) {
+      // Touch event
+      x = e.touches[0].clientX - rect.left;
+    } else {
+      // Mouse event
+      x = e.clientX - rect.left;
+    }
+    
     const percent = Math.max(0, Math.min(1, x / rect.width));
     seek(percent * duration);
   }, [duration, seek]);
@@ -143,6 +157,52 @@ export default function PlayerBar() {
 
   return (
     <>
+      {/* DESKTOP LYRICS PANEL - Slides up from player bar */}
+      <AnimatePresence>
+        {showLyrics && (
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-[88px] left-0 right-0 z-40 hidden md:block"
+          >
+            <div className="bg-gradient-to-t from-black via-black/95 to-black/90 backdrop-blur-xl border-t border-white/10 h-[400px] overflow-hidden">
+              {/* Close button */}
+              <button
+                onClick={() => setShowLyrics(false)}
+                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition z-10"
+              >
+                <ChevronDown size={20} className="text-white" />
+              </button>
+              
+              {/* Track info header */}
+              <div className="px-6 py-4 border-b border-white/10 flex items-center gap-4">
+                <img
+                  src={currentTrack.thumbnail}
+                  alt={currentTrack.title}
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+                <div>
+                  <h3 className="text-white font-semibold">{currentTrack.title}</h3>
+                  <p className="text-white/60 text-sm">{currentTrack.artist}</p>
+                </div>
+              </div>
+              
+              {/* Lyrics content */}
+              <div className="h-[calc(100%-80px)]">
+                <LyricsPanel
+                  trackTitle={currentTrack.title}
+                  artistName={currentTrack.artist}
+                  duration={duration}
+                  currentTime={progress}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* DESKTOP PLAYER BAR */}
       <div className="fixed bottom-0 left-0 right-0 z-50 hidden md:block">
         <div className="bg-black/80 backdrop-blur-xl border-t border-white/5">
@@ -178,6 +238,16 @@ export default function PlayerBar() {
               >
                 <Heart size={18} fill={trackIsLiked ? 'currentColor' : 'none'} />
               </button>
+              <AddToPlaylistDropdown
+                track={{
+                  videoId: currentTrack.videoId,
+                  title: currentTrack.title,
+                  artist: currentTrack.artist,
+                  thumbnail: currentTrack.thumbnail,
+                  duration: currentTrack.duration
+                }}
+                onAddToQueue={() => {}}
+              />
             </div>
 
             {/* CENTER: Controls */}
@@ -213,8 +283,16 @@ export default function PlayerBar() {
               </div>
             </div>
 
-            {/* RIGHT: Volume + Queue */}
+            {/* RIGHT: Lyrics + Volume + Queue */}
             <div className="flex items-center gap-3 w-[280px] justify-end">
+              {/* Lyrics Toggle */}
+              <button
+                onClick={() => setShowLyrics(!showLyrics)}
+                className={`p-2 transition rounded-full hover:bg-white/10 ${showLyrics ? 'text-green-500' : 'text-white/60 hover:text-white'}`}
+                title={showLyrics ? 'Hide lyrics' : 'Show lyrics'}
+              >
+                <FileText size={18} />
+              </button>
               <button
                 onClick={openQueue}
                 className="p-2 text-white/60 hover:text-white transition rounded-full hover:bg-white/10"
@@ -267,29 +345,47 @@ export default function PlayerBar() {
             </div>
 
             <div
-              className="bg-zinc-900/95 backdrop-blur-xl px-4 py-3 flex items-center gap-3"
+              className="bg-zinc-900/95 backdrop-blur-xl px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3"
               onClick={handleOpenFull}
             >
               <img
                 src={currentTrack.thumbnail}
                 alt={currentTrack.title}
-                className="w-12 h-12 rounded-lg object-cover"
+                className="w-11 sm:w-12 h-11 sm:h-12 rounded-md sm:rounded-lg object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{currentTrack.title}</p>
-                <p className="text-white/50 text-xs truncate">{currentTrack.artist}</p>
+                <p className="text-white text-xs sm:text-sm font-medium truncate">{currentTrack.title}</p>
+                <p className="text-white/50 text-[10px] sm:text-xs truncate">{currentTrack.artist}</p>
+              </div>
+              <div onClick={(e) => e.stopPropagation()}>
+                <AddToPlaylistDropdown
+                  track={{
+                    videoId: currentTrack.videoId,
+                    title: currentTrack.title,
+                    artist: currentTrack.artist,
+                    thumbnail: currentTrack.thumbnail,
+                    duration: currentTrack.duration
+                  }}
+                  onAddToQueue={() => {}}
+                />
               </div>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   togglePlay();
                 }}
-                className="w-11 h-11 bg-white rounded-full flex items-center justify-center"
+                className="w-10 sm:w-11 h-10 sm:h-11 bg-white rounded-full flex items-center justify-center flex-shrink-0"
               >
                 {isPlaying ? (
-                  <Pause size={22} className="text-black" fill="black" />
+                  <>
+                    <Pause size={20} className="sm:hidden text-black" fill="black" />
+                    <Pause size={22} className="hidden sm:block text-black" fill="black" />
+                  </>
                 ) : (
-                  <Play size={22} className="text-black ml-0.5" fill="black" />
+                  <>
+                    <Play size={20} className="sm:hidden text-black ml-0.5" fill="black" />
+                    <Play size={22} className="hidden sm:block text-black ml-0.5" fill="black" />
+                  </>
                 )}
               </button>
             </div>
@@ -323,107 +419,153 @@ export default function PlayerBar() {
             {/* Content overlay */}
             <div className="relative z-10 flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 pt-safe">
+              <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 pt-safe">
                 <button
                   onClick={handleClose}
-                  className="p-2 -ml-2 text-white/70 hover:text-white active:scale-95 transition"
+                  className="p-1.5 sm:p-2 -ml-1 sm:-ml-2 text-white/70 hover:text-white active:scale-95 transition"
                 >
-                  <ChevronDown size={28} />
+                  <ChevronDown size={24} className="sm:hidden" />
+                  <ChevronDown size={28} className="hidden sm:block" />
                 </button>
-                <div className="text-center">
-                  <p className="text-white/50 text-xs uppercase tracking-wider">Playing from</p>
-                  <p className="text-white text-sm font-medium">Your Library</p>
+                <div className="text-center flex-1">
+                  <p className="text-white/50 text-[10px] sm:text-xs uppercase tracking-wider">Playing from</p>
+                  <p className="text-white text-xs sm:text-sm font-medium">Your Library</p>
                 </div>
                 <button
-                  onClick={() => setShowOverflow(!showOverflow)}
-                  className="p-2 -mr-2 text-white/70 hover:text-white active:scale-95 transition"
+                  onClick={() => setShowLyrics(!showLyrics)}
+                  className={`p-1.5 sm:p-2 -mr-1 sm:-mr-2 active:scale-95 transition ${showLyrics ? 'text-white' : 'text-white/70 hover:text-white'}`}
+                  title="Toggle lyrics"
                 >
-                  <MoreHorizontal size={24} />
+                  <FileText size={20} className="sm:hidden" />
+                  <FileText size={24} className="hidden sm:block" />
                 </button>
               </div>
 
-              {/* Album Art */}
-              <div className="flex-1 flex items-center justify-center px-8 py-6">
-                <motion.img
-                  key={currentTrack.videoId}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                  src={currentTrack.thumbnail}
-                  alt={currentTrack.title}
-                  className="w-full max-w-[340px] aspect-square rounded-xl object-cover shadow-2xl"
-                />
+              {/* Album Art / Lyrics */}
+              <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 overflow-hidden">
+                {!showLyrics ? (
+                  <motion.img
+                    key={currentTrack.videoId}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    src={currentTrack.thumbnail}
+                    alt={currentTrack.title}
+                    className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[340px] aspect-square rounded-lg sm:rounded-xl object-cover shadow-2xl"
+                  />
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full h-full max-w-2xl"
+                  >
+                    <LyricsPanel
+                      trackTitle={currentTrack.title}
+                      artistName={currentTrack.artist}
+                      duration={duration}
+                      currentTime={progress}
+                    />
+                  </motion.div>
+                )}
               </div>
 
               {/* Track Info + Like */}
-              <div className="px-8 flex items-start justify-between">
-                <div className="min-w-0 flex-1 mr-4">
-                  <h2 className="text-white text-xl font-bold truncate">{currentTrack.title}</h2>
-                  <p className="text-white/60 text-base mt-1 truncate">{currentTrack.artist}</p>
+              <div className="px-4 sm:px-6 md:px-8 flex items-start justify-between">
+                <div className="min-w-0 flex-1 mr-2 sm:mr-4">
+                  <h2 className="text-white text-lg sm:text-xl font-bold truncate">{currentTrack.title}</h2>
+                  <p className="text-white/60 text-sm sm:text-base mt-0.5 sm:mt-1 truncate">{currentTrack.artist}</p>
                 </div>
                 <button
                   onClick={handleToggleLike}
-                  className={`p-2 -mr-2 transition active:scale-95 ${trackIsLiked ? 'text-green-500' : 'text-white/50'}`}
+                  className={`p-1.5 sm:p-2 -mr-1.5 sm:-mr-2 transition active:scale-95 flex-shrink-0 ${trackIsLiked ? 'text-green-500' : 'text-white/50'}`}
                 >
-                  <Heart size={26} fill={trackIsLiked ? 'currentColor' : 'none'} />
+                  <Heart size={22} className="sm:hidden" fill={trackIsLiked ? 'currentColor' : 'none'} />
+                  <Heart size={26} className="hidden sm:block" fill={trackIsLiked ? 'currentColor' : 'none'} />
                 </button>
               </div>
 
               {/* Progress Bar */}
-              <div className="px-8 mt-6">
+              <div className="px-4 sm:px-6 md:px-8 mt-4 sm:mt-6">
                 <div
-                  className="h-1 w-full bg-white/20 rounded-full cursor-pointer"
+                  ref={progressRef}
+                  className="h-1 w-full bg-white/20 rounded-full cursor-pointer active:h-1.5 transition-all"
                   onClick={handleSeek}
+                  onTouchStart={handleSeek}
                 >
                   <div
                     className="h-full bg-white rounded-full relative"
                     style={{ width: `${progressPercent}%` }}
                   >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow" />
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 bg-white rounded-full shadow" />
                   </div>
                 </div>
-                <div className="flex justify-between mt-2 text-xs text-white/50">
+                <div className="flex justify-between mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-white/50">
                   <span>{formatTime(progress)}</span>
                   <span>{formatTime(duration)}</span>
                 </div>
               </div>
 
               {/* Main Controls */}
-              <div className="flex items-center justify-center gap-8 px-8 mt-6">
+              <div className="flex items-center justify-center gap-6 sm:gap-8 px-4 sm:px-8 mt-4 sm:mt-6">
                 <button
                   onClick={prev}
-                  className="p-3 text-white active:scale-95 transition"
+                  className="p-2 sm:p-3 text-white active:scale-95 transition"
                 >
-                  <SkipBack size={32} fill="currentColor" />
+                  <SkipBack size={28} className="sm:hidden" fill="currentColor" />
+                  <SkipBack size={32} className="hidden sm:block" fill="currentColor" />
                 </button>
                 <button
                   onClick={togglePlay}
-                  className="w-16 h-16 bg-white rounded-full flex items-center justify-center active:scale-95 transition shadow-lg"
+                  className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-full flex items-center justify-center active:scale-95 transition shadow-lg"
                 >
                   {isPlaying ? (
-                    <Pause size={32} className="text-black" fill="black" />
+                    <>
+                      <Pause size={28} className="sm:hidden text-black" fill="black" />
+                      <Pause size={32} className="hidden sm:block text-black" fill="black" />
+                    </>
                   ) : (
-                    <Play size={32} className="text-black ml-1" fill="black" />
+                    <>
+                      <Play size={28} className="sm:hidden text-black ml-0.5" fill="black" />
+                      <Play size={32} className="hidden sm:block text-black ml-0.5" fill="black" />
+                    </>
                   )}
                 </button>
                 <button
                   onClick={next}
-                  className="p-3 text-white active:scale-95 transition"
+                  className="p-2 sm:p-3 text-white active:scale-95 transition"
                 >
-                  <SkipForward size={32} fill="currentColor" />
+                  <SkipForward size={28} className="sm:hidden" fill="currentColor" />
+                  <SkipForward size={32} className="hidden sm:block" fill="currentColor" />
                 </button>
               </div>
 
               {/* Bottom Actions */}
-              <div className="flex items-center justify-between px-8 mt-8 mb-8 pb-safe">
-                <button className="p-3 text-white/50 active:scale-95 transition">
-                  <Share2 size={22} />
+              <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 mt-6 sm:mt-8 mb-6 sm:mb-8 pb-safe relative">
+                <div className="relative">
+                  <AddToPlaylistDropdown
+                    track={{
+                      videoId: currentTrack.videoId,
+                      title: currentTrack.title,
+                      artist: currentTrack.artist,
+                      thumbnail: currentTrack.thumbnail,
+                      duration: currentTrack.duration
+                    }}
+                    onAddToQueue={() => {}}
+                  />
+                </div>
+                <button className="p-2 sm:p-3 text-white/50 active:scale-95 transition">
+                  <Share2 size={20} className="sm:hidden" />
+                  <Share2 size={22} className="hidden sm:block" />
                 </button>
                 <button
                   onClick={openQueue}
-                  className="p-3 text-white/50 active:scale-95 transition"
+                  className="p-2 sm:p-3 text-white/50 active:scale-95 transition"
                 >
-                  <ListMusic size={22} />
+                  <ListMusic size={20} className="sm:hidden" />
+                  <ListMusic size={22} className="hidden sm:block" />
                 </button>
               </div>
             </div>
@@ -448,10 +590,6 @@ export default function PlayerBar() {
                   >
                     <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-3" />
                     <div className="p-4">
-                      <button className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-xl transition">
-                        <Plus size={22} className="text-white/70" />
-                        <span className="text-white">Add to Playlist</span>
-                      </button>
                       <button className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-xl transition">
                         <Share2 size={22} className="text-white/70" />
                         <span className="text-white">Share</span>

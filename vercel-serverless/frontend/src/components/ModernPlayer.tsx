@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Heart, Loader2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Heart, Loader2, FileText } from 'lucide-react';
 import { usePlayer } from '../services/player';
+import { AddToPlaylistDropdown } from './AddToPlaylistDropdown';
+import { LyricsPanel } from './LyricsPanel';
 
 export default function ModernPlayer() {
   const {
@@ -20,6 +22,7 @@ export default function ModernPlayer() {
     isLiked,
   } = usePlayer();
 
+  const [showLyrics, setShowLyrics] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const volumeBarRef = useRef<HTMLDivElement>(null);
 
@@ -68,30 +71,74 @@ export default function ModernPlayer() {
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              {/* Album Art */}
-              <motion.div
-                className="relative aspect-square w-full mb-8 rounded-3xl overflow-hidden shadow-2xl"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                <img
-                  src={currentTrack.thumbnail}
-                  alt={currentTrack.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* Loading Overlay */}
-                {state === 'loading' && (
+              {/* Album Art / Lyrics */}
+              <div className="relative aspect-square w-full mb-8 rounded-3xl overflow-hidden shadow-2xl">
+                <AnimatePresence mode="wait">
+                {!showLyrics ? (
                   <motion.div
+                    key="album-art"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+                    exit={{ opacity: 0 }}
+                    className="relative w-full h-full"
                   >
-                    <Loader2 className="w-16 h-16 text-white animate-spin" />
+                    <img
+                      src={currentTrack.thumbnail}
+                      alt={currentTrack.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    {/* Loading Overlay */}
+                    {state === 'loading' && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+                      >
+                        <Loader2 className="w-16 h-16 text-white animate-spin" />
+                      </motion.div>
+                    )}
+
+                    {/* Lyrics Toggle Button */}
+                    <button
+                      onClick={() => setShowLyrics(true)}
+                      className="absolute top-4 right-4 p-3 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full transition-colors z-10"
+                      title="Show lyrics"
+                    >
+                      <FileText size={20} className="text-white" />
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="lyrics"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="relative w-full h-full bg-black/40 backdrop-blur-xl"
+                  >
+                    {/* Close Lyrics Button */}
+                    <button
+                      onClick={() => setShowLyrics(false)}
+                      className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full transition-colors z-10"
+                      title="Hide lyrics"
+                    >
+                      <FileText size={20} className="text-white" />
+                    </button>
+
+                    {/* Lyrics Content */}
+                    <div className="w-full h-full">
+                      <LyricsPanel
+                        trackTitle={currentTrack.title}
+                        artistName={currentTrack.artist}
+                        duration={duration}
+                        currentTime={progress}
+                      />
+                    </div>
                   </motion.div>
                 )}
-              </motion.div>
+                </AnimatePresence>
+              </div>
 
               {/* Track Info */}
               <div className="mb-6">
@@ -190,6 +237,18 @@ export default function ModernPlayer() {
                     className={`w-5 h-5 ${liked ? 'fill-pink-500 text-pink-500' : ''}`}
                   />
                 </motion.button>
+
+                {/* Add to Playlist Button */}
+                <AddToPlaylistDropdown
+                  track={{
+                    videoId: currentTrack.videoId,
+                    title: currentTrack.title,
+                    artist: currentTrack.artist,
+                    thumbnail: currentTrack.thumbnail,
+                    duration: currentTrack.duration
+                  }}
+                  onAddToQueue={() => {}}
+                />
 
                 {/* Volume Control */}
                 <div className="flex items-center gap-3 flex-1 max-w-xs ml-auto">

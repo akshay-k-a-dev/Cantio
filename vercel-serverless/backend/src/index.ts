@@ -9,6 +9,7 @@ import playlistsRoutes from './routes/playlists.js';
 import historyRoutes from './routes/history.js';
 import recommendationsRoutes from './routes/recommendations.js';
 import syncRoutes from './routes/sync.js';
+import blendsRoutes from './routes/blends.js';
 
 // Load environment variables
 config();
@@ -57,6 +58,7 @@ async function initializeApp() {
   await app.register(historyRoutes, { prefix: '/api/history' });
   await app.register(recommendationsRoutes, { prefix: '/api/recommendations' });
   await app.register(syncRoutes, { prefix: '/api/sync' });
+  await app.register(blendsRoutes, { prefix: '/api/blends' });
 
   // Root health endpoint (homepage)
   app.get('/', async (request, reply) => {
@@ -166,6 +168,41 @@ async function initializeApp() {
       request.log.error(error);
       reply.code(404);
       return { error: 'Track not found', message: error.message };
+    }
+  });
+
+  // Lyrics proxy endpoint (to bypass CORS from LRCLIB)
+  app.get('/api/lyrics', async (request, reply) => {
+    const { track_name, artist_name } = request.query as { track_name?: string; artist_name?: string };
+    
+    if (!track_name || !artist_name) {
+      reply.code(400);
+      return { error: 'Missing track_name or artist_name parameter' };
+    }
+
+    try {
+      const params = new URLSearchParams({
+        track_name,
+        artist_name,
+      });
+      
+      const response = await fetch(`https://lrclib.net/api/search?${params.toString()}`, {
+        headers: {
+          'User-Agent': 'MusicMu/1.0.0 (https://musicmu.app)',
+        },
+      });
+
+      if (!response.ok) {
+        reply.code(response.status);
+        return { error: 'LRCLIB API error', status: response.status };
+      }
+
+      const results = await response.json();
+      return results;
+    } catch (error: any) {
+      request.log.error('Lyrics fetch error:', error);
+      reply.code(500);
+      return { error: 'Failed to fetch lyrics', message: error.message };
     }
   });
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Play, Pause, Clock, Plus, Loader2 } from 'lucide-react';
+import { Heart, Play, Clock, Loader2 } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { cache, Track } from '../lib/cache';
 import { useAuth } from '../lib/authStore';
 import { getLikedTracks } from '../services/api';
+import { AddToPlaylistDropdown } from '../components/AddToPlaylistDropdown';
 
 export function LikedPage() {
   const [likedSongs, setLikedSongs] = useState<Track[]>([]);
@@ -245,15 +246,12 @@ export function LikedPage() {
 
               {/* Desktop: Add to queue */}
               <div className="hidden md:flex items-center justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => handleAddToQueue(e, track)}
-                  className="p-2 rounded-full hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
-                  title="Add to queue"
-                >
-                  <Plus size={16} className="text-gray-400 hover:text-white" />
-                </motion.button>
+                <div className="opacity-0 group-hover:opacity-100">
+                  <AddToPlaylistDropdown
+                    track={track}
+                    onAddToQueue={() => handleAddToQueue(new MouseEvent('click') as any, track)}
+                  />
+                </div>
               </div>
             </motion.div>
           );

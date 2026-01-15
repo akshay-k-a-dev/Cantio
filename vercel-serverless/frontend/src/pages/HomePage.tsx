@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Music, Loader2, RefreshCw, Sparkles, Play, Pause } from 'lucide-react';
+import { Music, Loader2, RefreshCw, Sparkles, Play, Pause, TrendingUp } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/authStore';
@@ -7,11 +7,15 @@ import { getRecommendations, getGuestRecommendations, Recommendations } from '..
 import RecommendationSection from '../components/RecommendationSection';
 import ArtistCard from '../components/ArtistCard';
 import { openFullScreenPlayer } from '../components/PlayerBar';
+import { Track } from '../lib/cache';
+
+const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:4001/api';
 
 export function HomePage() {
   const { currentTrack, state } = usePlayer();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
+  const [popularTracks, setPopularTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,8 +39,34 @@ export function HomePage() {
     }
   };
 
+  const loadPopularTracks = async () => {
+    if (!isAuthenticated || !token) return;
+
+    try {
+      const response = await fetch(`${API_URL}/playlists/discover/popular`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPopularTracks(
+          data.tracks.map((t: any) => ({
+            videoId: t.trackId,
+            title: t.title,
+            artist: t.artist,
+            thumbnail: t.thumbnail || '',
+            duration: t.duration || 0
+          }))
+        );
+      }
+    } catch (err) {
+      console.error('Failed to load popular tracks:', err);
+    }
+  };
+
   useEffect(() => {
     loadRecommendations();
+    loadPopularTracks();
   }, [isAuthenticated]);
 
   // Compact "Now Playing" mini-card (only when track is playing)
@@ -200,6 +230,32 @@ export function HomePage() {
       {/* Recommendations */}
       {!loading && !error && recommendations && (
         <div className="space-y-6 sm:space-y-8">
+          {/* Popular from Community - What Others Like */}
+          {isAuthenticated && popularTracks.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="mb-3 sm:mb-4 flex items-center gap-2">
+                <TrendingUp size={18} className="text-purple-400" />
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold text-white">
+                    What Others Love
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                    Most popular tracks from community playlists
+                  </p>
+                </div>
+              </div>
+              <RecommendationSection
+                title=""
+                description=""
+                tracks={popularTracks}
+                hideHeader
+              />
+            </motion.div>
+          )}
+
           {/* Continue Listening / Recently Played */}
           {recommendations.recentlyPlayed.length > 0 && (
             <RecommendationSection

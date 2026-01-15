@@ -88,7 +88,7 @@ export const useAuth = create<AuthState>((set) => ({
 }));
 
 // API helper with authentication
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4001';
+const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:4001/api';
 
 export const api = {
   async fetch(endpoint: string, options: RequestInit = {}) {
@@ -114,7 +114,7 @@ export const api = {
   },
 
   async register(email: string, password: string, name?: string) {
-    const response = await this.fetch('/api/auth/register', {
+    const response = await this.fetch('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, name })
     });
@@ -130,7 +130,7 @@ export const api = {
   },
 
   async login(email: string, password: string) {
-    const response = await this.fetch('/api/auth/login', {
+    const response = await this.fetch('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password })
     });
@@ -146,7 +146,7 @@ export const api = {
   },
 
   async changePassword(currentPassword: string, newPassword: string) {
-    const response = await this.fetch('/api/auth/change-password', {
+    const response = await this.fetch('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({ currentPassword, newPassword })
     });

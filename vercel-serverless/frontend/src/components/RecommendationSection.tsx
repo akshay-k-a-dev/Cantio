@@ -8,6 +8,7 @@ interface RecommendationSectionProps {
   description?: string;
   tracks: Track[];
   onViewAll?: () => void;
+  hideHeader?: boolean;
 }
 
 export default function RecommendationSection({
@@ -15,6 +16,7 @@ export default function RecommendationSection({
   description,
   tracks,
   onViewAll,
+  hideHeader = false,
 }: RecommendationSectionProps) {
   if (tracks.length === 0) {
     return null;
@@ -27,24 +29,26 @@ export default function RecommendationSection({
       className="mb-6"
     >
       {/* Section header */}
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
-          {description && (
-            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+      {!hideHeader && (
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-lg font-semibold text-white">{title}</h2>
+            {description && (
+              <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+            )}
+          </div>
+          
+          {onViewAll && tracks.length > 6 && (
+            <button
+              onClick={onViewAll}
+              className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              View all
+              <ChevronRight size={14} />
+            </button>
           )}
         </div>
-        
-        {onViewAll && tracks.length > 6 && (
-          <button
-            onClick={onViewAll}
-            className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
-          >
-            View all
-            <ChevronRight size={14} />
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Horizontal scroll on mobile, grid on desktop */}
       <div className="relative -mx-4 px-4 md:mx-0 md:px-0">

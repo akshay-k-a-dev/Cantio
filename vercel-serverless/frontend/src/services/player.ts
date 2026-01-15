@@ -15,6 +15,45 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
+// Wake Lock for background playback
+let wakeLock: WakeLockSentinel | null = null;
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('🔒 Wake lock acquired');
+      wakeLock.addEventListener('release', () => {
+        console.log('🔓 Wake lock released');
+      });
+    } catch (err) {
+      console.warn('Wake lock request failed:', err);
+    }
+  }
+}
+
+async function releaseWakeLock() {
+  if (wakeLock) {
+    try {
+      await wakeLock.release();
+      wakeLock = null;
+    } catch (err) {
+      // Ignore
+    }
+  }
+}
+
+// Re-acquire wake lock when page becomes visible again
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && wakeLock === null) {
+    // Check if we should have a wake lock (player is playing)
+    const playerStore = usePlayer.getState();
+    if (playerStore.state === 'playing') {
+      await requestWakeLock();
+    }
+  }
+});
+
 export type PlayerState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 export type PlaybackMode = 'iframe'; // Only iframe mode now
 
@@ -120,22 +159,6 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     
     // Sync liked tracks from database for logged-in users
     get().syncLikesFromDatabase();
-    
-    // 🔥 WATCHDOG: Continuously monitor and force resume if paused in background
-    setInterval(() => {
-      const { state, ytPlayer, ytPlayerReady } = get();
-      
-      // Only run watchdog if we should be playing and page is hidden
-      if (state === 'playing' && ytPlayer && ytPlayerReady && document.visibilityState === 'hidden') {
-        const YT = window.YT;
-        const ytState = ytPlayer.getPlayerState();
-        
-        if (ytState === YT.PlayerState.PAUSED) {
-          console.log('🐕 WATCHDOG: Detected pause in background, force resuming');
-          ytPlayer.playVideo();
-        }
-      }
-    }, 1000); // Check every second
   },
 
   initYouTubePlayer: async () => {
@@ -165,6 +188,7 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     const player = new window.YT.Player(container, {
       height: '1',
       width: '1',
+      videoId: '', // Start with no video to avoid errors
       playerVars: {
         autoplay: 0,
         controls: 0,
@@ -172,18 +196,33 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
         origin: window.location.origin,
         playsinline: 1,
         rel: 0,
+        modestbranding: 1,
+        fs: 0,
       },
       events: {
         onReady: () => {
           console.log('✅ YouTube IFrame Player ready');
-          player.setVolume(get().volume * 100);
-          set({ ytPlayerReady: true });
+          try {
+            player.setVolume(get().volume * 100);
+            set({ ytPlayerReady: true });
+          } catch (error) {
+            console.warn('⚠️  Player volume set failed:', error);
+            set({ ytPlayerReady: true }); // Still mark as ready
+          }
         },
         onStateChange: (event: any) => {
           const YT = window.YT;
           
           if (event.data === YT.PlayerState.PLAYING) {
             set({ state: 'playing', error: null });
+            
+            // Acquire wake lock to prevent device sleep
+            requestWakeLock();
+            
+            // Update media session playback state
+            if ('mediaSession' in navigator) {
+              navigator.mediaSession.playbackState = 'playing';
+            }
             
             // Start progress tracking
             const trackProgress = () => {
@@ -192,6 +231,20 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
                   const currentTime = player.getCurrentTime();
                   const duration = player.getDuration();
                   set({ progress: currentTime || 0, duration: duration || 0 });
+                  
+                  // Update media session position state for background playback
+                  if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+                    try {
+                      navigator.mediaSession.setPositionState({
+                        duration: duration || 0,
+                        playbackRate: 1,
+                        position: currentTime || 0,
+                      });
+                    } catch (e) {
+                      // Some browsers don't support setPositionState
+                    }
+                  }
+                  
                   requestAnimationFrame(trackProgress);
                 } catch (e) {
                   // Player might be destroyed
@@ -201,23 +254,53 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
             trackProgress();
             
           } else if (event.data === YT.PlayerState.PAUSED) {
-            // AGGRESSIVE: Only accept pause if page is visible AND we're actually pausing
-            if (document.visibilityState === 'visible') {
-              set({ state: 'paused' });
-            } else {
-              // Background auto-pause detected - FORCE RESUME immediately
-              console.log('⚠️ YouTube auto-paused in background - FORCE RESUMING NOW');
+            // Check if this was an intentional pause (user clicked) or browser auto-pause
+            const wasPlaying = get().state === 'playing';
+            const isHidden = document.visibilityState === 'hidden';
+            
+            if (isHidden && wasPlaying) {
+              // Browser auto-paused due to tab being hidden - aggressive resume
+              console.log('⚠️  Background pause detected, aggressively resuming...');
               
-              // Try multiple times to ensure it resumes (aggressive approach)
-              const forceResume = () => {
-                if (get().state === 'playing' && player) {
-                  player.playVideo();
-                }
+              // Multiple retry attempts with increasing delays
+              const retryResume = (attempt: number) => {
+                if (attempt > 5) return; // Give up after 5 attempts
+                
+                setTimeout(() => {
+                  try {
+                    const currentState = get().state;
+                    const ytState = player.getPlayerState();
+                    
+                    // Only resume if we still think we should be playing
+                    if (currentState === 'playing' && ytState === YT.PlayerState.PAUSED) {
+                      console.log(`🔄 Resume attempt ${attempt}...`);
+                      player.playVideo();
+                      
+                      // Check again after a short delay
+                      setTimeout(() => {
+                        const newState = player.getPlayerState();
+                        if (newState === YT.PlayerState.PAUSED && get().state === 'playing') {
+                          retryResume(attempt + 1);
+                        }
+                      }, 200);
+                    }
+                  } catch (e) {
+                    console.warn('Resume attempt failed:', e);
+                    retryResume(attempt + 1);
+                  }
+                }, 100 * attempt);
               };
               
-              setTimeout(forceResume, 50);
-              setTimeout(forceResume, 100);
-              setTimeout(forceResume, 200);
+              retryResume(1);
+            } else {
+              // Legitimate pause from user
+              set({ state: 'paused' });
+              // Release wake lock when paused
+              releaseWakeLock();
+              // Update media session
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+              }
             }
           } else if (event.data === YT.PlayerState.BUFFERING) {
             set({ state: 'loading' });
@@ -230,8 +313,18 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
           }
         },
         onError: (event: any) => {
-          console.error('YouTube player error:', event.data);
-          set({ state: 'error', error: 'Playback error' });
+          const errorCode = event.data;
+          let errorMessage = 'Playback error';
+          
+          // Error codes: 2 = invalid ID, 5 = HTML5 error, 100 = not found, 101/150 = restricted
+          if (errorCode === 100 || errorCode === 101 || errorCode === 150) {
+            errorMessage = 'Video not available or restricted';
+          } else if (errorCode === 5) {
+            errorMessage = 'Video player error';
+          }
+          
+          console.error('🚫 YouTube error:', errorCode, errorMessage);
+          set({ state: 'error', error: errorMessage });
           // Try next track on error
           setTimeout(() => get().next(), 2000);
         },
@@ -240,65 +333,56 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
     set({ ytPlayer: player });
     
-    // ✅ AGGRESSIVE: Prevent YouTube auto-pause on visibility change
-    document.addEventListener('visibilitychange', () => {
+    // Handle visibility changes for background playback
+    let visibilityHandler: (() => void) | null = null;
+    
+    visibilityHandler = () => {
       const { state: playerState, ytPlayer: currentPlayer } = get();
+      const YT = window.YT;
       
-      if (document.visibilityState === 'hidden') {
-        // App going to background - FORCE resume after YouTube auto-pauses
-        console.log('📱 App going to background, forcing playback to continue');
+      if (document.visibilityState === 'visible' && playerState === 'playing' && currentPlayer) {
+        // App coming to foreground - check if paused and resume
+        try {
+          const ytState = currentPlayer.getPlayerState();
+          
+          if (ytState === YT.PlayerState.PAUSED) {
+            console.log('🔄 Resuming on visibility change...');
+            setTimeout(() => currentPlayer.playVideo(), 50);
+          }
+        } catch (error) {
+          // Ignore errors
+        }
+      } else if (document.visibilityState === 'hidden' && playerState === 'playing' && currentPlayer) {
+        // App going to background - start proactive monitoring
+        console.log('📱 Going to background, starting playback monitor...');
         
-        // Aggressively resume within 80ms (before YouTube fully pauses)
-        setTimeout(() => {
-          if (currentPlayer && playerState === 'playing') {
+        // Proactively check and resume if paused
+        const backgroundMonitor = setInterval(() => {
+          if (document.visibilityState !== 'hidden') {
+            clearInterval(backgroundMonitor);
+            return;
+          }
+          
+          try {
+            const currentState = get().state;
             const ytState = currentPlayer.getPlayerState();
-            const YT = window.YT;
             
-            if (ytState === YT.PlayerState.PAUSED) {
-              console.log('🔄 FORCE-RESUMING after YouTube auto-pause');
+            if (currentState === 'playing' && ytState === YT.PlayerState.PAUSED) {
+              console.log('🔄 Background monitor: resuming paused playback...');
               currentPlayer.playVideo();
             }
+          } catch (e) {
+            // Player might be destroyed
+            clearInterval(backgroundMonitor);
           }
-        }, 80);
+        }, 500); // Check every 500ms while in background
         
-      } else if (document.visibilityState === 'visible') {
-        // App coming to foreground
-        console.log('📱 App coming to foreground');
-        
-        // Check if we need to resume
-        if (playerState === 'playing' && currentPlayer) {
-          const ytState = currentPlayer.getPlayerState();
-          const YT = window.YT;
-          
-          if (ytState === YT.PlayerState.PAUSED) {
-            console.log('🔄 Auto-resuming playback after returning to foreground');
-            currentPlayer.playVideo();
-          }
-        }
+        // Clear monitor after 30 seconds to avoid battery drain
+        setTimeout(() => clearInterval(backgroundMonitor), 30000);
       }
-    });
+    };
     
-    // Handle page freeze/unfreeze events (PWA lifecycle)
-    document.addEventListener('freeze', () => {
-      console.log('📱 Page frozen, attempting to keep playback alive');
-    });
-    
-    document.addEventListener('resume', () => {
-      console.log('📱 Page resumed');
-      const { state: playerState, ytPlayer: currentPlayer } = get();
-      
-      if (playerState === 'playing' && currentPlayer) {
-        setTimeout(() => {
-          const ytState = currentPlayer.getPlayerState();
-          const YT = window.YT;
-          
-          if (ytState === YT.PlayerState.PAUSED) {
-            console.log('🔄 Force resume after page resume');
-            currentPlayer.playVideo();
-          }
-        }, 50);
-      }
-    });
+    document.addEventListener('visibilitychange', visibilityHandler);
   },
 
   search: async (query: string, limit: number = 10) => {
@@ -322,12 +406,28 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   },
 
   _playInternal: async (track: Track, skipReverseQueue: boolean = false) => {
-    const { ytPlayer, ytPlayerReady, currentTrack: previousTrack } = get();
+    let { ytPlayer, ytPlayerReady, currentTrack: previousTrack } = get();
 
+    // Wait for player to be ready (with timeout)
     if (!ytPlayer || !ytPlayerReady) {
-      console.error('YouTube player not ready');
-      set({ error: 'Player not ready' });
-      return;
+      console.log('⏳ Waiting for YouTube player to initialize...');
+      const maxWait = 5000; // 5 seconds max
+      const startTime = Date.now();
+      
+      while ((!ytPlayer || !ytPlayerReady) && (Date.now() - startTime) < maxWait) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const state = get();
+        ytPlayer = state.ytPlayer;
+        ytPlayerReady = state.ytPlayerReady;
+      }
+      
+      if (!ytPlayer || !ytPlayerReady) {
+        console.error('❌ YouTube player initialization timeout');
+        set({ error: 'Player initialization failed. Please refresh the page.' });
+        return;
+      }
+      
+      console.log('✅ YouTube player ready after waiting');
     }
 
     // 🔄 REVERSE QUEUE LOGIC: Push previous track to reverse queue (history stack)

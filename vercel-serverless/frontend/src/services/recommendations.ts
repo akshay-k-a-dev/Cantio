@@ -12,7 +12,7 @@ export interface Recommendations {
   topArtists: TopArtist[];
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
+const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:4001/api';
 
 // Get recommendations for logged-in users from backend
 export async function getRecommendations(): Promise<Recommendations> {
@@ -25,7 +25,7 @@ export async function getRecommendations(): Promise<Recommendations> {
     return getGuestRecommendations();
   }
 
-  const response = await fetch(`${API_URL}/api/recommendations`, {
+  const response = await fetch(`${API_URL}/recommendations`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },

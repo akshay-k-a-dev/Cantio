@@ -1,4 +1,4 @@
-import { Home, Search, Heart, List, User, LogIn } from 'lucide-react';
+import { Home, Search, Heart, List, User, LogIn, Music2, Users } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../lib/authStore';
@@ -13,6 +13,8 @@ export default function Sidebar() {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/search', icon: Search, label: 'Search' },
     { path: '/liked', icon: Heart, label: 'Liked' },
+    { path: '/playlists', icon: Music2, label: 'Library' },
+    { path: '/blends', icon: Users, label: 'Blends' },
     { path: '/queue', icon: List, label: 'Queue' },
   ];
 

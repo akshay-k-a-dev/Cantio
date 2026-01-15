@@ -259,4 +259,37 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
       return { error: 'Failed to delete playlist' };
     }
   });
+
+  // Get popular tracks from other users' public playlists
+  fastify.get('/discover/popular', {
+    onRequest: [fastify.authenticate]
+  }, async (request, reply) => {
+    try {
+      const userId = (request.user as any).id;
+
+      // Get top 20 most common tracks from other users' public playlists
+      const popularTracks = await prisma.$queryRaw`
+        SELECT 
+          pt."trackId",
+          pt.title,
+          pt.artist,
+          pt.thumbnail,
+          pt.duration,
+          COUNT(*)::integer as "playlistCount"
+        FROM playlist_tracks pt
+        INNER JOIN playlists p ON pt."playlistId" = p.id
+        WHERE p."userId" != ${userId}
+          AND p."isPublic" = true
+        GROUP BY pt."trackId", pt.title, pt.artist, pt.thumbnail, pt.duration, pt."addedAt"
+        ORDER BY "playlistCount" DESC, pt."addedAt" DESC
+        LIMIT 20
+      ` as any[];
+
+      return { tracks: popularTracks };
+    } catch (error) {
+      fastify.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to fetch popular tracks' };
+    }
+  });
 }

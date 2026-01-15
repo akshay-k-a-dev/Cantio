@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search as SearchIcon, Plus, Heart } from 'lucide-react';
+import { Search as SearchIcon, Heart, Plus } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { Track } from '../lib/cache';
+import { AddToPlaylistDropdown } from '../components/AddToPlaylistDropdown';
 
 export function SearchPage() {
   const [query, setQuery] = useState('');
@@ -164,12 +165,10 @@ export function SearchPage() {
                     >
                       <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
                     </button>
-                    <button
-                      onClick={(e) => handleAddToQueue(e, track)}
-                      className="p-2 rounded-full text-gray-400 hover:text-white transition-colors"
-                    >
-                      <Plus size={18} />
-                    </button>
+                    <AddToPlaylistDropdown
+                      track={track}
+                      onAddToQueue={() => handleAddToQueue(new MouseEvent('click') as any, track)}
+                    />
                   </div>
                 </motion.div>
               );
