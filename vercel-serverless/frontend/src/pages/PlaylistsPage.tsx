@@ -15,10 +15,10 @@ export function PlaylistsPage() {
   const [creating, setCreating] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  // Force fetch on mount to always get fresh data
+  // Force fetch on mount AND when location changes (navigating back from playlist detail)
   useEffect(() => {
-    fetchPlaylists(true);
-  }, []); 
+    fetchPlaylists(true); // Always force fresh data on mount/navigation
+  }, [location.pathname, fetchPlaylists]); 
 
   // Refresh when navigating back or regaining focus (but use cache)
   useEffect(() => {

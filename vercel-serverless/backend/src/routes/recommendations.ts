@@ -81,42 +81,54 @@ export default async function recommendations(fastify: FastifyInstance) {
       take: 5
     });
 
-    // For each top artist, get their tracks
-    const topArtists: TopArtist[] = await Promise.all(
-      topArtistsRaw.map(async (artistGroup: any) => {
-        const tracks = await prisma.playHistory.findMany({
+    // Batch fetch all tracks for top artists in ONE query (avoid N+1)
+    const topArtistNames = topArtistsRaw.map((a: any) => a.artist);
+    const allArtistTracks = topArtistNames.length > 0 
+      ? await prisma.playHistory.findMany({
           where: {
             userId,
-            artist: artistGroup.artist
+            artist: { in: topArtistNames }
           },
           orderBy: { playedAt: 'desc' },
-          take: 20,
           select: {
             trackId: true,
             title: true,
             artist: true,
             thumbnail: true,
           }
-        });
+        })
+      : [];
 
-        // Deduplicate tracks by trackId
-        const uniqueTracks = Array.from(
-          new Map(tracks.map((t: any) => [t.trackId, {
-            videoId: t.trackId,
-            title: t.title,
-            artist: t.artist,
-            thumbnail: t.thumbnail || '',
-            duration: 0
-          }])).values()
-        ).slice(0, 8); // Max 8 tracks per artist
+    // Group tracks by artist
+    const tracksByArtist = new Map<string, Track[]>();
+    for (const t of allArtistTracks) {
+      const track: Track = {
+        videoId: t.trackId,
+        title: t.title,
+        artist: t.artist,
+        thumbnail: t.thumbnail || '',
+        duration: 0
+      };
+      
+      if (!tracksByArtist.has(t.artist)) {
+        tracksByArtist.set(t.artist, []);
+      }
+      
+      // Deduplicate by trackId within artist
+      const artistTracks = tracksByArtist.get(t.artist)!;
+      if (!artistTracks.some(at => at.videoId === track.videoId)) {
+        if (artistTracks.length < 8) {
+          artistTracks.push(track);
+        }
+      }
+    }
 
-        return {
-          name: artistGroup.artist,
-          playCount: artistGroup._count.artist,
-          tracks: uniqueTracks
-        };
-      })
-    );
+    // Build top artists array
+    const topArtists: TopArtist[] = topArtistsRaw.map((artistGroup: any) => ({
+      name: artistGroup.artist,
+      playCount: artistGroup._count.artist,
+      tracks: tracksByArtist.get(artistGroup.artist) || []
+    }));
 
     const recommendations: Recommendations = {
       recentlyPlayed,

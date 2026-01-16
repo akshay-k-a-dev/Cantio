@@ -133,6 +133,7 @@ export default function ModernPlayer() {
                         artistName={currentTrack.artist}
                         duration={duration}
                         currentTime={progress}
+                        trackId={currentTrack.videoId}
                       />
                     </div>
                   </motion.div>

@@ -196,6 +196,7 @@ export default function PlayerBar() {
                   artistName={currentTrack.artist}
                   duration={duration}
                   currentTime={progress}
+                  trackId={currentTrack.videoId}
                 />
               </div>
             </div>

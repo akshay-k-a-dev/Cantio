@@ -186,3 +186,28 @@ model BlendTrack {
   @@index([blendId])
   @@map("blend_tracks")
 }
+
+// Cached popular tracks aggregated weekly
+model CachedPopularTracks {
+  id          String   @id @default(cuid())
+  trackId     String   @unique
+  title       String
+  artist      String
+  thumbnail   String?
+  duration    Int?
+  playlistCount Int    @default(1)
+  updatedAt   DateTime @updatedAt
+  
+  @@index([playlistCount])
+  @@map("cached_popular_tracks")
+}
+
+// Store last aggregation time
+model SystemCache {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_cache")
+}

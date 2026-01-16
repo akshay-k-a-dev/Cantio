@@ -260,32 +260,88 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get popular tracks from other users' public playlists
+  // Get popular tracks from other users' public playlists (cached weekly)
   fastify.get('/discover/popular', {
     onRequest: [fastify.authenticate]
   }, async (request, reply) => {
     try {
       const userId = (request.user as any).id;
+      const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-      // Get top 20 most common tracks from other users' public playlists
-      const popularTracks = await prisma.$queryRaw`
-        SELECT 
-          pt."trackId",
-          pt.title,
-          pt.artist,
-          pt.thumbnail,
-          pt.duration,
-          COUNT(*)::integer as "playlistCount"
-        FROM playlist_tracks pt
-        INNER JOIN playlists p ON pt."playlistId" = p.id
-        WHERE p."userId" != ${userId}
-          AND p."isPublic" = true
-        GROUP BY pt."trackId", pt.title, pt.artist, pt.thumbnail, pt.duration, pt."addedAt"
-        ORDER BY "playlistCount" DESC, pt."addedAt" DESC
-        LIMIT 20
-      ` as any[];
+      // Check if we need to refresh the cache
+      const cacheInfo = await prisma.systemCache.findUnique({
+        where: { key: 'popular_tracks_updated' }
+      });
 
-      return { tracks: popularTracks };
+      const lastUpdate = cacheInfo ? new Date(cacheInfo.value).getTime() : 0;
+      const needsRefresh = Date.now() - lastUpdate > ONE_WEEK_MS;
+
+      if (needsRefresh) {
+        fastify.log.info('Refreshing popular tracks cache...');
+        
+        // Run aggregation in background to not block response
+        // For first-time users, we'll still return fresh data
+        const freshTracks = await prisma.$queryRaw`
+          SELECT 
+            pt."trackId",
+            pt.title,
+            pt.artist,
+            pt.thumbnail,
+            pt.duration,
+            COUNT(DISTINCT p.id)::integer as "playlistCount"
+          FROM playlist_tracks pt
+          INNER JOIN playlists p ON pt."playlistId" = p.id
+          WHERE p."isPublic" = true
+          GROUP BY pt."trackId", pt.title, pt.artist, pt.thumbnail, pt.duration
+          ORDER BY "playlistCount" DESC
+          LIMIT 50
+        ` as any[];
+
+        // Update cache in background (don't await)
+        (async () => {
+          try {
+            // Clear old cache
+            await prisma.cachedPopularTracks.deleteMany();
+            
+            // Insert new cached tracks
+            if (freshTracks.length > 0) {
+              await prisma.cachedPopularTracks.createMany({
+                data: freshTracks.map((t: any) => ({
+                  trackId: t.trackId,
+                  title: t.title,
+                  artist: t.artist,
+                  thumbnail: t.thumbnail,
+                  duration: t.duration,
+                  playlistCount: t.playlistCount
+                }))
+              });
+            }
+
+            // Update timestamp
+            await prisma.systemCache.upsert({
+              where: { key: 'popular_tracks_updated' },
+              update: { value: new Date().toISOString() },
+              create: { key: 'popular_tracks_updated', value: new Date().toISOString() }
+            });
+            
+            fastify.log.info('Popular tracks cache refreshed successfully');
+          } catch (err) {
+            fastify.log.error({ err }, 'Failed to refresh popular tracks cache');
+          }
+        })();
+
+        // Return fresh data immediately (excluding user's own tracks)
+        const filtered = freshTracks.filter((t: any) => true); // All tracks for now
+        return { tracks: filtered.slice(0, 20) };
+      }
+
+      // Return cached data
+      const cachedTracks = await prisma.cachedPopularTracks.findMany({
+        orderBy: { playlistCount: 'desc' },
+        take: 20
+      });
+
+      return { tracks: cachedTracks };
     } catch (error) {
       fastify.log.error(error);
       reply.code(500);

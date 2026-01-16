@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Music, Loader2, RefreshCw, Sparkles, Play, Pause, TrendingUp } from 'lucide-react';
+import { Music, Loader2, RefreshCw, Sparkles, Play, Pause, TrendingUp, ChevronDown } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/authStore';
@@ -7,7 +7,7 @@ import { getRecommendations, getGuestRecommendations, Recommendations } from '..
 import RecommendationSection from '../components/RecommendationSection';
 import ArtistCard from '../components/ArtistCard';
 import { openFullScreenPlayer } from '../components/PlayerBar';
-import { Track } from '../lib/cache';
+import { Track, cache } from '../lib/cache';
 
 const API_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:4001/api';
 
@@ -16,8 +16,12 @@ export function HomePage() {
   const { isAuthenticated, token } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
   const [popularTracks, setPopularTracks] = useState<Track[]>([]);
+  const [discoveredTracks, setDiscoveredTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showMoreRecent, setShowMoreRecent] = useState(false);
+  const [showMoreFavorites, setShowMoreFavorites] = useState(false);
+  const [showMoreDiscovered, setShowMoreDiscovered] = useState(false);
 
   const loadRecommendations = async () => {
     setLoading(true);
@@ -31,6 +35,10 @@ export function HomePage() {
         const data = await getGuestRecommendations();
         setRecommendations(data);
       }
+      
+      // Load discovered tracks from IndexedDB
+      const discovered = await cache.getDiscoveredTracks();
+      setDiscoveredTracks(discovered);
     } catch (err) {
       console.error('Failed to load recommendations:', err);
       setError('Failed to load recommendations');
@@ -230,6 +238,29 @@ export function HomePage() {
       {/* Recommendations */}
       {!loading && !error && recommendations && (
         <div className="space-y-6 sm:space-y-8">
+          {/* Discovered Tracks - For You (from search history) */}
+          {discoveredTracks.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <RecommendationSection
+                title="Discover Something New"
+                description="Tracks you've seen but haven't played yet"
+                tracks={showMoreDiscovered ? discoveredTracks : discoveredTracks.slice(0, 6)}
+              />
+              {discoveredTracks.length > 6 && (
+                <button
+                  onClick={() => setShowMoreDiscovered(!showMoreDiscovered)}
+                  className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition"
+                >
+                  <ChevronDown size={16} className={`transition-transform ${showMoreDiscovered ? 'rotate-180' : ''}`} />
+                  {showMoreDiscovered ? 'Show Less' : `Show ${discoveredTracks.length - 6} More`}
+                </button>
+              )}
+            </motion.div>
+          )}
+
           {/* Popular from Community - What Others Like */}
           {isAuthenticated && popularTracks.length > 0 && (
             <motion.div
@@ -258,20 +289,48 @@ export function HomePage() {
 
           {/* Continue Listening / Recently Played */}
           {recommendations.recentlyPlayed.length > 0 && (
-            <RecommendationSection
-              title="Continue Listening"
-              description="Pick up where you left off"
-              tracks={recommendations.recentlyPlayed}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <RecommendationSection
+                title="Continue Listening"
+                description="Pick up where you left off"
+                tracks={showMoreRecent ? recommendations.recentlyPlayed : recommendations.recentlyPlayed.slice(0, 6)}
+              />
+              {recommendations.recentlyPlayed.length > 6 && (
+                <button
+                  onClick={() => setShowMoreRecent(!showMoreRecent)}
+                  className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition"
+                >
+                  <ChevronDown size={16} className={`transition-transform ${showMoreRecent ? 'rotate-180' : ''}`} />
+                  {showMoreRecent ? 'Show Less' : `Show ${recommendations.recentlyPlayed.length - 6} More`}
+                </button>
+              )}
+            </motion.div>
           )}
 
           {/* Your Favorites / Most Played */}
           {recommendations.mostPlayed.length > 0 && (
-            <RecommendationSection
-              title="Your Favorites"
-              description="Tracks you can't get enough of"
-              tracks={recommendations.mostPlayed}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <RecommendationSection
+                title="Your Favorites"
+                description="Tracks you can't get enough of"
+                tracks={showMoreFavorites ? recommendations.mostPlayed : recommendations.mostPlayed.slice(0, 6)}
+              />
+              {recommendations.mostPlayed.length > 6 && (
+                <button
+                  onClick={() => setShowMoreFavorites(!showMoreFavorites)}
+                  className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition"
+                >
+                  <ChevronDown size={16} className={`transition-transform ${showMoreFavorites ? 'rotate-180' : ''}`} />
+                  {showMoreFavorites ? 'Show Less' : `Show ${recommendations.mostPlayed.length - 6} More`}
+                </button>
+              )}
+            </motion.div>
           )}
 
           {/* Top Artists */}

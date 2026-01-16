@@ -393,7 +393,14 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
       });
       const response = await fetch(`${API_BASE}/search?${params}`);
       const data = await response.json();
-      return data.results || [];
+      const results = data.results || [];
+      
+      // Save search results as discovered tracks (for "For You" section)
+      if (results.length > 0) {
+        cache.addDiscoveredTracks(results);
+      }
+      
+      return results;
     } catch (error) {
       console.error('Search error:', error);
       throw new Error('Failed to search');
@@ -402,6 +409,8 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
   play: async (track: Track) => {
     console.log('🚀 NEW CODE LOADED - play() called for:', track.title);
+    // Mark track as played for "For You" discovery feature
+    cache.markTrackAsPlayed(track.videoId);
     await get()._playInternal(track, false);
   },
 

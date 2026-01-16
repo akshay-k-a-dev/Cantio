@@ -11,58 +11,28 @@ interface LyricsPanelProps {
   trackId?: string;
 }
 
-// Memoized individual lyric line - Spotify-style for desktop, original for mobile
+// Memoized individual lyric line to prevent re-renders
 const LyricLine = memo(({ 
   line, 
   isCurrent, 
   isPast,
-  isDesktop,
-  distanceFromCurrent,
 }: { 
   line: SyncedLine; 
   isCurrent: boolean; 
   isPast: boolean;
-  isDesktop: boolean;
-  distanceFromCurrent: number;
-}) => {
-  // Desktop: Spotify-style with indentation and progressive fade
-  if (isDesktop) {
-    const opacity = isCurrent ? 1 : Math.max(0.3, 1 - Math.abs(distanceFromCurrent) * 0.15);
-    const indent = isCurrent ? 0 : 32;
-    
-    return (
-      <div
-        className={`text-center py-3 transition-all duration-300 ease-out ${
-          isCurrent
-            ? 'text-white text-2xl md:text-3xl font-bold'
-            : 'text-white/90 text-base md:text-lg font-normal'
-        }`}
-        style={{
-          opacity,
-          paddingLeft: `${indent}px`,
-          paddingRight: `${indent}px`,
-        }}
-      >
-        {line.text || '♪'}
-      </div>
-    );
-  }
-  
-  // Mobile: Original behavior with scale
-  return (
-    <div
-      className={`text-center py-2 transition-all duration-300 ease-out ${
-        isCurrent
-          ? 'text-white text-xl sm:text-2xl font-bold opacity-100 scale-105'
-          : isPast
-          ? 'text-white/50 text-sm sm:text-base opacity-70'
-          : 'text-white/80 text-base sm:text-lg opacity-90'
-      }`}
-    >
-      {line.text || '♪'}
-    </div>
-  );
-});
+}) => (
+  <div
+    className={`text-center py-2 transition-all duration-300 ease-out ${
+      isCurrent
+        ? 'text-white text-xl sm:text-2xl md:text-3xl font-bold opacity-100 scale-105'
+        : isPast
+        ? 'text-white/30 text-sm sm:text-base opacity-50'
+        : 'text-white/60 text-base sm:text-lg opacity-70'
+    }`}
+  >
+    {line.text || '♪'}
+  </div>
+));
 
 LyricLine.displayName = 'LyricLine';
 
@@ -74,8 +44,8 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
   const containerRef = useRef<HTMLDivElement>(null);
   const lyricsContentRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(0);
-  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const userScrollTimeout = useRef<number | null>(null);
   
   // Zustand store for caching
   const { getCached, setLyrics, setCurrentTrack } = useLyricsStore();
@@ -90,16 +60,6 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
   const cachedEntry = getCached(cacheKey);
   const lyrics = cachedEntry?.lyrics ?? null;
   const syncedLines = cachedEntry?.syncedLines ?? [];
-
-  // Detect desktop vs mobile on resize
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Measure container height for centering calculation
   useEffect(() => {
@@ -178,38 +138,35 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
     updateCurrentLine();
   }, [updateCurrentLine]);
 
-  // Calculate translateY for desktop centered view
+  // Calculate the Y offset to keep current line at fixed position (40% from top)
   const translateY = useMemo(() => {
-    if (!isDesktop || !isAutoScrollEnabled || currentLineIndex < 0 || containerHeight === 0) return 0;
+    if (!autoScroll || currentLineIndex < 0 || containerHeight === 0) return 0;
     
-    const lineHeight = 64; // Height per line with spacing
-    const centerPosition = containerHeight / 2;
-    const currentLinePosition = currentLineIndex * lineHeight;
-    
-    return centerPosition - currentLinePosition;
-  }, [isDesktop, isAutoScrollEnabled, currentLineIndex, containerHeight]);
-
-  // Handle user interaction - PERMANENTLY disable auto-scroll (desktop only)
-  const handleUserInteraction = useCallback(() => {
-    if (!isDesktop) return; // Mobile keeps its own behavior
-    if (!isAutoScrollEnabled) return; // Already disabled
-    
-    setIsAutoScrollEnabled(false);
-  }, [isDesktop, isAutoScrollEnabled]);
-
-  // For mobile: auto-scroll using scrollTo
-  useEffect(() => {
-    if (isDesktop || !isAutoScrollEnabled || currentLineIndex < 0 || !containerRef.current) return;
-    
-    const container = containerRef.current;
+    // Average line height (text + padding)
     const lineHeight = 52;
-    const targetScrollTop = (currentLineIndex * lineHeight) - (container.clientHeight * 0.4);
+    // Fixed position for current line (40% from top of container)
+    const fixedPosition = containerHeight * 0.4;
+    // Calculate offset to position current line at fixed position
+    const currentLineOffset = currentLineIndex * lineHeight;
     
-    container.scrollTo({
-      top: Math.max(0, targetScrollTop),
-      behavior: 'smooth'
-    });
-  }, [isDesktop, isAutoScrollEnabled, currentLineIndex]);
+    return fixedPosition - currentLineOffset;
+  }, [autoScroll, currentLineIndex, containerHeight]);
+
+  // Handle user scroll - disable auto-scroll temporarily
+  const handleUserScroll = useCallback(() => {
+    if (!autoScroll) return; // Already disabled
+    
+    setAutoScroll(false);
+    
+    // Re-enable auto-scroll after 3 seconds of no interaction
+    if (userScrollTimeout.current) {
+      clearTimeout(userScrollTimeout.current);
+    }
+    
+    userScrollTimeout.current = setTimeout(() => {
+      setAutoScroll(true);
+    }, 3000);
+  }, [autoScroll]);
 
   // Loading state
   if (loading || (!cachedEntry && duration <= 0)) {
@@ -251,7 +208,7 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
     );
   }
 
-  // Has synced lyrics - Different behavior for desktop vs mobile
+  // Has synced lyrics - Spotify-style with sticky current line
   if (lyrics.syncedLyrics && syncedLines.length > 0) {
     return (
       <div className="h-full flex flex-col overflow-hidden">
@@ -267,59 +224,38 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
               }`}
             >
               <Clock size={14} />
-              Synced
-            </button>
-            <button
-              onClick={() => setViewMode('plain')}
-              className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                viewMode === 'plain'
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/50 hover:text-white/80'
-              }`}
-            >
-              <AlignLeft size={14} />
-              Plain
-            </button>
-          </div>
-        )}
-
-        {/* Lyrics Content - Desktop: overflow-hidden with translateY, Mobile: scrollable */}
+              SyncedScrollable container with optional auto-scroll */}
         <div 
           ref={containerRef}
-          className={`flex-1 relative px-4 sm:px-6 ${
-            isDesktop ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden overscroll-contain'
-          }`}
-          onWheel={isDesktop ? handleUserInteraction : undefined}
-          onTouchMove={isDesktop ? handleUserInteraction : undefined}
-          onScroll={!isDesktop ? handleUserInteraction : undefined}
-          style={!isDesktop ? { 
-            WebkitOverflowScrolling: 'touch' as any,
-            scrollBehavior: isAutoScrollEnabled ? 'smooth' : 'auto'
-          } : undefined}
+          className="flex-1 relative overflow-y-auto overflow-x-hidden px-4 sm:px-6 overscroll-contain"
+          onTouchStart={handleUserScroll}
+          onWheel={handleUserScroll}
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: autoScroll ? 'smooth' : 'auto'
+          }}
         >
           {viewMode === 'synced' ? (
             <>
-              {/* Auto-scroll paused indicator (desktop only, persistent) */}
-              {isDesktop && !isAutoScrollEnabled && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 bg-purple-500/95 text-white text-sm rounded-full shadow-lg backdrop-blur border border-purple-400/50">
-                  Auto-scroll paused · Close lyrics to reset
+              {/* Auto-scroll indicator */}
+              {!autoScroll && (
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 bg-purple-500/90 text-white text-xs rounded-full shadow-lg backdrop-blur">
+                  Auto-scroll paused
                 </div>
               )}
               
-              {/* Gradient overlays */}
-              <div className={`${isDesktop ? 'absolute' : 'sticky'} top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/90 via-black/50 to-transparent z-10 pointer-events-none ${isDesktop ? '' : '-mb-24'}`} />
+              {/* Gradient overlay at top for fade effect */}
+              <div className="sticky top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/90 via-black/50 to-transparent z-10 pointer-events-none -mb-24" />
               
-              {/* Lyrics container */}
+              {/* Lyrics container - user can scroll, auto-scroll positions when enabled */}
               <div 
                 ref={lyricsContentRef}
-                className={`max-w-2xl mx-auto ${isDesktop ? '' : 'py-[40vh]'}`}
-                style={isDesktop ? { 
-                  transform: `translateY(${translateY}px)`,
-                  transition: isAutoScrollEnabled ? 'transform 500ms cubic-bezier(0.4, 0.0, 0.2, 1)' : 'none',
-                  willChange: isAutoScrollEnabled ? 'transform' : 'auto',
-                  paddingTop: `${containerHeight / 2}px`,
-                  paddingBottom: `${containerHeight / 2}px`,
-                } : undefined}
+                className="max-w-2xl mx-auto py-[40vh]"
+                style={{ 
+                  transform: autoScroll ? `translateY(${translateY}px)` : 'none',
+                  transition: autoScroll ? 'transform 500ms ease-out' : 'none',
+                  willChange: autoScroll ? 'transform' : 'auto'
+                }}
               >
                 {syncedLines.map((line, index) => (
                   <LyricLine
@@ -327,14 +263,28 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
                     line={line}
                     isCurrent={index === currentLineIndex}
                     isPast={index < currentLineIndex}
-                    isDesktop={isDesktop}
-                    distanceFromCurrent={index - currentLineIndex}
                   />
                 ))}
               </div>
               
-              {/* Bottom gradient */}
-              <div className={`${isDesktop ? 'absolute' : 'sticky'} bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10 pointer-events-none ${isDesktop ? '' : '-mt-24'}`} />
+              {/* Gradient overlay at bottom for fade effect */}
+              <div className="sticky bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10 pointer-events-none -mt-24" /radient overlay at bottom for fade effect */}
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10 pointer-events-none" />
+              
+              {/* Lyrics container with smooth translateY animation */}
+              <div 
+                className="max-w-2xl mx-auto transition-transform duration-500 ease-out will-change-transform"
+                style={{ transform: `translateY(${translateY}px)` }}
+              >
+                {syncedLines.map((line, index) => (
+                  <LyricLine
+                    key={index}
+                    line={line}
+                    isCurrent={index === currentLineIndex}
+                    isPast={index < currentLineIndex}
+                  />
+                ))}
+              </div>
             </>
           ) : (
             <div className="h-full overflow-y-auto py-6">

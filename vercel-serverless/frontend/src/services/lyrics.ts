@@ -8,9 +8,6 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
-// Import cache for lyrics caching
-import { cache } from '../lib/cache';
-
 export interface LyricsData {
   id: number;
   trackName: string;
@@ -50,60 +47,116 @@ export function parseSyncedLyrics(syncedLyrics: string): SyncedLine[] {
 }
 
 /**
+ * Extract potential song name and artist from YouTube title
+ * YouTube titles often have formats like:
+ * - "Artist - Song Name"
+ * - "Song Name - Artist"
+ * - "Artist - Song Name (Official Video)"
+ * - "Song Name ft. Artist2 - Artist1"
+ */
+function extractTitleCombinations(title: string): { track: string; artist: string }[] {
+  const combinations: { track: string; artist: string }[] = [];
+  
+  // Clean the title - remove common suffixes
+  let cleanTitle = title
+    .replace(/\(Official.*?\)/gi, '')
+    .replace(/\(Audio.*?\)/gi, '')
+    .replace(/\(Lyric.*?\)/gi, '')
+    .replace(/\(Music.*?\)/gi, '')
+    .replace(/\[Official.*?\]/gi, '')
+    .replace(/\[Audio.*?\]/gi, '')
+    .replace(/\[Lyric.*?\]/gi, '')
+    .replace(/Official Video/gi, '')
+    .replace(/Official Audio/gi, '')
+    .replace(/Lyrics/gi, '')
+    .replace(/HD|HQ|4K/gi, '')
+    .replace(/ft\.|feat\./gi, 'ft')
+    .trim();
+  
+  // Try splitting by " - "
+  if (cleanTitle.includes(' - ')) {
+    const parts = cleanTitle.split(' - ').map(p => p.trim());
+    if (parts.length >= 2) {
+      // Artist - Song
+      combinations.push({ track: parts[1], artist: parts[0] });
+      // Song - Artist
+      combinations.push({ track: parts[0], artist: parts[1] });
+    }
+  }
+  
+  // Try splitting by " | "
+  if (cleanTitle.includes(' | ')) {
+    const parts = cleanTitle.split(' | ').map(p => p.trim());
+    if (parts.length >= 2) {
+      combinations.push({ track: parts[0], artist: parts[1] });
+      combinations.push({ track: parts[1], artist: parts[0] });
+    }
+  }
+  
+  // Just use the clean title as track name
+  combinations.push({ track: cleanTitle, artist: '' });
+  
+  return combinations;
+}
+
+/**
  * Get lyrics from LRCLIB API using search endpoint
- * Checks IndexedDB cache first to reduce API calls
+ * Retries with different title/artist combinations if initial search fails
  */
 export async function getLyrics(
   trackName: string,
   artistName: string,
   duration: number
 ): Promise<LyricsData | null> {
-  try {
-    // Check cache first
-    const cached = await cache.getLyrics(trackName, artistName);
-    if (cached) {
-      console.log('📝 Lyrics: Cache hit for', trackName);
-      return cached;
-    }
+  const targetDuration = Math.round(duration);
+  
+  // Helper to search and find best match
+  async function searchLyricsApi(track: string, artist: string): Promise<LyricsData | null> {
+    try {
+      const searchParams = new URLSearchParams({
+        track_name: track,
+        artist_name: artist,
+      });
 
-    console.log('📝 Lyrics: Cache miss, fetching from backend for', trackName);
+      const response = await fetch(`${API_BASE}/lyrics?${searchParams.toString()}`);
+      
+      if (!response.ok) return null;
 
-    // Use backend proxy to bypass CORS
-    const searchParams = new URLSearchParams({
-      track_name: trackName,
-      artist_name: artistName,
-    });
+      const results: LyricsData[] = await response.json();
+      
+      if (!results || results.length === 0) return null;
 
-    const response = await fetch(`${API_BASE}/lyrics?${searchParams.toString()}`);
-    
-    if (!response.ok) {
-      console.error('Lyrics search failed:', response.status);
+      // Find best match by duration (within 10 seconds for more flexibility)
+      const bestMatch = results.find((r) => 
+        Math.abs(r.duration - targetDuration) <= 10
+      ) || results[0];
+      
+      // Only return if it has lyrics
+      if (bestMatch && (bestMatch.syncedLyrics || bestMatch.plainLyrics)) {
+        return bestMatch;
+      }
+      return null;
+    } catch {
       return null;
     }
-
-    const results: LyricsData[] = await response.json();
-    
-    if (!results || results.length === 0) {
-      return null;
-    }
-
-    // Find best match by duration (within 5 seconds)
-    const targetDuration = Math.round(duration);
-    const bestMatch = results.find((r) => 
-      Math.abs(r.duration - targetDuration) <= 5
-    ) || results[0];
-    
-    // Cache the result for future use
-    if (bestMatch) {
-      await cache.setLyrics(trackName, artistName, bestMatch);
-      console.log('📝 Lyrics: Cached for', trackName);
-    }
-    
-    return bestMatch;
-  } catch (error) {
-    console.error('Error fetching lyrics:', error);
-    return null;
   }
+  
+  // Try 1: Original artist + track name
+  let result = await searchLyricsApi(trackName, artistName);
+  if (result) return result;
+  
+  // Try 2: Use combinations extracted from the title
+  const combinations = extractTitleCombinations(trackName);
+  for (const combo of combinations) {
+    result = await searchLyricsApi(combo.track, combo.artist || artistName);
+    if (result) return result;
+  }
+  
+  // Try 3: Just the track name without artist
+  result = await searchLyricsApi(trackName, '');
+  if (result) return result;
+  
+  return null;
 }
 
 /**

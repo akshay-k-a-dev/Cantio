@@ -28,6 +28,8 @@ export interface GuestCache {
   reverseQueue: Track[]; // Reverse queue (stack) - songs already played
   lastPlayed: Track | null;
   lyrics: { [key: string]: LyricsCache }; // Cached lyrics
+  discoveredTracks: Track[]; // Tracks from search that user hasn't played yet
+  playedVideoIds: string[]; // IDs of tracks user has played
   version: number;
 }
 
@@ -48,6 +50,8 @@ const defaultCache: GuestCache = {
   reverseQueue: [],
   lastPlayed: null,
   lyrics: {},
+  discoveredTracks: [],
+  playedVideoIds: [],
   version: CACHE_VERSION,
 };
 
@@ -78,7 +82,14 @@ export class CacheManager {
           now - timestamp < expiryTime &&
           cached.version === CACHE_VERSION
         ) {
-          this.cache = cached;
+          // Migrate missing fields from older cache versions
+          this.cache = {
+            ...defaultCache,
+            ...cached,
+            discoveredTracks: cached.discoveredTracks || [],
+            playedVideoIds: cached.playedVideoIds || [],
+            lyrics: cached.lyrics || {},
+          };
           console.log('✓ Guest cache loaded');
           return;
         }
@@ -295,6 +306,68 @@ export class CacheManager {
     this.cache = { ...defaultCache };
     await store.clear();
     await this.save();
+  }
+
+  // Discovered tracks methods (for "For You" section)
+  async addDiscoveredTracks(tracks: Track[]): Promise<void> {
+    if (!this.cache) await this.init();
+    
+    // Ensure arrays exist (migration safety)
+    if (!this.cache!.playedVideoIds) this.cache!.playedVideoIds = [];
+    if (!this.cache!.discoveredTracks) this.cache!.discoveredTracks = [];
+    
+    const playedIds = new Set(this.cache!.playedVideoIds);
+    const existingIds = new Set(this.cache!.discoveredTracks.map(t => t.videoId));
+    
+    // Add only new tracks that haven't been played
+    const newTracks = tracks.filter(t => 
+      !playedIds.has(t.videoId) && !existingIds.has(t.videoId)
+    );
+    
+    this.cache!.discoveredTracks = [...newTracks, ...this.cache!.discoveredTracks];
+    
+    // Keep only last 50 discovered tracks
+    if (this.cache!.discoveredTracks.length > 50) {
+      this.cache!.discoveredTracks = this.cache!.discoveredTracks.slice(0, 50);
+    }
+    
+    await this.save();
+  }
+
+  async getDiscoveredTracks(): Promise<Track[]> {
+    if (!this.cache) await this.init();
+    
+    // Ensure arrays exist (migration safety)
+    const discoveredTracks = this.cache!.discoveredTracks || [];
+    const playedVideoIds = this.cache!.playedVideoIds || [];
+    
+    // Filter out any tracks that have since been played
+    const playedIds = new Set(playedVideoIds);
+    return discoveredTracks.filter(t => !playedIds.has(t.videoId));
+  }
+
+  async markTrackAsPlayed(videoId: string): Promise<void> {
+    if (!this.cache) await this.init();
+    
+    // Ensure arrays exist (migration safety)
+    if (!this.cache!.playedVideoIds) this.cache!.playedVideoIds = [];
+    if (!this.cache!.discoveredTracks) this.cache!.discoveredTracks = [];
+    
+    if (!this.cache!.playedVideoIds.includes(videoId)) {
+      this.cache!.playedVideoIds.push(videoId);
+      
+      // Keep only last 500 played IDs
+      if (this.cache!.playedVideoIds.length > 500) {
+        this.cache!.playedVideoIds = this.cache!.playedVideoIds.slice(-500);
+      }
+      
+      // Remove from discovered
+      this.cache!.discoveredTracks = this.cache!.discoveredTracks.filter(
+        t => t.videoId !== videoId
+      );
+      
+      await this.save();
+    }
   }
 }
 
