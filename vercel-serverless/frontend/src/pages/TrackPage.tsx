@@ -3,6 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../services/player';
 import { Loader2, AlertCircle } from 'lucide-react';
 
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE = getApiBase();
+
 export function TrackPage() {
   const { videoId } = useParams<{ videoId: string }>();
   const navigate = useNavigate();
@@ -28,9 +37,11 @@ export function TrackPage() {
         }
 
         // Fetch track metadata from backend
-        const response = await fetch(`/api/track/${videoId}`);
+        const response = await fetch(`${API_BASE}/track/${videoId}`);
         if (!response.ok) {
-          throw new Error('Failed to load track');
+          const text = await response.text();
+          console.error('Track fetch failed:', response.status, text);
+          throw new Error(`Failed to load track: ${response.status}`);
         }
 
         const track = await response.json();
