@@ -44,31 +44,52 @@ export async function search(query: string, limit: number = 10): Promise<VideoRe
 export async function getMetadata(videoId: string) {
   try {
     console.log(`[youtube.ts] Fetching metadata for: ${videoId}`);
-    const yt = await getYouTube();
-    console.log(`[youtube.ts] Innertube instance ready`);
     
-    const info = await yt.getBasicInfo(videoId);
-    console.log(`[youtube.ts] Got basic info for: ${videoId}`);
-    
-    const title = info.basic_info.title || '';
-    const thumbnail = info.basic_info.thumbnail?.[0]?.url || '';
-    
-    console.log(`[youtube.ts] Parsed data - Title: "${title}", Thumbnail: ${thumbnail ? 'present' : 'missing'}`);
-    
-    // Validate that we got actual data
-    if (!title || !thumbnail) {
-      throw new Error(`Failed to fetch metadata for video ${videoId}: Missing title or thumbnail`);
+    // Try youtubei.js first
+    try {
+      const yt = await getYouTube();
+      console.log(`[youtube.ts] Innertube instance ready`);
+      
+      const info = await yt.getBasicInfo(videoId);
+      console.log(`[youtube.ts] Got basic info from Innertube`);
+      
+      const title = info.basic_info.title || '';
+      const thumbnail = info.basic_info.thumbnail?.[0]?.url || '';
+      
+      if (title && thumbnail) {
+        return {
+          videoId,
+          title,
+          artist: info.basic_info.author || 'Unknown',
+          duration: info.basic_info.duration || 0,
+          thumbnail
+        };
+      }
+    } catch (innertubeError: any) {
+      console.warn(`[youtube.ts] Innertube failed, trying fallback:`, innertubeError.message);
     }
+    
+    // Fallback: Use YouTube oEmbed API (more reliable in serverless)
+    console.log(`[youtube.ts] Using oEmbed fallback`);
+    const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+    const response = await fetch(oembedUrl);
+    
+    if (!response.ok) {
+      throw new Error(`oEmbed API failed with status ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`[youtube.ts] Got oEmbed data:`, data);
     
     return {
       videoId,
-      title,
-      artist: info.basic_info.author || 'Unknown',
-      duration: info.basic_info.duration || 0,
-      thumbnail
+      title: data.title || 'Unknown Title',
+      artist: data.author_name || 'Unknown Artist',
+      duration: 0, // oEmbed doesn't provide duration, but player will handle it
+      thumbnail: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
     };
   } catch (error: any) {
-    console.error(`[youtube.ts] Error fetching metadata for ${videoId}:`, error.message);
-    throw error;
+    console.error(`[youtube.ts] All methods failed for ${videoId}:`, error.message);
+    throw new Error(`Failed to fetch metadata: ${error.message}`);
   }
 }
