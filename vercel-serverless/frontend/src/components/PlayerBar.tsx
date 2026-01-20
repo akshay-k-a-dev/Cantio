@@ -139,6 +139,41 @@ export default function PlayerBar() {
     closeFullScreenPlayer();
   };
 
+  const handleShare = async () => {
+    if (!currentTrack) return;
+    
+    // Get the app's domain from window.location
+    const appDomain = window.location.origin;
+    const shareUrl = `${appDomain}/track/${currentTrack.videoId}`;
+    
+    const shareData = {
+      title: currentTrack.title,
+      text: `Check out "${currentTrack.title}" by ${currentTrack.artist} on MusicMu`,
+      url: shareUrl
+    };
+    
+    try {
+      // Check if Web Share API is supported
+      if (navigator.share) {
+        await navigator.share(shareData);
+        console.log('✅ Track shared successfully');
+      } else {
+        // Fallback: Copy to clipboard
+        const textToCopy = `${shareData.text}\n${shareData.url}`;
+        await navigator.clipboard.writeText(textToCopy);
+        
+        // Show a temporary success message (you can add a toast notification here)
+        console.log('✅ Link copied to clipboard');
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('❌ Share failed:', error);
+      }
+    }
+  };
+
   const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
 
   // Empty state - no track
@@ -293,6 +328,13 @@ export default function PlayerBar() {
                 title={showLyrics ? 'Hide lyrics' : 'Show lyrics'}
               >
                 <FileText size={18} />
+              </button>
+              <button
+                onClick={handleShare}
+                className="p-2 text-white/60 hover:text-white transition rounded-full hover:bg-white/10"
+                title="Share track"
+              >
+                <Share2 size={18} />
               </button>
               <button
                 onClick={openQueue}
@@ -557,7 +599,10 @@ export default function PlayerBar() {
                     onAddToQueue={() => {}}
                   />
                 </div>
-                <button className="p-2 sm:p-3 text-white/50 active:scale-95 transition">
+                <button 
+                  onClick={handleShare}
+                  className="p-2 sm:p-3 text-white/50 hover:text-white active:scale-95 transition"
+                >
                   <Share2 size={20} className="sm:hidden" />
                   <Share2 size={22} className="hidden sm:block" />
                 </button>
@@ -606,7 +651,7 @@ export default function PlayerBar() {
                       <button 
                         onClick={() => {
                           setShowOverflow(false);
-                          // Share functionality would go here
+                          handleShare();
                         }}
                         className="flex items-center gap-4 w-full p-4 hover:bg-white/5 rounded-xl transition"
                       >

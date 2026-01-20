@@ -13,6 +13,7 @@ import { BlendDetailPage } from './pages/BlendDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import { TrackPage } from './pages/TrackPage';
 import Sidebar from './components/Sidebar';
 import PlayerBar from './components/PlayerBar';
 import MobileNav from './components/MobileNav';
@@ -56,6 +57,7 @@ function AppContent() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/liked" element={<LikedPage />} />
             <Route path="/queue" element={<QueuePage />} />
+            <Route path="/track/:videoId" element={<TrackPage />} />
             <Route path="/playlists" element={<PlaylistsPage />} />
             <Route path="/playlist/:id" element={<PlaylistDetailPage />} />
             <Route path="/blends" element={<BlendsPage />} />
