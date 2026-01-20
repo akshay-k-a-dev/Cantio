@@ -46,6 +46,8 @@ export function TrackPage() {
 
         const track = await response.json();
         
+        console.log('🎵 TrackPage: Loading track:', track);
+        
         // Play the track
         await play({
           videoId: track.videoId,
@@ -55,8 +57,17 @@ export function TrackPage() {
           duration: track.duration
         });
 
-        // Wait a bit for player state to be set
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Wait for player state to actually update
+        const maxWait = 2000; // 2 seconds max
+        const startTime = Date.now();
+        let playerState = usePlayer.getState();
+        
+        while (playerState.currentTrack?.videoId !== videoId && (Date.now() - startTime) < maxWait) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          playerState = usePlayer.getState();
+        }
+        
+        console.log('✅ TrackPage: Player state updated, currentTrack:', playerState.currentTrack);
 
         // Navigate to home page where the player will be visible
         navigate('/');
