@@ -130,12 +130,18 @@ async function initializeApp() {
     const { id } = request.params as { id: string };
 
     try {
+      request.log.info(`Fetching metadata for video: ${id}`);
       const metadata = await getMetadata(id);
+      request.log.info(`Successfully fetched metadata for: ${id}`);
       return metadata;
     } catch (error: any) {
-      request.log.error(error);
-      reply.code(404);
-      return { error: 'Track not found', message: error.message };
+      request.log.error(`Failed to fetch metadata for ${id}:`, error);
+      reply.code(500);
+      return { 
+        error: 'Failed to fetch track metadata', 
+        message: error.message,
+        videoId: id 
+      };
     }
   });
 

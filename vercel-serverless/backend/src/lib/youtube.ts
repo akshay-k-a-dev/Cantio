@@ -42,22 +42,33 @@ export async function search(query: string, limit: number = 10): Promise<VideoRe
 }
 
 export async function getMetadata(videoId: string) {
-  const yt = await getYouTube();
-  const info = await yt.getBasicInfo(videoId);
-  
-  const title = info.basic_info.title || '';
-  const thumbnail = info.basic_info.thumbnail?.[0]?.url || '';
-  
-  // Validate that we got actual data
-  if (!title || !thumbnail) {
-    throw new Error(`Failed to fetch metadata for video ${videoId}: Missing title or thumbnail`);
+  try {
+    console.log(`[youtube.ts] Fetching metadata for: ${videoId}`);
+    const yt = await getYouTube();
+    console.log(`[youtube.ts] Innertube instance ready`);
+    
+    const info = await yt.getBasicInfo(videoId);
+    console.log(`[youtube.ts] Got basic info for: ${videoId}`);
+    
+    const title = info.basic_info.title || '';
+    const thumbnail = info.basic_info.thumbnail?.[0]?.url || '';
+    
+    console.log(`[youtube.ts] Parsed data - Title: "${title}", Thumbnail: ${thumbnail ? 'present' : 'missing'}`);
+    
+    // Validate that we got actual data
+    if (!title || !thumbnail) {
+      throw new Error(`Failed to fetch metadata for video ${videoId}: Missing title or thumbnail`);
+    }
+    
+    return {
+      videoId,
+      title,
+      artist: info.basic_info.author || 'Unknown',
+      duration: info.basic_info.duration || 0,
+      thumbnail
+    };
+  } catch (error: any) {
+    console.error(`[youtube.ts] Error fetching metadata for ${videoId}:`, error.message);
+    throw error;
   }
-  
-  return {
-    videoId,
-    title,
-    artist: info.basic_info.author || 'Unknown',
-    duration: info.basic_info.duration || 0,
-    thumbnail
-  };
 }
