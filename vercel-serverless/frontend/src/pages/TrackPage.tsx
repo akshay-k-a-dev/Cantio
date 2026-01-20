@@ -49,8 +49,9 @@ export function TrackPage() {
         console.log('🎵 TrackPage: Fetched track from API:', JSON.stringify(track, null, 2));
         
         // Ensure we have all required fields
-        if (!track.videoId || !track.title) {
-          throw new Error('Invalid track data received from API');
+        if (!track.videoId || !track.title || !track.thumbnail) {
+          console.error('❌ Invalid track data:', track);
+          throw new Error('Unable to load track metadata. The video may be unavailable or restricted.');
         }
         
         const trackData = {

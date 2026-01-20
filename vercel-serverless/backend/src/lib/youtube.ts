@@ -45,11 +45,19 @@ export async function getMetadata(videoId: string) {
   const yt = await getYouTube();
   const info = await yt.getBasicInfo(videoId);
   
+  const title = info.basic_info.title || '';
+  const thumbnail = info.basic_info.thumbnail?.[0]?.url || '';
+  
+  // Validate that we got actual data
+  if (!title || !thumbnail) {
+    throw new Error(`Failed to fetch metadata for video ${videoId}: Missing title or thumbnail`);
+  }
+  
   return {
     videoId,
-    title: info.basic_info.title || '',
+    title,
     artist: info.basic_info.author || 'Unknown',
     duration: info.basic_info.duration || 0,
-    thumbnail: info.basic_info.thumbnail?.[0]?.url || ''
+    thumbnail
   };
 }
