@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.AppImage
+*.exe
+*.nsis*
+.DS_Store
+dist/releases/

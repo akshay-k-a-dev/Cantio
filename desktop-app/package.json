@@ -1,0 +1,69 @@
+{
+  "name": "cantio-desktop",
+  "version": "1.0.0",
+  "description": "Electron wrapper for Cantio (desktop builds for Linux AppImage and Windows .exe)",
+  "main": "main.js",
+  "author": "Cantio <support@cantio.app>",
+  "homepage": "https://music-mu-p6h9.vercel.app/",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:web": "cd ../vercel-serverless/frontend && npm install && VITE_API_URL=https://music-mu-p6h9.vercel.app npm run build && cd - && rm -rf dist && mkdir -p dist && cp -r ../vercel-serverless/frontend/dist dist/",
+    "prepare:web": "node ./scripts/prepare-web.js",
+    "clean:web": "rm -rf dist",
+    "generate-icons": "node ./scripts/generate-icons.js",
+    "postinstall": "npm run generate-icons || true",
+    "package": "npm run build:web && electron-builder --dir",
+    "dist": "npm run build:web && electron-builder"
+  },
+
+  "dependencies": {
+    "electron-updater": "^6.7.3",
+    "electron-log": "^5.4.3"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.6.0",
+    "jimp": "^0.16.1",
+    "png-to-ico": "^3.0.1"
+  },
+  "build": {
+    "appId": "com.cantio.app",
+    "productName": "Cantio",
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "assets/**",
+      "dist/**"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "publish": [
+      { "provider": "github", "owner": "YOUR_GITHUB_OWNER", "repo": "YOUR_REPO" }
+    ],
+    "protocols": [
+      { "name": "Cantio Protocol", "schemes": ["cantio"] }
+    ],
+    "fileAssociations": [
+      { "ext": "m3u", "name": "M3U Playlist", "role": "Viewer", "mimeType": "audio/x-mpegurl" },
+      { "ext": "cantio", "name": "Cantio Link", "role": "Viewer" }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "maintainer": "Cantio <support@cantio.app>",
+      "target": ["AppImage", "deb", "rpm"]
+    },
+    "deb": {
+      "description": "Cantio - YouTube Music Player"
+    }
+  }
+}

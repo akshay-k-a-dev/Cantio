@@ -215,6 +215,20 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
           
           if (event.data === YT.PlayerState.PLAYING) {
             set({ state: 'playing', error: null });
+
+            // Show a native desktop notification for the current track (if available)
+            try {
+              const current = get().currentTrack;
+              if (current && typeof window !== 'undefined' && (window as any).electronAPI && (window as any).electronAPI.notify) {
+                (window as any).electronAPI.notify({
+                  title: current.title,
+                  body: current.artist || '',
+                  icon: current.thumbnail || undefined
+                }).catch((e: any) => console.warn('Notify failed', e));
+              }
+            } catch (e) {
+              console.warn('Notification attempt failed', e);
+            }
             
             // Acquire wake lock to prevent device sleep
             requestWakeLock();
