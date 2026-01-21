@@ -126,13 +126,13 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
         return { error: 'Playlist not found' };
       }
 
-      // Get current max position
-      const maxPosition = await prisma.playlistTrack.findFirst({
+      // Shift all existing tracks down (increment their positions)
+      await prisma.playlistTrack.updateMany({
         where: { playlistId: id },
-        orderBy: { position: 'desc' },
-        select: { position: true }
+        data: { position: { increment: 1 } }
       });
 
+      // Add new track at position 0 (top of playlist)
       const track = await prisma.playlistTrack.create({
         data: {
           playlistId: id,
@@ -141,7 +141,7 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
           artist: body.artist,
           thumbnail: body.thumbnail,
           duration: body.duration,
-          position: (maxPosition?.position ?? -1) + 1
+          position: 0
         }
       });
 
