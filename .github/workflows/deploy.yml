@@ -1,4 +1,4 @@
-name: Run MusicMu Startup (Manual)
+name: Run Cantio Startup (Manual)
 
 on:
   workflow_dispatch:

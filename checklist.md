@@ -1,6 +1,6 @@
-# 📋 MusicMu Development Checklist
+# 📋 Cantio Development Checklist
 
-This checklist outlines key features and enhancements planned for future development of **MusicMu**, the ad-free, open-source music streaming app.
+This checklist outlines key features and enhancements planned for future development of **Cantio**, the ad-free, open-source music streaming app.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## ✅ Relationship Maps Added to Documentation
 
-Your MusicMu documentation has been significantly enhanced with **comprehensive relationship maps and visualizations**.
+Your Cantio documentation has been significantly enhanced with **comprehensive relationship maps and visualizations**.
 
 ---
 
@@ -181,7 +181,7 @@ Table format showing:
 ## 💡 Key Documentation Highlights
 
 ### **Denormalization Pattern**
-Explained why MusicMu stores track metadata in multiple tables:
+Explained why Cantio stores track metadata in multiple tables:
 - No separate `tracks` table
 - YouTube Video ID as primary identifier
 - Immutable history (snapshots)
@@ -311,7 +311,7 @@ Complete hierarchy showing all parent-child relationships with:
 ### **Design Pattern Explanations**
 Each pattern includes:
 - What it is
-- Why MusicMu uses it
+- Why Cantio uses it
 - Benefits
 - SQL/Prisma examples
 - Use cases
@@ -396,7 +396,7 @@ Complete SQL definitions for:
 
 ## 🎉 Summary
 
-Your MusicMu documentation now includes:
+Your Cantio documentation now includes:
 
 ✅ **Complete relationship visualization** - Understand entire database at a glance  
 ✅ **Design pattern explanations** - Learn why relationships are designed this way  

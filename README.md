@@ -1,10 +1,10 @@
 
-# 🎵 MusicMu - Ad-Free Open Source Music Streamer
+# 🎵 Cantio - Ad-Free Open Source Music Streamer
 
 **A free and open-source music streaming application — built for music lovers, not algorithms.**
 
 > ⚠️ **Not affiliated with or endorsed by Google LLC or YouTube.**  
-> MusicMu streams content using official YouTube embedding policies and does not store or redistribute copyrighted material.
+> Cantio streams content using official YouTube embedding policies and does not store or redistribute copyrighted material.
 
 ## 🌟 Quick Links
 
@@ -14,7 +14,7 @@
 
 ---
 
-## ✨ What Makes MusicMu Special?
+## ✨ What Makes Cantio Special?
 
 ### 🎧 Core Playback Features
 - 🚫 **Ad-Free Streaming** — Enjoy uninterrupted audio streaming
@@ -218,8 +218,14 @@ See the [`LICENSE`](./LICENSE) file for full details.
 
 ## ⏭️ What's Next?
 
+---
+
+## ⚠️ IMPORTANT: URLs & Environment Variables
+
+Some values (deployment URLs, release asset names, and environment variables) are tied to the live deployments and CI release flow. **Do NOT change `VITE_API_URL`, `CANTIO_REMOTE_URL`, `MUSICMU_REMOTE_URL`, `VITE_APP_NAME`, or similar URL/env references in code or documentation** unless you coordinate the change with the release/CI owner; changing these may break the live sites, desktop auto-updates, or CI/CD pipelines.
+
 We're building a full roadmap of what's coming next. Check it out here:
-👉 *[MusicMu Roadmap](checklist.md)*
+👉 *[Cantio Roadmap](checklist.md)*
 
 ---
 

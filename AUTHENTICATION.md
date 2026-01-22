@@ -1,8 +1,8 @@
-# MusicMu Authentication System
+# Cantio Authentication System
 
 ## Overview
 
-MusicMu now includes a complete authentication system with user registration, login, and cloud data synchronization using Prisma ORM with PostgreSQL (via Prisma Accelerate).
+Cantio now includes a complete authentication system with user registration, login, and cloud data synchronization using Prisma ORM with PostgreSQL (via Prisma Accelerate).
 
 ## Features
 
@@ -335,4 +335,4 @@ vercel deploy --prod
 
 ## License
 
-Same as MusicMu project (see root LICENSE file)
+Same as Cantio project (see root LICENSE file)

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80" viewBox="0 0 300 80">
+  <rect width="300" height="80" rx="8" fill="#000" />
+  <g fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="14">
+    <text x="20" y="28" font-weight="700">Vercel</text>
+    <text x="20" y="52">Serverless Backend</text>
+  </g>
+</svg>

@@ -66,4 +66,12 @@ This app is a fully-packaged desktop application that contains the built fronten
 
 ---
 
+## Releases & Assets
+
+- Desktop artifacts (AppImage for Linux, `.deb` packages, and Windows `.exe` installers) are published on GitHub Releases for the repository. The app's auto-update depends on those release assets; do not move or rename release artifacts once published.
+
+**Important:** Do NOT change deployment URLs or environment variables (for example `VITE_API_URL`, `CANTIO_REMOTE_URL`, `MUSICMU_REMOTE_URL`, `VITE_APP_NAME`, etc.) in code or documentation without prior coordination with a release or CI owner — changing these values can break the hosted deployments and update flows.
+
+---
+
 If you'd like, I can run the build steps now and produce an AppImage for Linux and a Windows NSIS installer (Windows build may require `wine`). Which target should I build first?

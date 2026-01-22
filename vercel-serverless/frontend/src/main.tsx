@@ -57,7 +57,7 @@ if (typeof window !== 'undefined' && (window as any).electronAPI) {
   api.onUpdateEvent((ev: any) => {
     if (!ev || !ev.type) return;
     if (ev.type === 'update-available') {
-      api.notify({ title: 'Update available', body: 'A new version of MusicMu is available.' });
+      api.notify({ title: 'Update available', body: 'A new version of Cantio is available.' });
     } else if (ev.type === 'update-downloaded') {
       api.notify({ title: 'Update ready', body: 'Update downloaded. Restart to install.' });
     } else if (ev.type === 'error') {

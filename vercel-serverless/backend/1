@@ -1,11 +1,12 @@
 
-> musicmu-serverless-backend@1.0.0 dev
+
+> cantio-serverless-backend@1.0.0 dev
 > tsx src/index.ts
 
 prisma:warn In production, we recommend using `prisma generate --no-engine` (See: `prisma generate --help`)
 {"level":30,"time":1768572799301,"pid":4072,"hostname":"akshayka-3227fh4","msg":"Server listening at http://0.0.0.0:4001"}
 
-🎵 MusicMu Serverless Backend
+🎵 Cantio Serverless Backend
 📡 Running on http://0.0.0.0:4001
 🏥 Health check: http://localhost:4001/api/health
 🏠 Homepage: http://localhost:4001/

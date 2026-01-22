@@ -63,7 +63,7 @@ async function initializeApp() {
   // Root health endpoint (homepage)
   app.get('/', async (request, reply) => {
     return {
-      service: 'MusicMu Serverless Backend',
+      service: 'Cantio Serverless Backend',
       status: 'ok',
       timestamp: new Date().toISOString(),
       version: '1.0.0',
@@ -92,7 +92,7 @@ async function initializeApp() {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      service: 'musicmu-serverless'
+      service: 'cantio-serverless'
     };
   });
 
@@ -220,7 +220,7 @@ const start = async () => {
   try {
     await initializeApp();
     await app.listen({ port: PORT, host: HOST });
-    console.log(`\n🎵 MusicMu Serverless Backend`);
+    console.log(`\n🎵 Cantio Serverless Backend`);
     console.log(`📡 Running on http://${HOST}:${PORT}`);
     console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
     console.log(`🏠 Homepage: http://localhost:${PORT}/`);

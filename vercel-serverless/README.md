@@ -1,4 +1,4 @@
-# MusicMu Vercel Serverless
+# Cantio Vercel Serverless
 
 Clean Fastify serverless backend and React frontend setup for Vercel deployment.
 
