@@ -20,25 +20,81 @@ export interface VideoResult {
 export async function search(query: string, limit: number = 10): Promise<VideoResult[]> {
   const yt = await getYouTube();
   
+  // Apply Music category filter
   const results = await yt.search(query, { type: 'video' });
+  
+  // Blacklist keywords to filter out non-song content
+  const blacklist = [
+    'interview',
+    'podcast',
+    'reaction',
+    'review',
+    'analysis',
+    'trailer',
+    'teaser',
+    'explanation',
+    'news',
+    "case",
+    "arrest",
+    "arrested",
+    "mla",
+    "court",
+    "crime",
+    "police",
+    "exclusive",
+    "reporter",
+    "debate",
+    "breaking",
+    "politics",
+    "geopolitics",
+    "documentary",
+    "vlog",
+    "comedy",
+    "sketch",
+    "prank",
+    "challenge",
+    "gaming",
+    "walkthrough",
+    "speedrun",
+    "mod showcase",
+    "gameplay",
+    "stream highlights" ,
+    "tv"    
+  ];
   
   // Filter duration: 1 min (60s) to 10 min (600s)
   const MIN_DURATION = 60;   // 1 minute
   const MAX_DURATION = 600;  // 10 minutes
   
-  const videos = results.videos
+  const mapped: VideoResult[] = results.videos
     .filter((video: any) => video && video.id && video.title)
-    .map((video: any) => ({
+    .map((video: any): VideoResult => ({
       videoId: video.id,
       title: video.title?.text || video.title || 'Unknown Title',
       artist: video.author?.name || 'Unknown',
       duration: video.duration?.seconds || 0,
       thumbnail: video.best_thumbnail?.url || ''
-    }))
+    }));
+
+  const videos = mapped
     .filter((video) => video.duration >= MIN_DURATION && video.duration <= MAX_DURATION)
-    .slice(0, limit);
+    .filter((video) => {
+      // Remove videos with blacklist keywords in title or channel name
+      const titleLower = video.title.toLowerCase();
+      const artistLower = video.artist.toLowerCase();
+      return !blacklist.some(keyword => 
+        titleLower.includes(keyword) || artistLower.includes(keyword)
+      );
+    });
   
-  return videos;
+  // Prioritize Topic channels (e.g., "Artist - Topic")
+  const topicVideos = videos.filter(video => video.artist.includes('- Topic'));
+  const otherVideos = videos.filter(video => !video.artist.includes('- Topic'));
+  
+  // Return Topic videos first, then others
+  const sortedVideos = [...topicVideos, ...otherVideos].slice(0, limit);
+  
+  return sortedVideos;
 }
 
 export async function getMetadata(videoId: string) {
@@ -78,7 +134,7 @@ export async function getMetadata(videoId: string) {
       throw new Error(`oEmbed API failed with status ${response.status}`);
     }
     
-    const data = await response.json();
+    const data = await response.json() as any;
     console.log(`[youtube.ts] Got oEmbed data:`, data);
     
     return {
