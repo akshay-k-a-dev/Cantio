@@ -196,6 +196,16 @@ function getThumbnailUrl(thumbnails: any): string {
   return '';
 }
 
+/** Safely extract a plain string from a youtubei.js Text / string value */
+function getText(t: any): string {
+  if (!t) return '';
+  if (typeof t === 'string') return t;
+  if (t.text && typeof t.text === 'string') return t.text;
+  if (Array.isArray(t.runs)) return t.runs.map((r: any) => r?.text || '').join('');
+  const s = String(t);
+  return s === '[object Object]' ? '' : s;
+}
+
 export async function searchMusic(query: string, type: MusicSearchType, limit: number = 20): Promise<MusicSearchResult[]> {
   const yt = await getYouTubeMusic();
 
@@ -260,19 +270,23 @@ export async function searchMusic(query: string, type: MusicSearchType, limit: n
 
 export async function getYTMusicPlaylistTracks(playlistId: string): Promise<VideoResult[]> {
   const yt = await getYouTubeMusic();
-  const playlist = await (yt as any).getPlaylist(playlistId);
+  // must use the music sub-client, not the base yt client
+  const playlist = await (yt as any).music.getPlaylist(playlistId);
 
-  const rawItems: any[] = playlist?.items || playlist?.contents?.flatMap((s: any) => s?.contents || []) || [];
+  // .items is a computed getter that flattens the playlist contents
+  const rawItems: any[] = playlist?.items ?? [];
 
   const tracks: VideoResult[] = [];
   for (const item of rawItems) {
     if (!item) continue;
-    const videoId: string = item.id || item.video_id || '';
+    const videoId: string = item.id || '';
     if (!videoId) continue;
+    const title = getText(item.title);
+    if (!title) continue;
     tracks.push({
       videoId,
-      title: item.title?.text || item.title || 'Unknown',
-      artist: item.author?.name || item.artists?.[0]?.name || 'Unknown',
+      title,
+      artist: item.artists?.[0]?.name || item.author?.name || 'Unknown',
       duration: item.duration?.seconds || 0,
       thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail)
         || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
@@ -286,22 +300,29 @@ export async function getYTMusicAlbumTracks(browseId: string): Promise<{ tracks:
   const yt = await getYouTubeMusic();
   const album = await (yt as any).music.getAlbum(browseId);
 
-  const title: string = album?.header?.title?.text || album?.title?.text || album?.title || 'Unknown Album';
-  const artist: string = album?.header?.subtitle?.text || album?.artists?.[0]?.name || 'Unknown Artist';
-  const thumbnail: string = getThumbnailUrl(album?.header?.thumbnail?.contents || album?.thumbnail);
-  const year: string | undefined = album?.header?.year?.text || undefined;
+  const title: string = getText(album?.header?.title) || 'Unknown Album';
+  // strapline_text_one holds the artist name; subtitle is "EP • Year"
+  const artist: string = getText(album?.header?.strapline_text_one) || 'Unknown Artist';
+  const thumbnail: string = getThumbnailUrl(album?.header?.thumbnail?.contents || album?.header?.thumbnail);
+  // year lives inside subtitle text e.g. "EP • 2005"
+  const subtitleText: string = getText(album?.header?.subtitle) || '';
+  const yearMatch = subtitleText.match(/\b(19|20)\d{2}\b/);
+  const year: string | undefined = yearMatch ? yearMatch[0] : undefined;
 
-  const rawItems: any[] = album?.contents?.flatMap((s: any) => s?.contents || s?.items || [s]) || [];
+  // album.contents is the direct flat array of MusicResponsiveListItem tracks
+  const rawItems: any[] = album?.contents ?? [];
 
   const tracks: VideoResult[] = [];
   for (const item of rawItems) {
     if (!item) continue;
-    const videoId: string = item.id || item.video_id || '';
+    const videoId: string = item.id || '';
     if (!videoId) continue;
+    const trackTitle = getText(item.title);
+    if (!trackTitle) continue;
     tracks.push({
       videoId,
-      title: item.title?.text || item.title || 'Unknown',
-      artist: item.author?.name || item.artists?.[0]?.name || artist,
+      title: trackTitle,
+      artist: item.artists?.[0]?.name || item.author?.name || artist,
       duration: item.duration?.seconds || 0,
       thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail)
         || thumbnail
@@ -316,25 +337,28 @@ export async function getYTMusicArtistTopTracks(browseId: string): Promise<{ tra
   const yt = await getYouTubeMusic();
   const artist = await (yt as any).music.getArtist(browseId);
 
-  const name: string = artist?.header?.title?.text || artist?.name || 'Unknown Artist';
-  const thumbnail: string = getThumbnailUrl(artist?.header?.thumbnail?.contents || artist?.thumbnail);
+  const name: string = getText(artist?.header?.title) || 'Unknown Artist';
+  const thumbnail: string = getThumbnailUrl(artist?.header?.thumbnail?.contents || artist?.header?.thumbnail);
   const subscribers: string | undefined = artist?.header?.subscribers?.text || undefined;
 
-  // songs section
-  const songsSection = artist?.sections?.find((s: any) =>
-    s?.header?.title?.text?.toLowerCase().includes('song') || s?.type === 'MusicShelfRenderer'
-  );
-  const rawItems: any[] = songsSection?.contents || [];
+  // sections[0] is "Top songs" (MusicShelf), its .contents has the tracks
+  const songsSection = artist?.sections?.find((s: any) => {
+    const t = getText(s?.title).toLowerCase();
+    return t.includes('song') || s?.contents?.[0]?.id;
+  }) || artist?.sections?.[0];
+  const rawItems: any[] = songsSection?.contents ?? [];
 
   const tracks: VideoResult[] = [];
   for (const item of rawItems) {
     if (!item) continue;
     const videoId: string = item.id || '';
     if (!videoId) continue;
+    const trackTitle = getText(item.title);
+    if (!trackTitle) continue;
     tracks.push({
       videoId,
-      title: item.title?.text || item.title || 'Unknown',
-      artist: item.artist?.name || item.artists?.[0]?.name || name,
+      title: trackTitle,
+      artist: item.artists?.[0]?.name || item.author?.name || name,
       duration: item.duration?.seconds || 0,
       thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail)
         || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
