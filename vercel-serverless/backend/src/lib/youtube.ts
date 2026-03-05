@@ -1,12 +1,20 @@
 import Innertube from 'youtubei.js';
 
 let youtube: Innertube | null = null;
+let youtubeMusicClient: Innertube | null = null;
 
 async function getYouTube() {
   if (!youtube) {
     youtube = await Innertube.create();
   }
   return youtube;
+}
+
+async function getYouTubeMusic() {
+  if (!youtubeMusicClient) {
+    youtubeMusicClient = await Innertube.create({ client_type: 'WEB_REMIX' } as any);
+  }
+  return youtubeMusicClient;
 }
 
 export interface VideoResult {
@@ -16,6 +24,35 @@ export interface VideoResult {
   duration: number;
   thumbnail: string;
 }
+
+export interface MusicPlaylistResult {
+  type: 'playlist';
+  playlistId: string;
+  title: string;
+  author: string;
+  thumbnail: string;
+  trackCount?: number;
+}
+
+export interface MusicAlbumResult {
+  type: 'album';
+  browseId: string;
+  title: string;
+  artist: string;
+  thumbnail: string;
+  year?: string;
+}
+
+export interface MusicArtistResult {
+  type: 'artist';
+  browseId: string;
+  name: string;
+  thumbnail: string;
+  subscribers?: string;
+}
+
+export type MusicSearchType = 'playlists' | 'albums' | 'artists';
+export type MusicSearchResult = MusicPlaylistResult | MusicAlbumResult | MusicArtistResult;
 
 export async function search(query: string, limit: number = 10): Promise<VideoResult[]> {
   const yt = await getYouTube();
@@ -148,4 +185,161 @@ export async function getMetadata(videoId: string) {
     console.error(`[youtube.ts] All methods failed for ${videoId}:`, error.message);
     throw new Error(`Failed to fetch metadata: ${error.message}`);
   }
+}
+
+function getThumbnailUrl(thumbnails: any): string {
+  if (!thumbnails) return '';
+  if (Array.isArray(thumbnails)) {
+    return thumbnails[thumbnails.length - 1]?.url || thumbnails[0]?.url || '';
+  }
+  if (thumbnails.url) return thumbnails.url;
+  return '';
+}
+
+export async function searchMusic(query: string, type: MusicSearchType, limit: number = 20): Promise<MusicSearchResult[]> {
+  const yt = await getYouTubeMusic();
+
+  let ytType: string;
+  if (type === 'playlists') ytType = 'playlist';
+  else if (type === 'albums') ytType = 'album';
+  else ytType = 'artist';
+
+  const raw = await (yt as any).music.search(query, { type: ytType });
+  const items: any[] = raw?.contents?.flatMap((section: any) => section?.contents || section?.items || []) 
+    ?? raw?.items 
+    ?? [];
+
+  const results: MusicSearchResult[] = [];
+
+  for (const item of items) {
+    if (results.length >= limit) break;
+    if (!item) continue;
+
+    try {
+      if (type === 'playlists') {
+        const id: string = item.id || item.playlist_id || '';
+        if (!id) continue;
+        const playlistId = id.startsWith('VL') ? id.slice(2) : id;
+        results.push({
+          type: 'playlist',
+          playlistId,
+          title: item.title?.text || item.title || 'Unknown Playlist',
+          author: item.author?.name || item.authors?.[0]?.name || item.subtitle?.text || 'Unknown',
+          thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail),
+          trackCount: item.item_count ? parseInt(item.item_count, 10) : undefined
+        });
+      } else if (type === 'albums') {
+        const id: string = item.id || '';
+        if (!id) continue;
+        results.push({
+          type: 'album',
+          browseId: id,
+          title: item.title?.text || item.title || 'Unknown Album',
+          artist: item.author?.name || item.authors?.[0]?.name || item.subtitle?.text || 'Unknown',
+          thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail),
+          year: item.year || undefined
+        });
+      } else {
+        const id: string = item.id || '';
+        if (!id) continue;
+        results.push({
+          type: 'artist',
+          browseId: id,
+          name: item.name || item.title?.text || item.title || 'Unknown Artist',
+          thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail),
+          subscribers: item.subscribers?.text || undefined
+        });
+      }
+    } catch (_) {
+      // skip malformed items
+    }
+  }
+
+  return results;
+}
+
+export async function getYTMusicPlaylistTracks(playlistId: string): Promise<VideoResult[]> {
+  const yt = await getYouTubeMusic();
+  const playlist = await (yt as any).getPlaylist(playlistId);
+
+  const rawItems: any[] = playlist?.items || playlist?.contents?.flatMap((s: any) => s?.contents || []) || [];
+
+  const tracks: VideoResult[] = [];
+  for (const item of rawItems) {
+    if (!item) continue;
+    const videoId: string = item.id || item.video_id || '';
+    if (!videoId) continue;
+    tracks.push({
+      videoId,
+      title: item.title?.text || item.title || 'Unknown',
+      artist: item.author?.name || item.artists?.[0]?.name || 'Unknown',
+      duration: item.duration?.seconds || 0,
+      thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail)
+        || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+    });
+  }
+
+  return tracks;
+}
+
+export async function getYTMusicAlbumTracks(browseId: string): Promise<{ tracks: VideoResult[]; title: string; artist: string; thumbnail: string; year?: string }> {
+  const yt = await getYouTubeMusic();
+  const album = await (yt as any).music.getAlbum(browseId);
+
+  const title: string = album?.header?.title?.text || album?.title?.text || album?.title || 'Unknown Album';
+  const artist: string = album?.header?.subtitle?.text || album?.artists?.[0]?.name || 'Unknown Artist';
+  const thumbnail: string = getThumbnailUrl(album?.header?.thumbnail?.contents || album?.thumbnail);
+  const year: string | undefined = album?.header?.year?.text || undefined;
+
+  const rawItems: any[] = album?.contents?.flatMap((s: any) => s?.contents || s?.items || [s]) || [];
+
+  const tracks: VideoResult[] = [];
+  for (const item of rawItems) {
+    if (!item) continue;
+    const videoId: string = item.id || item.video_id || '';
+    if (!videoId) continue;
+    tracks.push({
+      videoId,
+      title: item.title?.text || item.title || 'Unknown',
+      artist: item.author?.name || item.artists?.[0]?.name || artist,
+      duration: item.duration?.seconds || 0,
+      thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail)
+        || thumbnail
+        || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+    });
+  }
+
+  return { tracks, title, artist, thumbnail, year };
+}
+
+export async function getYTMusicArtistTopTracks(browseId: string): Promise<{ tracks: VideoResult[]; name: string; thumbnail: string; subscribers?: string }> {
+  const yt = await getYouTubeMusic();
+  const artist = await (yt as any).music.getArtist(browseId);
+
+  const name: string = artist?.header?.title?.text || artist?.name || 'Unknown Artist';
+  const thumbnail: string = getThumbnailUrl(artist?.header?.thumbnail?.contents || artist?.thumbnail);
+  const subscribers: string | undefined = artist?.header?.subscribers?.text || undefined;
+
+  // songs section
+  const songsSection = artist?.sections?.find((s: any) =>
+    s?.header?.title?.text?.toLowerCase().includes('song') || s?.type === 'MusicShelfRenderer'
+  );
+  const rawItems: any[] = songsSection?.contents || [];
+
+  const tracks: VideoResult[] = [];
+  for (const item of rawItems) {
+    if (!item) continue;
+    const videoId: string = item.id || '';
+    if (!videoId) continue;
+    tracks.push({
+      videoId,
+      title: item.title?.text || item.title || 'Unknown',
+      artist: item.artist?.name || item.artists?.[0]?.name || name,
+      duration: item.duration?.seconds || 0,
+      thumbnail: getThumbnailUrl(item.thumbnail?.contents || item.thumbnail)
+        || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+    });
+  }
+
+  return { tracks, name, thumbnail, subscribers };
 }

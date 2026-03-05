@@ -1,13 +1,54 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search as SearchIcon, Heart, Plus } from 'lucide-react';
+import { Search as SearchIcon, Heart, Plus, ListMusic, Disc3, Mic2, PlayCircle } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { Track } from '../lib/cache';
 import { AddToPlaylistDropdown } from '../components/AddToPlaylistDropdown';
 
+type SearchFilter = 'songs' | 'playlists' | 'albums' | 'artists';
+
+interface MusicPlaylistResult {
+  type: 'playlist';
+  playlistId: string;
+  title: string;
+  author: string;
+  thumbnail: string;
+  trackCount?: number;
+}
+
+interface MusicAlbumResult {
+  type: 'album';
+  browseId: string;
+  title: string;
+  artist: string;
+  thumbnail: string;
+  year?: string;
+}
+
+interface MusicArtistResult {
+  type: 'artist';
+  browseId: string;
+  name: string;
+  thumbnail: string;
+  subscribers?: string;
+}
+
+type MusicResult = MusicPlaylistResult | MusicAlbumResult | MusicArtistResult;
+
+const FILTERS: { id: SearchFilter; label: string; icon: React.ReactNode }[] = [
+  { id: 'songs',     label: 'Songs',     icon: <ListMusic size={14} /> },
+  { id: 'playlists', label: 'Playlists', icon: <PlayCircle size={14} /> },
+  { id: 'albums',    label: 'Albums',    icon: <Disc3 size={14} /> },
+  { id: 'artists',   label: 'Artists',   icon: <Mic2 size={14} /> },
+];
+
 export function SearchPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Track[]>([]);
+  const [filter, setFilter] = useState<SearchFilter>('songs');
+  const [songResults, setSongResults] = useState<Track[]>([]);
+  const [musicResults, setMusicResults] = useState<MusicResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentLimit, setCurrentLimit] = useState(10);
@@ -16,31 +57,42 @@ export function SearchPage() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-
     setLoading(true);
-    setCurrentLimit(10); // Reset to initial limit
+    setCurrentLimit(10);
     try {
-      const searchResults = await usePlayer.getState().search(query, 10);
-      setResults(searchResults);
+      if (filter === 'songs') {
+        const results = await usePlayer.getState().search(query, 10);
+        setSongResults(results);
+        setMusicResults([]);
+      } else {
+        const results = await usePlayer.getState().searchMusic(query, filter, 20);
+        setMusicResults(results);
+        setSongResults([]);
+      }
     } catch (error) {
       console.error('Search failed:', error);
-      setResults([]);
+      setSongResults([]);
+      setMusicResults([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLoadMore = async () => {
-    if (!query.trim()) return;
-    
-    // Maximum limit of 50 results
-    if (currentLimit >= 50) return;
+  const handleFilterChange = (newFilter: SearchFilter) => {
+    setFilter(newFilter);
+    setSongResults([]);
+    setMusicResults([]);
+    setCurrentLimit(10);
+  };
 
+  const handleLoadMore = async () => {
+    if (!query.trim() || filter !== 'songs') return;
+    if (currentLimit >= 50) return;
     setLoadingMore(true);
     try {
-      const newLimit = Math.min(currentLimit + 10, 50); // Cap at 50
-      const searchResults = await usePlayer.getState().search(query, newLimit);
-      setResults(searchResults);
+      const newLimit = Math.min(currentLimit + 10, 50);
+      const results = await usePlayer.getState().search(query, newLimit);
+      setSongResults(results);
       setCurrentLimit(newLimit);
     } catch (error) {
       console.error('Load more failed:', error);
@@ -50,11 +102,8 @@ export function SearchPage() {
   };
 
   const handlePlay = async (track: Track, index: number) => {
-    // Play the selected track
     await play(track);
-    
-    // Add all songs after this one to the queue
-    const songsAfter = results.slice(index + 1);
+    const songsAfter = songResults.slice(index + 1);
     for (const song of songsAfter) {
       await addToQueue(song);
     }
@@ -73,6 +122,12 @@ export function SearchPage() {
       await like(track);
     }
   };
+
+  const handleMusicCardClick = (type: 'playlist' | 'album' | 'artist', id: string) => {
+    navigate(`/ytmusic/${type}/${id}`);
+  };
+
+  const hasResults = filter === 'songs' ? songResults.length > 0 : musicResults.length > 0;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -103,6 +158,24 @@ export function SearchPage() {
             Search
           </button>
         </form>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-2 mt-4 flex-wrap">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => handleFilterChange(f.id)}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                filter === f.id
+                  ? 'bg-white text-black'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+              }`}
+            >
+              {f.icon}
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Loading State */}
@@ -112,16 +185,14 @@ export function SearchPage() {
         </div>
       )}
 
-      {/* Results List */}
-      {!loading && results.length > 0 && (
+      {/* Songs Results */}
+      {!loading && filter === 'songs' && songResults.length > 0 && (
         <div>
-          <h2 className="text-xl md:text-2xl font-bold mb-4">Top Results</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-4">Songs</h2>
           <div className="space-y-1">
-            {results.map((track, index) => {
-              const isPlaying =
-                currentTrack?.videoId === track.videoId && state === 'playing';
+            {songResults.map((track, index) => {
+              const isPlaying = currentTrack?.videoId === track.videoId && state === 'playing';
               const liked = isLiked(track.videoId);
-
               return (
                 <motion.div
                   key={track.videoId}
@@ -131,24 +202,17 @@ export function SearchPage() {
                   onClick={() => handlePlay(track, index)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 active:bg-white/15 cursor-pointer group"
                 >
-                  {/* Thumbnail */}
                   <img
                     src={track.thumbnail}
                     alt={track.title}
                     className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                   />
-
-                  {/* Track info */}
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
                       {track.title}
                     </p>
-                    <p className="text-xs text-gray-400 truncate mt-0.5">
-                      {track.artist}
-                    </p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">{track.artist}</p>
                   </div>
-
-                  {/* Playing indicator */}
                   {isPlaying && (
                     <div className="flex gap-0.5 items-center flex-shrink-0">
                       <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
@@ -156,8 +220,6 @@ export function SearchPage() {
                       <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
                     </div>
                   )}
-
-                  {/* Action buttons */}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={(e) => handleToggleLike(e, track)}
@@ -174,8 +236,7 @@ export function SearchPage() {
               );
             })}
           </div>
-          
-          {/* Load More Button */}
+
           {currentLimit < 50 && (
             <div className="flex justify-center mt-6">
               <motion.button
@@ -202,21 +263,111 @@ export function SearchPage() {
         </div>
       )}
 
+      {/* Music (Playlists / Albums / Artists) Results */}
+      {!loading && filter !== 'songs' && musicResults.length > 0 && (
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold mb-4 capitalize">{filter}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {musicResults.map((item, index) => {
+              if (item.type === 'playlist') {
+                return (
+                  <motion.div
+                    key={item.playlistId}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.04 }}
+                    onClick={() => handleMusicCardClick('playlist', item.playlistId)}
+                    className="bg-white/5 hover:bg-white/10 rounded-xl p-3 cursor-pointer transition-colors group"
+                  >
+                    <div className="relative mb-3">
+                      <img
+                        src={item.thumbnail || '/offline.html'}
+                        alt={item.title}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        className="w-full aspect-square object-cover rounded-lg"
+                      />
+                    </div>
+                    <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">{item.author}</p>
+                    {item.trackCount != null && (
+                      <p className="text-xs text-gray-500 mt-0.5">{item.trackCount} tracks</p>
+                    )}
+                  </motion.div>
+                );
+              }
+
+              if (item.type === 'album') {
+                return (
+                  <motion.div
+                    key={item.browseId}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.04 }}
+                    onClick={() => handleMusicCardClick('album', item.browseId)}
+                    className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors cursor-pointer"
+                  >
+                    <div className="mb-3">
+                      <img
+                        src={item.thumbnail || '/offline.html'}
+                        alt={item.title}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        className="w-full aspect-square object-cover rounded-lg"
+                      />
+                    </div>
+                    <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">{item.artist}</p>
+                    {item.year && <p className="text-xs text-gray-500 mt-0.5">{item.year}</p>}
+                  </motion.div>
+                );
+              }
+
+              if (item.type === 'artist') {
+                return (
+                  <motion.div
+                    key={item.browseId}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.04 }}
+                    onClick={() => handleMusicCardClick('artist', item.browseId)}
+                    className="bg-white/5 hover:bg-white/10 rounded-xl p-3 transition-colors text-center cursor-pointer"
+                  >
+                    <div className="mb-3">
+                      <img
+                        src={item.thumbnail || '/offline.html'}
+                        alt={item.name}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        className="w-full aspect-square object-cover rounded-full"
+                      />
+                    </div>
+                    <p className="text-sm font-semibold text-white truncate">{item.name}</p>
+                    {item.subscribers && (
+                      <p className="text-xs text-gray-400 mt-0.5">{item.subscribers}</p>
+                    )}
+                  </motion.div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Empty State */}
-      {!loading && results.length === 0 && !query && (
+      {!loading && !hasResults && !query && (
         <div className="text-center py-12 md:py-20">
           <SearchIcon size={48} className="mx-auto mb-4 text-gray-700 md:w-16 md:h-16" />
           <h3 className="text-xl md:text-2xl font-bold text-gray-400 mb-2">
-            Search for songs and artists
+            Search for songs, playlists, albums & artists
           </h3>
           <p className="text-sm md:text-base text-gray-500">
-            Find your favorite music from YouTube
+            Use the filters above to switch between YouTube and YouTube Music
           </p>
         </div>
       )}
 
       {/* No Results */}
-      {!loading && results.length === 0 && query && (
+      {!loading && !hasResults && query && (
         <div className="text-center py-12 md:py-20">
           <SearchIcon size={48} className="mx-auto mb-4 text-gray-700 md:w-16 md:h-16" />
           <h3 className="text-xl md:text-2xl font-bold text-gray-400 mb-2">

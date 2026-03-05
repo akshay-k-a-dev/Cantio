@@ -84,6 +84,10 @@ interface PlayerStore {
   
   // Actions
   search: (query: string, limit?: number) => Promise<Track[]>;
+  searchMusic: (query: string, type: 'playlists' | 'albums' | 'artists', limit?: number) => Promise<any[]>;
+  getYTMusicPlaylistTracks: (playlistId: string) => Promise<Track[]>;
+  getYTMusicAlbumTracks: (browseId: string) => Promise<{ tracks: Track[]; title: string; artist: string; thumbnail: string; year?: string }>;
+  getYTMusicArtistTopTracks: (browseId: string) => Promise<{ tracks: Track[]; name: string; thumbnail: string; subscribers?: string }>;
   play: (track: Track) => Promise<void>;
   _playInternal: (track: Track, skipReverseQueue?: boolean) => Promise<void>;
   togglePlay: () => void;
@@ -465,6 +469,62 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     } catch (error) {
       console.error('Search error:', error);
       throw new Error('Failed to search');
+    }
+  },
+
+  searchMusic: async (query: string, type: 'playlists' | 'albums' | 'artists', limit: number = 20) => {
+    try {
+      const params = new URLSearchParams({ q: query, type, limit: limit.toString() });
+      const response = await fetch(`${API_BASE}/search/music?${params}`);
+      const data = await response.json();
+      return data.results || [];
+    } catch (error) {
+      console.error('Music search error:', error);
+      throw new Error('Failed to search music');
+    }
+  },
+
+  getYTMusicPlaylistTracks: async (playlistId: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/ytmusic/playlist/${playlistId}`);
+      const data = await response.json();
+      return (data.tracks || []) as import('../lib/cache').Track[];
+    } catch (error) {
+      console.error('YT Music playlist error:', error);
+      throw new Error('Failed to load playlist');
+    }
+  },
+
+  getYTMusicAlbumTracks: async (browseId: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/ytmusic/album/${browseId}`);
+      const data = await response.json();
+      return {
+        tracks: (data.tracks || []) as import('../lib/cache').Track[],
+        title: data.title || 'Unknown Album',
+        artist: data.artist || 'Unknown',
+        thumbnail: data.thumbnail || '',
+        year: data.year
+      };
+    } catch (error) {
+      console.error('YT Music album error:', error);
+      throw new Error('Failed to load album');
+    }
+  },
+
+  getYTMusicArtistTopTracks: async (browseId: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/ytmusic/artist/${browseId}`);
+      const data = await response.json();
+      return {
+        tracks: (data.tracks || []) as import('../lib/cache').Track[],
+        name: data.name || 'Unknown Artist',
+        thumbnail: data.thumbnail || '',
+        subscribers: data.subscribers
+      };
+    } catch (error) {
+      console.error('YT Music artist error:', error);
+      throw new Error('Failed to load artist');
     }
   },
 

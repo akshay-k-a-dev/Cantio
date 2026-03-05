@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import { config } from 'dotenv';
-import { search, getMetadata } from './lib/youtube.js';
+import { search, getMetadata, searchMusic, getYTMusicPlaylistTracks, getYTMusicAlbumTracks, getYTMusicArtistTopTracks } from './lib/youtube.js';
 import authRoutes from './routes/auth.js';
 import likesRoutes from './routes/likes.js';
 import playlistsRoutes from './routes/playlists.js';
@@ -113,6 +113,68 @@ async function initializeApp() {
       request.log.error(error);
       reply.code(500);
       return { error: 'Search failed', message: error.message };
+    }
+  });
+
+  // YT Music search endpoint (playlists / albums / artists)
+  app.get('/api/search/music', async (request, reply) => {
+    const { q, type, limit } = request.query as { q?: string; type?: string; limit?: string };
+
+    if (!q) {
+      reply.code(400);
+      return { error: 'Missing search query parameter "q"' };
+    }
+
+    const validTypes = ['playlists', 'albums', 'artists'] as const;
+    const searchType = (validTypes as readonly string[]).includes(type || '') ? (type as 'playlists' | 'albums' | 'artists') : 'playlists';
+    const resultLimit = limit ? parseInt(limit, 10) : 20;
+
+    try {
+      const results = await searchMusic(q, searchType, resultLimit);
+      return { results };
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(500);
+      return { error: 'Music search failed', message: error.message };
+    }
+  });
+
+  // YT Music playlist tracks endpoint
+  app.get('/api/ytmusic/playlist/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    try {
+      const tracks = await getYTMusicPlaylistTracks(id);
+      return { tracks };
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to load playlist', message: error.message };
+    }
+  });
+
+  // YT Music album tracks endpoint
+  app.get('/api/ytmusic/album/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    try {
+      const result = await getYTMusicAlbumTracks(id);
+      return result;
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to load album', message: error.message };
+    }
+  });
+
+  // YT Music artist top tracks endpoint
+  app.get('/api/ytmusic/artist/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    try {
+      const result = await getYTMusicArtistTopTracks(id);
+      return result;
+    } catch (error: any) {
+      request.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to load artist', message: error.message };
     }
   });
 

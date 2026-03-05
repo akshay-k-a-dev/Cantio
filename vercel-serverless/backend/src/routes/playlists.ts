@@ -161,6 +161,50 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // Bulk add tracks to playlist (for saving YT Music playlists/albums)
+  fastify.post('/:id/tracks/bulk', {
+    onRequest: [fastify.authenticate]
+  }, async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { tracks } = request.body as { tracks: Array<{ trackId: string; title: string; artist: string; thumbnail?: string; duration?: number }> };
+      const userId = (request.user as any).id;
+
+      if (!Array.isArray(tracks) || tracks.length === 0) {
+        reply.code(400);
+        return { error: 'tracks array is required and must not be empty' };
+      }
+
+      const playlist = await prisma.playlist.findFirst({ where: { id, userId } });
+      if (!playlist) {
+        reply.code(404);
+        return { error: 'Playlist not found' };
+      }
+
+      // Get current max position so new tracks follow after existing ones
+      const existing = await prisma.playlistTrack.count({ where: { playlistId: id } });
+
+      const data = tracks.map((t, i) => ({
+        playlistId: id,
+        trackId: t.trackId,
+        title: t.title,
+        artist: t.artist,
+        thumbnail: t.thumbnail ?? null,
+        duration: t.duration ?? null,
+        position: existing + i
+      }));
+
+      // createMany skips duplicates so it won't throw on already-saved tracks
+      await prisma.playlistTrack.createMany({ data, skipDuplicates: true });
+
+      return { added: data.length };
+    } catch (error: any) {
+      fastify.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to bulk add tracks', message: error.message };
+    }
+  });
+
   // Remove track from playlist
   fastify.delete('/:id/tracks/:trackId', {
     onRequest: [fastify.authenticate]

@@ -51,6 +51,13 @@ interface PlaylistState {
     thumbnail?: string;
     duration?: number;
   }) => Promise<void>;
+  addTracksToPlaylist: (playlistId: string, tracks: Array<{
+    trackId: string;
+    title: string;
+    artist: string;
+    thumbnail?: string;
+    duration?: number;
+  }>) => Promise<void>;
   removeTrackFromPlaylist: (playlistId: string, trackId: string) => Promise<void>;
   updatePlaylist: (id: string, data: { name?: string; description?: string; isPublic?: boolean }) => Promise<void>;
   deletePlaylist: (id: string) => Promise<void>;
@@ -205,6 +212,35 @@ export const usePlaylist = create<PlaylistState>((set, get) => ({
         }
       });
     }
+  },
+
+  addTracksToPlaylist: async (playlistId: string, tracks) => {
+    const token = useAuth.getState().token;
+    if (!token) throw new Error('Not authenticated');
+
+    const response = await fetch(`${API_URL}/playlists/${playlistId}/tracks/bulk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ tracks })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error((err as any).error || 'Failed to save tracks');
+    }
+
+    // refresh count on the playlist card
+    const { playlists } = get();
+    set({
+      playlists: playlists.map(p =>
+        p.id === playlistId
+          ? { ...p, _count: { tracks: (p._count?.tracks || 0) + tracks.length } }
+          : p
+      )
+    });
   },
 
   removeTrackFromPlaylist: async (playlistId: string, trackId: string) => {
