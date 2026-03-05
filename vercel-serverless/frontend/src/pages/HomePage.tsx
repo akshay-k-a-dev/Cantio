@@ -1,11 +1,12 @@
-import { motion } from 'framer-motion';
-import { Music, Loader2, RefreshCw, Sparkles, Play, Pause, TrendingUp, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Music, Loader2, RefreshCw, Sparkles, Play, Pause, TrendingUp, ChevronDown, X, Shuffle } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/authStore';
-import { getRecommendations, getGuestRecommendations, Recommendations } from '../services/recommendations';
+import { getRecommendations, getGuestRecommendations, Recommendations, TopArtist } from '../services/recommendations';
 import RecommendationSection from '../components/RecommendationSection';
 import ArtistCard from '../components/ArtistCard';
+import TrackCard from '../components/TrackCard';
 import { openFullScreenPlayer } from '../components/PlayerBar';
 import { Track, cache } from '../lib/cache';
 
@@ -22,6 +23,30 @@ export function HomePage() {
   const [showMoreRecent, setShowMoreRecent] = useState(false);
   const [showMoreFavorites, setShowMoreFavorites] = useState(false);
   const [showMoreDiscovered, setShowMoreDiscovered] = useState(false);
+  const [showMorePopular, setShowMorePopular] = useState(false);
+  const [showMoreArtists, setShowMoreArtists] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState<TopArtist | null>(null);
+
+  const handleArtistSelect = (artist: TopArtist) => {
+    setSelectedArtist(prev => prev?.name === artist.name ? null : artist);
+  };
+
+  const handlePlayArtist = (artist: TopArtist) => {
+    const { play, addToQueue } = usePlayer.getState();
+    if (artist.tracks.length > 0) {
+      play(artist.tracks[0]);
+      artist.tracks.slice(1).forEach(t => addToQueue(t));
+    }
+  };
+
+  const handlePlayArtistShuffled = (artist: TopArtist) => {
+    const { play, addToQueue } = usePlayer.getState();
+    const shuffled = [...artist.tracks].sort(() => Math.random() - 0.5);
+    if (shuffled.length > 0) {
+      play(shuffled[0]);
+      shuffled.slice(1).forEach(t => addToQueue(t));
+    }
+  };
 
   const loadRecommendations = async () => {
     setLoading(true);
@@ -281,9 +306,18 @@ export function HomePage() {
               <RecommendationSection
                 title=""
                 description=""
-                tracks={popularTracks}
+                tracks={showMorePopular ? popularTracks : popularTracks.slice(0, 6)}
                 hideHeader
               />
+              {popularTracks.length > 6 && (
+                <button
+                  onClick={() => setShowMorePopular(!showMorePopular)}
+                  className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition"
+                >
+                  <ChevronDown size={16} className={`transition-transform ${showMorePopular ? 'rotate-180' : ''}`} />
+                  {showMorePopular ? 'Show Less' : `Show ${popularTracks.length - 6} More`}
+                </button>
+              )}
             </motion.div>
           )}
 
@@ -342,13 +376,93 @@ export function HomePage() {
             >
               <div className="mb-3 sm:mb-4">
                 <h3 className="text-base sm:text-lg font-semibold text-white">Top Artists</h3>
-                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Artists you love most</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Click an artist to browse their tracks</p>
               </div>
               <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-                {recommendations.topArtists.map((artist, index) => (
-                  <ArtistCard key={artist.name} artist={artist} index={index} />
+                {(showMoreArtists ? recommendations.topArtists : recommendations.topArtists.slice(0, 5)).map((artist, index) => (
+                  <ArtistCard
+                    key={artist.name}
+                    artist={artist}
+                    index={index}
+                    isSelected={selectedArtist?.name === artist.name}
+                    onSelect={() => handleArtistSelect(artist)}
+                  />
                 ))}
               </div>
+              {recommendations.topArtists.length > 5 && (
+                <button
+                  onClick={() => setShowMoreArtists(!showMoreArtists)}
+                  className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition"
+                >
+                  <ChevronDown size={16} className={`transition-transform ${showMoreArtists ? 'rotate-180' : ''}`} />
+                  {showMoreArtists ? 'Show Less' : `Show ${recommendations.topArtists.length - 5} More`}
+                </button>
+              )}
+
+              {/* Expanded Artist Panel */}
+              <AnimatePresence>
+                {selectedArtist && (
+                  <motion.div
+                    key={selectedArtist.name}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-4 bg-white/[0.03] border border-white/10 rounded-2xl p-4 sm:p-5">
+                      {/* Panel header */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {selectedArtist.tracks[0]?.thumbnail && (
+                            <img
+                              src={selectedArtist.tracks[0].thumbnail}
+                              alt={selectedArtist.name}
+                              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <h4 className="text-white font-bold text-base sm:text-lg truncate">{selectedArtist.name}</h4>
+                            <p className="text-gray-400 text-xs sm:text-sm">{selectedArtist.tracks.length} tracks · {selectedArtist.playCount} plays</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Play all */}
+                          <button
+                            onClick={() => handlePlayArtist(selectedArtist)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs sm:text-sm font-medium rounded-full transition"
+                          >
+                            <Play size={14} fill="white" />
+                            Play All
+                          </button>
+                          {/* Shuffle */}
+                          <button
+                            onClick={() => handlePlayArtistShuffled(selectedArtist)}
+                            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition"
+                            title="Shuffle"
+                          >
+                            <Shuffle size={16} />
+                          </button>
+                          {/* Close */}
+                          <button
+                            onClick={() => setSelectedArtist(null)}
+                            className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Track list */}
+                      <div className="space-y-1.5">
+                        {selectedArtist.tracks.map((track, i) => (
+                          <TrackCard key={track.videoId} track={track} index={i} />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
 

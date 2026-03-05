@@ -53,7 +53,7 @@ export default function RecommendationSection({
       {/* Horizontal scroll on mobile, grid on desktop */}
       <div className="relative -mx-4 px-4 md:mx-0 md:px-0">
         <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 scrollbar-hide">
-          {tracks.slice(0, 6).map((track, index) => (
+          {tracks.map((track, index) => (
             <div key={`${track.videoId}-${index}`} className="flex-shrink-0 w-64 md:w-auto">
               <TrackCard track={track} index={index} />
             </div>
