@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Heart, Loader2, FileText } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Heart, Loader2, FileText, Shuffle, Repeat, Repeat1 } from 'lucide-react';
 import { usePlayer } from '../services/player';
+import { useQueue } from '../lib/queueStore';
 import { AddToPlaylistDropdown } from './AddToPlaylistDropdown';
 import { LyricsPanel } from './LyricsPanel';
 
@@ -25,6 +26,14 @@ export default function ModernPlayer() {
   const [showLyrics, setShowLyrics] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const volumeBarRef = useRef<HTMLDivElement>(null);
+
+  const { shuffle, repeatMode, toggleShuffle, setRepeatMode } = useQueue();
+
+  const cycleRepeatMode = () => {
+    if (repeatMode === 'off') setRepeatMode('queue');
+    else if (repeatMode === 'queue') setRepeatMode('track');
+    else setRepeatMode('off');
+  };
 
   const liked = currentTrack ? isLiked(currentTrack.videoId) : false;
 
@@ -186,7 +195,25 @@ export default function ModernPlayer() {
               </div>
 
               {/* Controls */}
-              <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="flex items-center justify-center gap-4 mb-8">
+                {/* Shuffle */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={toggleShuffle}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors relative ${
+                    shuffle
+                      ? 'bg-purple-500/30 text-purple-300'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                  }`}
+                  title={shuffle ? 'Shuffle on' : 'Shuffle off'}
+                >
+                  <Shuffle className="w-5 h-5" />
+                  {shuffle && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-400" />
+                  )}
+                </motion.button>
+
                 {/* Previous */}
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -222,6 +249,24 @@ export default function ModernPlayer() {
                   className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                 >
                   <SkipForward className="w-6 h-6" fill="currentColor" />
+                </motion.button>
+
+                {/* Repeat */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={cycleRepeatMode}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors relative ${
+                    repeatMode !== 'off'
+                      ? 'bg-purple-500/30 text-purple-300'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                  }`}
+                  title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'queue' ? 'Repeat queue' : 'Repeat track'}
+                >
+                  {repeatMode === 'track' ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
+                  {repeatMode !== 'off' && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-400" />
+                  )}
                 </motion.button>
               </div>
 

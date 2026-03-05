@@ -2,8 +2,10 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Volume1,
-  Heart, ListMusic, Share2, ChevronDown, MoreHorizontal, Plus, Music2, FileText
+  Heart, ListMusic, Share2, ChevronDown, MoreHorizontal, Plus, Music2, FileText,
+  Shuffle, Repeat, Repeat1
 } from 'lucide-react';
+import { useQueue } from '../lib/queueStore';
 import { usePlayer } from '../services/player';
 import { useNavigate } from 'react-router-dom';
 import { AddToPlaylistDropdown } from './AddToPlaylistDropdown';
@@ -59,6 +61,14 @@ export default function PlayerBar() {
   const volumeRef = useRef<HTMLDivElement>(null);
 
   const isPlaying = state === 'playing';
+
+  const { shuffle, repeatMode, toggleShuffle, setRepeatMode } = useQueue();
+
+  const cycleRepeatMode = () => {
+    if (repeatMode === 'off') setRepeatMode('queue');
+    else if (repeatMode === 'queue') setRepeatMode('track');
+    else setRepeatMode('off');
+  };
 
   // Check if track is liked
   useEffect(() => {
@@ -289,6 +299,20 @@ export default function PlayerBar() {
             {/* CENTER: Controls */}
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center gap-4">
+                {/* Shuffle */}
+                <button
+                  onClick={toggleShuffle}
+                  className={`p-2 transition rounded-full hover:bg-white/10 relative ${
+                    shuffle ? 'text-green-500' : 'text-white/60 hover:text-white'
+                  }`}
+                  title={shuffle ? 'Shuffle on' : 'Shuffle off'}
+                >
+                  <Shuffle size={18} />
+                  {shuffle && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                  )}
+                </button>
+
                 <button
                   onClick={prev}
                   className="p-2 text-white/60 hover:text-white transition"
@@ -310,6 +334,20 @@ export default function PlayerBar() {
                   className="p-2 text-white/60 hover:text-white transition"
                 >
                   <SkipForward size={22} fill="currentColor" />
+                </button>
+
+                {/* Repeat */}
+                <button
+                  onClick={cycleRepeatMode}
+                  className={`p-2 transition rounded-full hover:bg-white/10 relative ${
+                    repeatMode !== 'off' ? 'text-green-500' : 'text-white/60 hover:text-white'
+                  }`}
+                  title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'queue' ? 'Repeat queue' : 'Repeat track'}
+                >
+                  {repeatMode === 'track' ? <Repeat1 size={18} /> : <Repeat size={18} />}
+                  {repeatMode !== 'off' && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                  )}
                 </button>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-white/40">
@@ -552,7 +590,20 @@ export default function PlayerBar() {
               </div>
 
               {/* Main Controls */}
-              <div className="flex items-center justify-center gap-6 sm:gap-8 px-4 sm:px-8 mt-4 sm:mt-6">
+              <div className="flex items-center justify-center gap-4 sm:gap-6 px-4 sm:px-8 mt-4 sm:mt-6">
+                {/* Shuffle */}
+                <button
+                  onClick={toggleShuffle}
+                  className={`p-2 sm:p-3 active:scale-95 transition relative ${shuffle ? 'text-green-500' : 'text-white/50'}`}
+                  title={shuffle ? 'Shuffle on' : 'Shuffle off'}
+                >
+                  <Shuffle size={22} className="sm:hidden" />
+                  <Shuffle size={24} className="hidden sm:block" />
+                  {shuffle && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                  )}
+                </button>
+
                 <button
                   onClick={prev}
                   className="p-2 sm:p-3 text-white active:scale-95 transition"
@@ -582,6 +633,21 @@ export default function PlayerBar() {
                 >
                   <SkipForward size={28} className="sm:hidden" fill="currentColor" />
                   <SkipForward size={32} className="hidden sm:block" fill="currentColor" />
+                </button>
+
+                {/* Repeat */}
+                <button
+                  onClick={cycleRepeatMode}
+                  className={`p-2 sm:p-3 active:scale-95 transition relative ${repeatMode !== 'off' ? 'text-green-500' : 'text-white/50'}`}
+                  title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'queue' ? 'Repeat queue' : 'Repeat track'}
+                >
+                  {repeatMode === 'track'
+                    ? <><Repeat1 size={22} className="sm:hidden" /><Repeat1 size={24} className="hidden sm:block" /></>
+                    : <><Repeat size={22} className="sm:hidden" /><Repeat size={24} className="hidden sm:block" /></>
+                  }
+                  {repeatMode !== 'off' && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                  )}
                 </button>
               </div>
 

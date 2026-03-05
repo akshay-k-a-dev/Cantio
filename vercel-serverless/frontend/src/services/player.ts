@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { cache, Track } from '../lib/cache';
 import { mediaSessionManager } from '../lib/mediaSession';
+import { useQueue } from '../lib/queueStore';
 
 // Determine API base URL dynamically
 const getApiBase = () => {
@@ -618,36 +619,70 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
   next: async () => {
     const { queue, currentTrack } = get();
-    
+    const { shuffle, repeatMode, manualQueue, setRepeatMode } = useQueue.getState();
+
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('⏭️  NEXT BUTTON CLICKED');
-    if (currentTrack) {
-      console.log('⏩ SKIPPING:', currentTrack.title);
-    }
-    console.log('📝 Queue length:', queue.length);
+    if (currentTrack) console.log('⏩ SKIPPING:', currentTrack.title);
+    console.log('📝 Queue length:', queue.length, '| Manual:', manualQueue.length, '| Shuffle:', shuffle, '| Repeat:', repeatMode);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
-    if (queue.length > 0) {
-      await get().play(queue[0]);
-    } else {
-      // Queue is empty, stop playback
+
+    // 1️⃣ Repeat track — replay current without touching queue
+    if (repeatMode === 'track' && currentTrack) {
+      get().seek(0);
       const { ytPlayer } = get();
-      if (ytPlayer) {
-        ytPlayer.stopVideo();
-      }
-      
-      set({ 
-        state: 'idle', 
-        currentTrack: null, 
-        progress: 0, 
-        duration: 0
-      });
-      
-      // Update media session
-      mediaSessionManager.updatePlaybackState('none');
-      
-      console.log('📭 Queue empty, stopped playback');
+      if (ytPlayer) ytPlayer.playVideo();
+      set({ state: 'playing' });
+      return;
     }
+
+    // 2️⃣ Manual queue has priority
+    if (manualQueue.length > 0) {
+      const [nextTrack, ...remaining] = manualQueue;
+      useQueue.setState({ manualQueue: remaining });
+      await get().play(nextTrack);
+      return;
+    }
+
+    // 3️⃣ Context queue — with shuffle support
+    if (queue.length > 0) {
+      let nextTrack: Track;
+      let newQueue: Track[];
+
+      if (shuffle) {
+        const idx = Math.floor(Math.random() * queue.length);
+        nextTrack = queue[idx];
+        newQueue = [...queue.slice(0, idx), ...queue.slice(idx + 1)];
+      } else {
+        [nextTrack, ...newQueue] = queue;
+      }
+
+      set({ queue: newQueue });
+      await get().play(nextTrack);
+      return;
+    }
+
+    // 4️⃣ Repeat queue — recycle reverse queue back into play
+    if (repeatMode === 'queue') {
+      const reverseQueue = await cache.getReverseQueue();
+      if (reverseQueue.length > 0) {
+        const recycled = shuffle
+          ? [...reverseQueue].sort(() => Math.random() - 0.5)
+          : [...reverseQueue];
+        const [nextTrack, ...rest] = recycled;
+        set({ queue: rest });
+        await cache.clearReverseQueue();
+        await get().play(nextTrack);
+        return;
+      }
+    }
+
+    // 5️⃣ Nothing left — stop playback
+    const { ytPlayer } = get();
+    if (ytPlayer) ytPlayer.stopVideo();
+    set({ state: 'idle', currentTrack: null, progress: 0, duration: 0 });
+    mediaSessionManager.updatePlaybackState('none');
+    console.log('📭 Queue empty, stopped playback');
   },
 
   prev: async () => {
