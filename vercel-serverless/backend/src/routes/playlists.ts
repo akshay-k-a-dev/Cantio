@@ -297,42 +297,36 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
           LIMIT 50
         ` as any[];
 
-        // Update cache in background (don't await)
-        (async () => {
-          try {
-            // Clear old cache
-            await prisma.cachedPopularTracks.deleteMany();
-            
-            // Insert new cached tracks
-            if (freshTracks.length > 0) {
-              await prisma.cachedPopularTracks.createMany({
-                data: freshTracks.map((t: any) => ({
-                  trackId: t.trackId,
-                  title: t.title,
-                  artist: t.artist,
-                  thumbnail: t.thumbnail,
-                  duration: t.duration,
-                  playlistCount: t.playlistCount
-                }))
-              });
-            }
+        // Persist cache before returning — fire-and-forget doesn't work in serverless
+        // (function exits immediately after return, killing any unawaited async work)
+        try {
+          await prisma.cachedPopularTracks.deleteMany();
 
-            // Update timestamp
-            await prisma.systemCache.upsert({
-              where: { key: 'popular_tracks_updated' },
-              update: { value: new Date().toISOString() },
-              create: { key: 'popular_tracks_updated', value: new Date().toISOString() }
+          if (freshTracks.length > 0) {
+            await prisma.cachedPopularTracks.createMany({
+              data: freshTracks.map((t: any) => ({
+                trackId: t.trackId,
+                title: t.title,
+                artist: t.artist,
+                thumbnail: t.thumbnail,
+                duration: t.duration,
+                playlistCount: t.playlistCount
+              }))
             });
-            
-            fastify.log.info('Popular tracks cache refreshed successfully');
-          } catch (err) {
-            fastify.log.error({ err }, 'Failed to refresh popular tracks cache');
           }
-        })();
 
-        // Return fresh data immediately (excluding user's own tracks)
-        const filtered = freshTracks.filter((t: any) => true); // All tracks for now
-        return { tracks: filtered.slice(0, 20) };
+          await prisma.systemCache.upsert({
+            where: { key: 'popular_tracks_updated' },
+            update: { value: new Date().toISOString() },
+            create: { key: 'popular_tracks_updated', value: new Date().toISOString() }
+          });
+
+          fastify.log.info('Popular tracks cache refreshed successfully');
+        } catch (err) {
+          fastify.log.error({ err }, 'Failed to persist popular tracks cache');
+        }
+
+        return { tracks: freshTracks.slice(0, 20) };
       }
 
       // Return cached data
