@@ -1,233 +1,214 @@
+<div align="center">
 
-# 🎵 Cantio - Ad-Free Open Source Music Streamer
+# Cantio
 
-**A free and open-source music streaming application — built for music lovers, not algorithms.**
+### Privacy-first open-source music player
 
-> ⚠️ **Not affiliated with or endorsed by Google LLC or YouTube.**  
-> Cantio streams content using official YouTube embedding policies and does not store or redistribute copyrighted material.
+**Stream music. Own your data. No account required.**
 
-## 🌟 Quick Links
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://react.dev/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://music-mu-p6h9.vercel.app/)
 
-- **Live Demo**: https://music-mu-p6h9.vercel.app/
-- **Backend API**: https://music-mu-lovat.vercel.app/api
-- **Full Documentation**: See [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) for detailed architecture, features, and database schema
+**[🌐 Open Web App](https://music-mu-p6h9.vercel.app/)** · **[📖 Contributing](./CONTRIBUTING.md)** · **[📦 Download Desktop](#-desktop-downloads)**
 
----
-
-## ✨ What Makes Cantio Special?
-
-### 🎧 Core Playback Features
-- 🚫 **Ad-Free Streaming** — Enjoy uninterrupted audio streaming
-- ⏭️ **Unlimited Skips** — Skip freely without restrictions
-- 🔊 **Audio-Only Mode** — Save bandwidth, focus on sound
-- 🎛️ **Full Playback Control** — Seek, play, pause, queue management without limitations
-- 🔁 **Smart Queue System** — Dual-queue architecture (forward & history-based)
-- 👤 **Dual Mode Support** — Guest mode (localStorage) or authenticated (database)
-- 🎵 **Collaborative Blends** — Create shared playlists with friends
-
-### 🏗️ Modern Architecture
-- **Frontend**: React 18 + Vite + Tailwind CSS with glassmorphic design
-- **Backend**: Fastify serverless on Vercel with PostgreSQL (Prisma)
-- **Search**: Innertube (YouTube metadata)
-- **Playback**: YouTube IFrame API (official, no copyright violations)
-- **Storage**: IndexedDB (guest) + PostgreSQL (authenticated)
-
-### 📱 Pages & Features
-- **Home** – Personalized recommendations with artist insights
-- **Search** – YouTube-powered track discovery with load-more
-- **Liked Songs** – Personal liked tracks collection
-- **Queue** – Visual queue management with reverse history
-- **Playlists** – Create and manage custom playlists
-- **Blends** – Collaborative playlists with friends (invite-based)
-- **Profile** – User settings and stats
-- **Mobile Navigation** – Full responsive mobile-first design
+</div>
 
 ---
 
-## 🚀 Quick Deploy (Serverless)
+## What is Cantio?
 
-**Deployed on Vercel:**
-```
-Frontend:  https://music-mu-p6h9.vercel.app/
-Backend:   https://music-mu-lovat.vercel.app/api
-```
+Most music apps demand an account before you can press play. They track everything you listen to, sell that data to advertisers, and lock features behind paid tiers.
 
-**Directory Structure:**
-```
-./vercel-serverless/
-├── backend/              # Fastify serverless API
-│   ├── api/              # Vercel serverless endpoints
-│   ├── src/
-│   │   ├── routes/       # 7 route modules
-│   │   ├── lib/          # YouTube, Auth, Validation
-│   │   └── index.ts
-│   └── prisma/           # Database schema
-└── frontend/             # React Vite client
-    ├── src/
-    │   ├── pages/        # 11 route pages
-    │   ├── components/   # UI components
-    │   ├── services/     # API & playback logic
-    │   └── lib/          # State & cache
-    └── public/           # PWA assets
-```
+**Cantio doesn't do any of that.**
+
+- Search and play without signing up
+- No analytics, no telemetry, no ads
+- Create an account *only* if you want to sync across devices
+- Fully open source — audit every line
 
 ---
 
-## 🧠 How It Works (High Level)
+## Features
 
-### Data Flow Architecture
-```
-┌─────────────────────────────────────────────────────────┐
-│  GUEST MODE (No Login)                                  │
-│  IndexedDB ↔ Frontend Store (Zustand) ↔ YouTube IFrame │
-└─────────────────────────────────────────────────────────┘
+### Playback
+- 🎵 Stream from YouTube Music — no ads, no interruptions
+- ⏭️ Unlimited skips
+- 🔁 Shuffle, repeat-track, repeat-queue modes
+- 🕹️ Drag-and-drop queue reorder with auto-scroll
+- 📜 Synced lyrics panel
 
-┌──────────────────────────────────────────────────────────┐
-│  AUTHENTICATED MODE (With Login)                         │
-│  ┌───────────────┐         ┌─────────────────┐          │
-│  │  Frontend     │ ←JWT→  │  Fastify API    │          │
-│  │  Zustand      │        │  PostgreSQL     │          │
-│  │  IndexedDB    │ ←──→   │  Prisma ORM     │          │
-│  └───────────────┘        └─────────────────┘          │
-│         ↓                                                │
-│  YouTube IFrame Player API (streaming only)             │
-└──────────────────────────────────────────────────────────┘
-```
+### Library
+- ❤️ Liked songs
+- 📋 Multiple playlists
+- 🔀 Blends — merge your taste with a friend's and get a shared playlist
+- ⏳ Play history with reverse-queue (previous button that actually works)
 
-### Search & Metadata Pipeline
-```
-Search Query → Innertube.search() → Filter (1-10 min duration)
-            → YouTube Video ID → YouTube IFrame URL
-```
+### Privacy & Sync
+- 👤 Guest mode — works fully offline, no login ever needed
+- ☁️ Optional account sync — liked songs, playlists, history across devices
+- 🔓 Open source — no black boxes
+
+### Platforms
+- 🌐 Web app (PWA — installable on any device)
+- 🖥️ Desktop app (Windows, Linux)
+- 📱 Mobile app (in progress)
 
 ---
 
-## 🔧 Key API Endpoints
+## Try It Now
 
-> Base URL: `https://music-mu-lovat.vercel.app/api`
+| Platform | Link |
+|---|---|
+| Web App | [music-mu-p6h9.vercel.app](https://music-mu-p6h9.vercel.app/) |
+| Landing Page | [/landing](https://music-mu-p6h9.vercel.app/landing) |
 
-### Public Endpoints
-```
-GET  /health                    Health check
-GET  /search?q=query&limit=10   Search tracks (YouTube metadata)
-GET  /track/:id                 Get track metadata
-GET  /track/:id/stream          Get IFrame embed URL
-GET  /guest                     Create guest session
-```
+No sign-up needed. Search a song, click play.
 
-### Authentication Routes `/auth`
-```
-POST /auth/register             Register new user
-POST /auth/login                Login user (returns JWT)
-GET  /auth/me                   Get current user profile
-```
+---
 
-### Likes Routes `/likes` (Protected)
-```
-GET  /likes                     Get all liked tracks
-POST /likes                     Like a track
-DELETE /likes/:trackId          Unlike a track
-GET  /likes/:trackId            Check if track is liked
-```
+## Desktop Downloads
 
-### Playlists Routes `/playlists` (Protected)
-```
-GET  /playlists                 Get user playlists
-POST /playlists                 Create new playlist
-GET  /playlists/:id             Get playlist details + tracks
-POST /playlists/:id/tracks      Add track to playlist
-DELETE /playlists/:id/tracks/:trackId   Remove track
-GET  /playlists/discover/popular   Get popular tracks cache
-```
+| Platform | File |
+|---|---|
+| Windows | [Cantio.Setup.1.0.0.exe](https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/Cantio.Setup.1.0.0.exe) |
+| Linux — Debian/Ubuntu | [cantio-desktop_1.0.0_amd64.deb](https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/cantio-desktop_1.0.0_amd64.deb) |
+| Linux — AppImage | [Cantio-1.0.0.AppImage](https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/Cantio-1.0.0.AppImage) |
+| Android | Coming Soon |
 
-### History Routes `/history` (Protected)
-```
-GET  /history?limit=50&offset=0     Get play history
-POST /history                       Record play
-```
+---
 
-### Recommendations Routes `/recommendations` (Protected)
-```
-GET  /recommendations           Get personalized recommendations
-```
+## Tech Stack
 
-### Blends Routes `/blends` (Protected)
+| Layer | Tech |
+|---|---|
+| Frontend | React 18, Vite, Tailwind CSS, Zustand, Framer Motion |
+| Backend | Fastify, TypeScript, Prisma, PostgreSQL |
+| Search / Metadata | Innertube (youtubei.js) |
+| Playback | YouTube IFrame Player API |
+| Desktop | Electron |
+| Deployment | Vercel (serverless) |
+
+---
+
+## Project Structure
+
 ```
-POST /blends/invite             Send blend invite
-GET  /blends/invites            Get pending invites
-POST /blends/invites/:id/accept Accept invite
-POST /blends/invites/:id/reject Reject invite
-GET  /blends                    Get all blends
-GET  /blends/:id                Get blend details + tracks
+vercel-serverless/
+├── backend/          # Fastify API + Prisma ORM
+│   ├── src/routes/   # auth, likes, playlists, blends, history, recommendations
+│   └── prisma/       # schema + migrations
+└── frontend/         # React + Vite client
+    └── src/
+        ├── pages/    # Home, Search, Queue, Playlists, Blends, Profile …
+        ├── components/
+        ├── services/ # player service (YouTube IFrame + queue logic)
+        └── lib/      # Zustand stores, IndexedDB cache
+desktop-app/          # Electron wrapper
+mobile-app/           # React Native app (in progress)
 ```
 
 ---
 
-## 🛠 Tech Stack
+## Local Development
 
-- **Frontend:**
-  - React 18 + Vite
-  - Zustand (State Management)
-  - Tailwind CSS (UI)
-  - Framer Motion (Animations)
-  - Lucide React (Icons)
+### Frontend
 
-- **Backend:**
-  - Fastify (Serverless optimized)
-  - TypeScript
-  - YouTube iFrame API (Streaming)
-  - Innertube (Metadata search)
-
----
-
-## 🔐 Environment Variables (Serverless)
-
-Create `.env` files under `vercel-serverless/backend/` and `vercel-serverless/frontend/`.
-
-### Backend `.env`:
 ```bash
-NODE_ENV=production
+cd vercel-serverless/frontend
+npm install
+npm run dev        # http://localhost:5173
+```
+
+### Backend
+
+```bash
+cd vercel-serverless/backend
+npm install
+# create .env — see below
+npx prisma migrate dev
+npm run dev        # http://localhost:3000
+```
+
+#### Backend `.env`
+
+```env
+NODE_ENV=development
 LOG_LEVEL=info
-CORS_ORIGIN=*
-````
-
-### Frontend `.env`:
-
-```bash
-VITE_API_URL=https://music-mu-lovat.vercel.app/api
-VITE_APP_NAME=MusicMu
-VITE_APP_VERSION=1.0.0
+CORS_ORIGIN=http://localhost:5173
+DATABASE_URL=postgresql://...
+JWT_SECRET=your_secret_here
 ```
 
----
+#### Frontend `.env`
 
-## 👨‍💻 Developer
+```env
+VITE_API_URL=http://localhost:3000/api
+```
 
-**Akshay K A**
-📧 [akshayka@mamocollege.org](mailto:akshayka@mamocollege.org)
-💻 Contributions welcome!
-
----
-
-## 📜 License
-
-This project is licensed under the **GNU General Public License v3.0 (GPLv3)**.
-See the [`LICENSE`](./LICENSE) file for full details.
+> ⚠️ **Do not change `VITE_API_URL` in production** without coordinating with the deployment owner — it points to the live Vercel backend. Changing it will break the live site.
 
 ---
 
-## ⏭️ What's Next?
+## API Overview
+
+Base URL: `https://music-mu-lovat.vercel.app/api`
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/health` | — | Health check |
+| GET | `/search?q=&limit=` | — | Search tracks |
+| GET | `/track/:id` | — | Track metadata |
+| POST | `/auth/register` | — | Register |
+| POST | `/auth/login` | — | Login (returns JWT) |
+| GET | `/likes` | ✅ | Get liked tracks |
+| POST | `/likes` | ✅ | Like a track |
+| GET | `/playlists` | ✅ | List playlists |
+| POST | `/playlists` | ✅ | Create playlist |
+| GET | `/recommendations` | ✅ | Personalised recommendations |
+| POST | `/blends/invite` | ✅ | Send blend invite |
+| GET | `/blends` | ✅ | List blends |
 
 ---
 
-## ⚠️ IMPORTANT: URLs & Environment Variables
+## Roadmap
 
-Some values (deployment URLs, release asset names, and environment variables) are tied to the live deployments and CI release flow. **Do NOT change `VITE_API_URL`, `CANTIO_REMOTE_URL`, `MUSICMU_REMOTE_URL`, `VITE_APP_NAME`, or similar URL/env references in code or documentation** unless you coordinate the change with the release/CI owner; changing these may break the live sites, desktop auto-updates, or CI/CD pipelines.
-
-We're building a full roadmap of what's coming next. Check it out here:
-👉 *[Cantio Roadmap](checklist.md)*
+- [x] Core playback + queue system
+- [x] Liked songs + playlists
+- [x] Blends (collaborative playlists)
+- [x] Drag-and-drop queue reorder
+- [x] Desktop app (Windows + Linux)
+- [x] Shuffle / repeat modes
+- [x] Lyrics panel
+- [x] YT Music search (songs, albums, artists, playlists)
+- [ ] Android app
+- [ ] macOS desktop build
+- [ ] Self-hosted backend support
+- [ ] Last.fm scrobbling integration
 
 ---
 
-**Made with 💜 for listeners who want control, simplicity, and peace.**
+## Contributing
 
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, commit style, and PR workflow.
+
+---
+
+## Legal
+
+> ⚠️ Cantio is not affiliated with or endorsed by Google LLC or YouTube.
+> Streaming uses the official YouTube IFrame Player API under YouTube's terms of service.
+> No copyrighted material is stored or redistributed.
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+<div align="center">
+Made with 💜 for listeners who want control, simplicity, and peace.
+</div>
