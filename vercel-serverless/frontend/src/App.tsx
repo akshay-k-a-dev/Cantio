@@ -21,6 +21,7 @@ import MobileNav from './components/MobileNav';
 import MobileHeader from './components/MobileHeader';
 import { BlendInviteNotifications } from './components/BlendInviteNotifications';
 import DownloadPopup from './components/DownloadPopup';
+import { LandingPage } from './pages/LandingPage';
 
 function AppContent() {
   const isPlayerVisible = usePlayer((state) => state.isPlayerVisible);
@@ -87,7 +88,12 @@ function AppContent() {
 export function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <Routes>
+        {/* Landing page — full-page, no app shell */}
+        <Route path="/landing" element={<LandingPage />} />
+        {/* Everything else — uses the normal app layout */}
+        <Route path="/*" element={<AppContent />} />
+      </Routes>
     </BrowserRouter>
   );
 }
