@@ -97,6 +97,7 @@ interface PlayerStore {
   setVolume: (volume: number) => void;
   addToQueue: (track: Track) => Promise<void>;
   removeFromQueue: (index: number) => Promise<void>;
+  rearrangeQueue: (fromIndex: number, toIndex: number) => void;
   clearQueue: () => Promise<void>;
   like: (track: Track) => Promise<void>;
   unlike: (videoId: string) => Promise<void>;
@@ -838,6 +839,16 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     const newQueue = queue.filter((_, i) => i !== index);
     set({ queue: newQueue });
     await cache.removeFromQueue(index);
+  },
+
+  rearrangeQueue: (fromIndex: number, toIndex: number) => {
+    const { queue } = get();
+    if (fromIndex === toIndex) return;
+    const newQueue = [...queue];
+    const [moved] = newQueue.splice(fromIndex, 1);
+    newQueue.splice(toIndex, 0, moved);
+    set({ queue: newQueue });
+    cache.reorderQueue(fromIndex, toIndex).catch(() => {});
   },
 
   clearQueue: async () => {

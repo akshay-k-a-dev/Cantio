@@ -1,14 +1,41 @@
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { List, Play, X, Music } from 'lucide-react';
+import { List, Play, X, Music, GripVertical } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { Track } from '../lib/cache';
 
 export function QueuePage() {
-  const { queue, currentTrack, play, removeFromQueue, clearQueue, state } = usePlayer();
+  const { queue, currentTrack, play, removeFromQueue, clearQueue, rearrangeQueue, state } = usePlayer();
+
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const handlePlay = async (track: Track) => {
-    // Simply play the track - it will be auto-removed from queue
     await play(track);
+  };
+
+  const handleDragStart = (index: number) => {
+    dragIndexRef.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    const fromIndex = dragIndexRef.current;
+    if (fromIndex !== null && fromIndex !== toIndex) {
+      rearrangeQueue(fromIndex, toIndex);
+    }
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    dragIndexRef.current = null;
+    setDragOverIndex(null);
   };
 
   const formatDuration = (seconds: number) => {
@@ -53,16 +80,30 @@ export function QueuePage() {
       <div className="space-y-2">
         {queue.map((track, index) => {
           const isPlaying = currentTrack?.videoId === track.videoId && state === 'playing';
+          const isDragOver = dragOverIndex === index;
 
           return (
-            <motion.div
+            <div
               key={`${track.videoId}-${index}`}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ delay: index * 0.02 }}
-              className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 group transition-colors"
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`flex items-center gap-4 p-3 rounded-lg transition-colors group cursor-default border
+                ${isDragOver
+                  ? 'bg-white/20 border-white/30'
+                  : 'bg-white/5 hover:bg-white/10 border-transparent'
+                }`}
             >
+              {/* Drag Handle */}
+              <div
+                className="text-gray-600 hover:text-gray-300 cursor-grab active:cursor-grabbing flex-shrink-0 transition-colors"
+                title="Drag to reorder"
+              >
+                <GripVertical size={18} />
+              </div>
+
               {/* Play Button */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -107,7 +148,7 @@ export function QueuePage() {
               >
                 <X size={18} className="text-gray-400 hover:text-white" />
               </motion.button>
-            </motion.div>
+            </div>
           );
         })}
       </div>
