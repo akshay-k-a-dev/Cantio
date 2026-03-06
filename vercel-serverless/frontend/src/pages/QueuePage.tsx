@@ -4,11 +4,53 @@ import { List, Play, X, Music, GripVertical } from 'lucide-react';
 import { usePlayer } from '../services/player';
 import { Track } from '../lib/cache';
 
+const SCROLL_ZONE = 120; // px from viewport edge to trigger auto-scroll
+const MAX_SPEED = 16;    // max px scrolled per animation frame
+
 export function QueuePage() {
   const { queue, currentTrack, play, removeFromQueue, clearQueue, rearrangeQueue, state } = usePlayer();
 
   const dragIndexRef = useRef<number | null>(null);
+  const dragClientYRef = useRef<number>(0);
+  const autoScrollRafRef = useRef<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // ── Auto-scroll helpers ──────────────────────────────────────────────────
+  const stopAutoScroll = () => {
+    if (autoScrollRafRef.current !== null) {
+      cancelAnimationFrame(autoScrollRafRef.current);
+      autoScrollRafRef.current = null;
+    }
+  };
+
+  const autoScrollStep = () => {
+    const y = dragClientYRef.current;
+    const vh = window.innerHeight;
+
+    if (y < SCROLL_ZONE) {
+      // near top → scroll up; faster the closer to the edge
+      const speed = Math.ceil(MAX_SPEED * (1 - y / SCROLL_ZONE));
+      window.scrollBy(0, -speed);
+      autoScrollRafRef.current = requestAnimationFrame(autoScrollStep);
+    } else if (y > vh - SCROLL_ZONE) {
+      // near bottom → scroll down
+      const speed = Math.ceil(MAX_SPEED * (1 - (vh - y) / SCROLL_ZONE));
+      window.scrollBy(0, speed);
+      autoScrollRafRef.current = requestAnimationFrame(autoScrollStep);
+    } else {
+      // middle zone — stop the loop
+      autoScrollRafRef.current = null;
+    }
+  };
+
+  const tickAutoScroll = (clientY: number) => {
+    dragClientYRef.current = clientY;
+    // start the RAF loop only if it isn't already running
+    if (autoScrollRafRef.current === null) {
+      autoScrollRafRef.current = requestAnimationFrame(autoScrollStep);
+    }
+  };
+  // ────────────────────────────────────────────────────────────────────────
 
   const handlePlay = async (track: Track) => {
     await play(track);
@@ -21,10 +63,12 @@ export function QueuePage() {
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     setDragOverIndex(index);
+    tickAutoScroll(e.clientY);
   };
 
   const handleDrop = (e: React.DragEvent, toIndex: number) => {
     e.preventDefault();
+    stopAutoScroll();
     const fromIndex = dragIndexRef.current;
     if (fromIndex !== null && fromIndex !== toIndex) {
       rearrangeQueue(fromIndex, toIndex);
@@ -34,6 +78,7 @@ export function QueuePage() {
   };
 
   const handleDragEnd = () => {
+    stopAutoScroll();
     dragIndexRef.current = null;
     setDragOverIndex(null);
   };
