@@ -1,13 +1,13 @@
 {
-  "name": "Cantio - YouTube Music Player",
+  "name": "Cantio — Privacy-First Music Player",
   "short_name": "Cantio",
-  "description": "Stream music from YouTube with a beautiful interface. Offline support and app-like experience.",
+  "description": "Stream music with no ads, no tracking and no forced account. Optional cloud sync. Free forever.",
   "start_url": "/",
-  "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#1f2937",
-  "orientation": "portrait-primary",
   "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
   "categories": ["music", "entertainment"],
   "lang": "en-US",
   "dir": "ltr",
@@ -16,7 +16,7 @@
       "src": "/icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
@@ -29,13 +29,21 @@
   "shortcuts": [
     {
       "name": "Search Music",
+      "short_name": "Search",
       "url": "/search",
-      "description": "Search for music"
+      "description": "Search for songs, albums and artists"
     },
     {
       "name": "My Queue",
+      "short_name": "Queue",
       "url": "/queue",
-      "description": "View your music queue"
+      "description": "View and manage your music queue"
+    },
+    {
+      "name": "Liked Songs",
+      "short_name": "Liked",
+      "url": "/liked",
+      "description": "Your liked tracks"
     }
   ]
 }

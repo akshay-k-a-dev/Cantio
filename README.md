@@ -9,9 +9,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://react.dev/)
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://music-mu-p6h9.vercel.app/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://music.akshayka.dev/)
 
-**[🌐 Open Web App](https://music-mu-p6h9.vercel.app/)** · **[📖 Contributing](./CONTRIBUTING.md)** · **[📦 Download Desktop](#-desktop-downloads)**
+**[🌐 Open Web App](https://music.akshayka.dev/)** · **[📖 Contributing](./CONTRIBUTING.md)** · **[📦 Download Desktop](#-desktop-downloads)**
 
 </div>
 
@@ -61,8 +61,8 @@ Most music apps demand an account before you can press play. They track everythi
 
 | Platform | Link |
 |---|---|
-| Web App | [music-mu-p6h9.vercel.app](https://music-mu-p6h9.vercel.app/) |
-| Landing Page | [/landing](https://music-mu-p6h9.vercel.app/landing) |
+| Web App | [music.akshayka.dev](https://music.akshayka.dev/) |
+| Landing Page | [/landing](https://music.akshayka.dev/landing) |
 
 No sign-up needed. Search a song, click play.
 

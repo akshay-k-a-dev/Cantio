@@ -2,18 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#1f2937" />
-    <meta name="description" content="Stream music from YouTube with a beautiful interface. Offline support and app-like experience." />
+
+    <!-- ── Primary SEO ──────────────────────────────────────────── -->
+    <title>Cantio — Privacy-First Open Source Music Player</title>
+    <meta name="description" content="Cantio is a free, open-source music player. Stream from YouTube Music with no ads, no tracking and no forced account. Optional sync across all your devices." />
+    <meta name="keywords" content="cantio, music player, open source music, privacy music player, ad-free music, youtube music player, free music streaming, playlist sync" />
+    <meta name="author" content="Akshay K A" />
+    <link rel="canonical" href="https://music.akshayka.dev/" />
+
+    <!-- ── Open Graph (Facebook / LinkedIn / Product Hunt) ──────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Cantio" />
+    <meta property="og:title" content="Cantio — Privacy-First Open Source Music Player" />
+    <meta property="og:description" content="Stream music with no ads, no tracking, no forced accounts. Optional cloud sync. Free forever." />
+    <meta property="og:url" content="https://music.akshayka.dev/" />
+    <meta property="og:image" content="https://music.akshayka.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ── Twitter Card ─────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cantio — Privacy-First Open Source Music Player" />
+    <meta name="twitter:description" content="Stream music with no ads, no tracking, no forced accounts. Optional cloud sync. Free forever." />
+    <meta name="twitter:image" content="https://music.akshayka.dev/og-image.png" />
+
+    <!-- ── PWA / Mobile ─────────────────────────────────────────── -->
+    <meta name="theme-color" content="#0a0a0a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Cantio" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
-    <title>Cantio - YouTube Music Player</title>
+    <meta name="application-name" content="Cantio" />
+
+    <!-- ── Icons / Manifest ─────────────────────────────────────── -->
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ── Structured Data (JSON-LD) ────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Cantio",
+      "url": "https://music.akshayka.dev",
+      "description": "Privacy-first open-source music player. Stream from YouTube Music with no ads, no tracking and no forced account.",
+      "applicationCategory": "MusicApplication",
+      "operatingSystem": "Web, Windows, Linux, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Akshay K A",
+        "url": "https://github.com/akshay-k-a-dev"
+      },
+      "license": "https://opensource.org/licenses/MIT",
+      "keywords": "music player, open source, privacy, ad-free, youtube music"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
