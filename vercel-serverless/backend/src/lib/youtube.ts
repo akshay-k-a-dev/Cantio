@@ -341,7 +341,34 @@ export async function getYTMusicArtistTopTracks(browseId: string): Promise<{ tra
   const thumbnail: string = getThumbnailUrl(artist?.header?.thumbnail?.contents || artist?.header?.thumbnail);
   const subscribers: string | undefined = artist?.header?.subscribers?.text || undefined;
 
-  // sections[0] is "Top songs" (MusicShelf), its .contents has the tracks
+  // ── Try getAllSongs() first — returns the full songs shelf ─────────────
+  try {
+    const shelf = await artist.getAllSongs();
+    if (shelf?.contents?.length) {
+      const tracks: VideoResult[] = [];
+      for (const item of shelf.contents) {
+        if (!item || !(item as any).id) continue;           // skip ContinuationItem
+        const videoId: string = (item as any).id;
+        const trackTitle = getText((item as any).title);
+        if (!trackTitle) continue;
+        tracks.push({
+          videoId,
+          title: trackTitle,
+          artist: (item as any).artists?.[0]?.name || (item as any).author?.name || name,
+          duration: (item as any).duration?.seconds || 0,
+          thumbnail: getThumbnailUrl((item as any).thumbnail?.contents || (item as any).thumbnail)
+            || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+        });
+      }
+      if (tracks.length > 0) {
+        return { tracks, name, thumbnail, subscribers };
+      }
+    }
+  } catch (_) {
+    // fall through to top-tracks fallback below
+  }
+
+  // ── Fallback: parse the "Top songs" shelf from the artist page ─────────
   const songsSection = artist?.sections?.find((s: any) => {
     const t = getText(s?.title).toLowerCase();
     return t.includes('song') || s?.contents?.[0]?.id;
