@@ -136,7 +136,12 @@ export const api = {
       body: JSON.stringify({ email, purpose }),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Failed to send OTP');
+    if (!response.ok) {
+      const err: any = new Error(data.error || 'Failed to send OTP');
+      err.code = data.code;
+      err.retryAfter = data.retryAfter;
+      throw err;
+    }
     return data;
   },
 

@@ -50,6 +50,7 @@ export default function RegisterPage() {
       setResendCooldown(60);
     } catch (err: any) {
       setError(err.message || 'Failed to send verification code');
+      if (err.retryAfter) setResendCooldown(err.retryAfter);
     } finally {
       setLoading(false);
     }
@@ -78,6 +79,7 @@ export default function RegisterPage() {
       setResendCooldown(60);
     } catch (err: any) {
       setError(err.message || 'Failed to resend code');
+      if (err.retryAfter) setResendCooldown(err.retryAfter);
     } finally {
       setLoading(false);
     }

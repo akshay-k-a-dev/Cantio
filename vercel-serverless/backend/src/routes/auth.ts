@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { hashPassword, verifyPassword } from '../lib/auth.js';
 import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, sendOtpSchema, resetPasswordSchema } from '../lib/validation.js';
-import { storeOtp, sendOtpEmail, verifyOtp } from '../lib/email.js';
+import { storeOtp, sendOtpEmail, verifyOtp, checkResendCooldown, EmailError } from '../lib/email.js';
 
 const registerWithOtpSchema = registerSchema.extend({
   otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d{6}$/, 'OTP must be numeric'),
@@ -103,6 +103,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         }
       }
 
+      checkResendCooldown(email);
       const otp = storeOtp(email, body.purpose);
       await sendOtpEmail(email, otp, body.purpose);
       return { success: true, message: 'OTP sent to your email' };
@@ -110,6 +111,22 @@ export default async function authRoutes(fastify: FastifyInstance) {
       if (error.name === 'ZodError') {
         reply.code(400);
         return { error: 'Validation failed', details: error.errors };
+      }
+      if (error instanceof EmailError) {
+        const statusMap: Record<string, number> = {
+          RATE_LIMITED:      429,
+          QUOTA_EXCEEDED:    503,
+          AUTH_FAILED:       500,
+          INVALID_RECIPIENT: 422,
+          NETWORK_ERROR:     502,
+          UNKNOWN:           500,
+        };
+        reply.code(statusMap[error.code] ?? 500);
+        return {
+          error: error.message,
+          code: error.code,
+          ...(error.retryAfterSeconds ? { retryAfter: error.retryAfterSeconds } : {}),
+        };
       }
       fastify.log.error(error);
       reply.code(500);

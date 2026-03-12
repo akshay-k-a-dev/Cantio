@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../lib/authStore';
 import { motion } from 'framer-motion';
 import { User, LogOut, Lock, Eye, EyeOff, Download, Smartphone, MonitorPlay, Apple } from 'lucide-react';
@@ -106,25 +106,25 @@ export default function ProfilePage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass p-8 rounded-2xl"
+        className="glass p-4 sm:p-8 rounded-2xl"
       >
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <User className="w-8 h-8" />
+        <div className="flex items-center justify-between mb-6 sm:mb-8 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <User className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{user.name || 'User'}</h1>
-              <p className="text-gray-400 text-sm">{user.email}</p>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold truncate">{user.name || 'User'}</h1>
+              <p className="text-gray-400 text-xs sm:text-sm truncate">{user.email}</p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="btn-secondary flex items-center gap-2"
+            className="btn-secondary flex items-center gap-2 shrink-0 text-sm px-3 py-2"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            <span className="hidden xs:inline sm:inline">Logout</span>
           </button>
         </div>
 
@@ -134,14 +134,22 @@ export default function ProfilePage() {
         </div>
 
         {/* Password Change Section */}
-        <div className="mt-8 pt-8 border-t border-white/10">
-          <button
-            onClick={() => setShowPasswordChange(!showPasswordChange)}
-            className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
-          >
-            <Lock className="w-5 h-5" />
-            <span className="font-medium">Change Password</span>
-          </button>
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setShowPasswordChange(!showPasswordChange)}
+              className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              <Lock className="w-5 h-5" />
+              <span className="font-medium">Change Password</span>
+            </button>
+            <Link
+              to="/forgot-password"
+              className="text-sm text-gray-400 hover:text-purple-400 transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           {showPasswordChange && (
             <motion.form
