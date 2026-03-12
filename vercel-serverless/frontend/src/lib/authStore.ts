@@ -113,10 +113,10 @@ export const api = {
     return response;
   },
 
-  async register(email: string, password: string, name?: string) {
+  async register(email: string, password: string, otp: string, name?: string) {
     const response = await this.fetch('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password, name })
+      body: JSON.stringify({ email, password, otp, name })
     });
 
     const data = await response.json();
@@ -126,6 +126,28 @@ export const api = {
     }
 
     useAuth.getState().setAuth(data.token, data.user);
+    return data;
+  },
+
+  async sendOtp(email: string, purpose: 'register' | 'reset') {
+    const response = await fetch(`${API_BASE}/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, purpose }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to send OTP');
+    return data;
+  },
+
+  async resetPassword(email: string, otp: string, newPassword: string) {
+    const response = await fetch(`${API_BASE}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to reset password');
     return data;
   },
 

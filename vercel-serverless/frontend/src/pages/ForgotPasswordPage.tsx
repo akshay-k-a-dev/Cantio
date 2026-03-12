@@ -1,27 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { api, useAuth } from '../lib/authStore';
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../lib/authStore';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail } from 'lucide-react';
+import { Mail, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
-export default function RegisterPage() {
+export default function ForgotPasswordPage() {
   const navigate = useNavigate();
-  const isAuthenticated = useAuth((s) => s.isAuthenticated);
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-
-  useEffect(() => {
-    if (isAuthenticated) navigate('/');
-  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -40,30 +34,30 @@ export default function RegisterPage() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const pwError = validatePassword(password);
-    if (pwError) { setError(pwError); return; }
-    if (password !== confirmPassword) { setError('Passwords do not match'); return; }
     setLoading(true);
     try {
-      await api.sendOtp(email, 'register');
+      await api.sendOtp(email, 'reset');
       setStep(2);
       setResendCooldown(60);
     } catch (err: any) {
-      setError(err.message || 'Failed to send verification code');
+      setError(err.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyAndRegister = async (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    const pwError = validatePassword(newPassword);
+    if (pwError) { setError(pwError); return; }
+    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return; }
     setLoading(true);
     try {
-      await api.register(email, password, otp, name || undefined);
-      navigate('/');
+      await api.resetPassword(email, otp, newPassword);
+      setStep(3);
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }
@@ -74,7 +68,7 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await api.sendOtp(email, 'register');
+      await api.sendOtp(email, 'reset');
       setResendCooldown(60);
     } catch (err: any) {
       setError(err.message || 'Failed to resend code');
@@ -92,8 +86,12 @@ export default function RegisterPage() {
       >
         <div className="glass p-8 rounded-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Create Account</h1>
-            <p className="text-gray-400">Join Cantio and start listening</p>
+            <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
+            <p className="text-gray-400">
+              {step === 1 && "Enter your email to receive a verification code"}
+              {step === 2 && "Enter the code and your new password"}
+              {step === 3 && "Your password has been reset"}
+            </p>
           </div>
 
           {error && (
@@ -106,23 +104,8 @@ export default function RegisterPage() {
             </motion.div>
           )}
 
-          {step === 1 ? (
+          {step === 1 && (
             <form onSubmit={handleSendOtp} className="space-y-5">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2">
-                  Name (Optional)
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={loading}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50"
-                  placeholder="Your name"
-                />
-              </div>
-
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
                   Email
@@ -139,59 +122,6 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Must be 8+ characters with uppercase, lowercase, and number
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
               <button
                 type="submit"
                 disabled={loading}
@@ -200,8 +130,10 @@ export default function RegisterPage() {
                 {loading ? 'Sending code...' : 'Send Verification Code'}
               </button>
             </form>
-          ) : (
-            <form onSubmit={handleVerifyAndRegister} className="space-y-5">
+          )}
+
+          {step === 2 && (
+            <form onSubmit={handleReset} className="space-y-5">
               <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-start gap-3">
                 <Mail className="w-5 h-5 text-purple-400 mt-0.5 shrink-0" />
                 <div>
@@ -228,12 +160,65 @@ export default function RegisterPage() {
                 />
               </div>
 
+              <div>
+                <label htmlFor="newPassword" className="block text-sm font-medium mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="newPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Must be 8+ characters with uppercase, lowercase, and number
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading || otp.length !== 6}
                 className="btn-primary w-full touch-target disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Creating account...' : 'Verify & Create Account'}
+                {loading ? 'Resetting...' : 'Reset Password'}
               </button>
 
               <div className="flex justify-between items-center text-sm">
@@ -242,7 +227,7 @@ export default function RegisterPage() {
                   onClick={() => { setStep(1); setOtp(''); setError(''); }}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  ← Change details
+                  ← Change email
                 </button>
                 <button
                   type="button"
@@ -256,30 +241,36 @@ export default function RegisterPage() {
             </form>
           )}
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-400">
-              Already have an account?{' '}
+          {step === 3 && (
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <CheckCircle className="w-16 h-16 text-green-400" />
+              </div>
+              <div>
+                <p className="text-gray-300 mb-1">Your password has been reset successfully.</p>
+                <p className="text-sm text-gray-500">You can now sign in with your new password.</p>
+              </div>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-primary w-full touch-target"
+              >
+                Go to Sign In
+              </button>
+            </div>
+          )}
+
+          {step !== 3 && (
+            <div className="mt-6 text-center">
               <Link
                 to="/login"
-                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                className="text-sm text-gray-400 hover:text-white transition-colors"
               >
-                Sign in
+                ← Back to Sign In
               </Link>
-            </p>
-          </div>
-
-          <div className="mt-4 text-center">
-            <Link
-              to="/"
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              ← Back to Home
-            </Link>
-          </div>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
   );
 }
-
-

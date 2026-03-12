@@ -36,6 +36,26 @@ export const changePasswordSchema = z.object({
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
 });
 
+export const sendOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  purpose: z.enum(['register', 'reset']),
+});
+
+export const verifyOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d{6}$/, 'OTP must be numeric'),
+  purpose: z.enum(['register', 'reset']),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d{6}$/, 'OTP must be numeric'),
+  newPassword: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(100, 'Password must be at most 100 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+});
+
 export const likeTrackSchema = z.object({
   trackId: z.string().min(1),
   title: z.string().min(1),

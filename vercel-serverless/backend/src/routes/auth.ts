@@ -1,23 +1,37 @@
 import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { hashPassword, verifyPassword } from '../lib/auth.js';
-import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } from '../lib/validation.js';
+import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, sendOtpSchema, resetPasswordSchema } from '../lib/validation.js';
+import { storeOtp, sendOtpEmail, verifyOtp } from '../lib/email.js';
+
+const registerWithOtpSchema = registerSchema.extend({
+  otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d{6}$/, 'OTP must be numeric'),
+});
 
 export default async function authRoutes(fastify: FastifyInstance) {
   // Register
   fastify.post('/register', async (request, reply) => {
     try {
-      const body = registerSchema.parse(request.body);
+      const body = registerWithOtpSchema.parse(request.body);
+      const email = body.email.toLowerCase();
+
+      // Verify OTP before creating account
+      const otpValid = verifyOtp(email, body.otp, 'register');
+      if (!otpValid) {
+        reply.code(400);
+        return { error: 'Invalid or expired verification code' };
+      }
       
       // Generate username from email if not provided
-      const username = body.username || body.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_') + '_' + Math.random().toString(36).substr(2, 4);
+      const username = body.username || email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_') + '_' + Math.random().toString(36).substr(2, 4);
       
       // Check if user already exists
       const existingUser = await prisma.user.findFirst({
         where: {
           OR: [
-            { email: body.email },
-            { username: username }
+            { email },
+            { username }
           ]
         }
       });
@@ -25,7 +39,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       if (existingUser) {
         reply.code(409);
         return { 
-          error: existingUser.email === body.email 
+          error: existingUser.email === email 
             ? 'Email already registered' 
             : 'Username already taken' 
         };
@@ -35,8 +49,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
       const hashedPassword = await hashPassword(body.password);
       const user = await prisma.user.create({
         data: {
-          email: body.email,
-          username: username,
+          email,
+          username,
           password: hashedPassword,
           name: body.name || username,
         },
@@ -66,6 +80,76 @@ export default async function authRoutes(fastify: FastifyInstance) {
       fastify.log.error(error);
       reply.code(500);
       return { error: 'Registration failed' };
+    }
+  });
+
+  // Send OTP (register verification or password reset)
+  fastify.post('/send-otp', async (request, reply) => {
+    try {
+      const body = sendOtpSchema.parse(request.body);
+      const email = body.email.toLowerCase();
+
+      if (body.purpose === 'register') {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) {
+          reply.code(409);
+          return { error: 'Email already registered' };
+        }
+      } else {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (!existing) {
+          // Don't reveal whether email exists
+          return { success: true, message: 'If that email is registered, an OTP has been sent.' };
+        }
+      }
+
+      const otp = storeOtp(email, body.purpose);
+      await sendOtpEmail(email, otp, body.purpose);
+      return { success: true, message: 'OTP sent to your email' };
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        reply.code(400);
+        return { error: 'Validation failed', details: error.errors };
+      }
+      fastify.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to send OTP' };
+    }
+  });
+
+  // Reset password via OTP
+  fastify.post('/reset-password', async (request, reply) => {
+    try {
+      const body = resetPasswordSchema.parse(request.body);
+      const email = body.email.toLowerCase();
+
+      const otpValid = verifyOtp(email, body.otp, 'reset');
+      if (!otpValid) {
+        reply.code(400);
+        return { error: 'Invalid or expired verification code' };
+      }
+
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        reply.code(404);
+        return { error: 'User not found' };
+      }
+
+      const hashedPassword = await hashPassword(body.newPassword);
+      await prisma.user.update({
+        where: { email },
+        data: { password: hashedPassword }
+      });
+
+      return { success: true, message: 'Password reset successfully' };
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        reply.code(400);
+        return { error: 'Validation failed', details: error.errors };
+      }
+      fastify.log.error(error);
+      reply.code(500);
+      return { error: 'Failed to reset password' };
     }
   });
 

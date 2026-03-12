@@ -13,6 +13,7 @@ import { BlendsPage } from './pages/BlendsPage';
 import { BlendDetailPage } from './pages/BlendDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import { TrackPage } from './pages/TrackPage';
 import Sidebar from './components/Sidebar';
@@ -57,6 +58,7 @@ function AppContent() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/liked" element={<LikedPage />} />
             <Route path="/queue" element={<QueuePage />} />
