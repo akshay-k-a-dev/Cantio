@@ -182,7 +182,7 @@ export async function getMetadata(videoId: string) {
       thumbnail: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
     };
   } catch (error: any) {
-    console.error(`[youtube.ts] All methods failed for ${videoId}:`, error.message);
+    console.error('[youtube.ts] All methods failed for video', videoId, '-', error.message);
     throw new Error(`Failed to fetch metadata: ${error.message}`);
   }
 }

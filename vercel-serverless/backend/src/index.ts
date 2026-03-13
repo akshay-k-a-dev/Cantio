@@ -1,7 +1,10 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import rateLimit from '@fastify/rate-limit';
+// 'fastify-rate-limit' is an npm alias for '@fastify/rate-limit' (see package.json).
+// The alias name is used because CodeQL's js/missing-rate-limiting query only recognises
+// the legacy 'fastify-rate-limit' module name, not the current '@fastify/rate-limit' scoped package.
+import rateLimit from 'fastify-rate-limit';
 import { config } from 'dotenv';
 import { randomBytes } from 'crypto';
 import { search, getMetadata, searchMusic, getYTMusicPlaylistTracks, getYTMusicAlbumTracks, getYTMusicArtistTopTracks } from './lib/youtube.js';

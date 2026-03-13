@@ -74,8 +74,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle YouTube thumbnails
-  if (request.url.includes('ytimg.com') || request.url.includes('ggpht.com')) {
+  // Handle YouTube thumbnails - check hostname to prevent substring spoofing
+  let requestHostname = '';
+  try { requestHostname = new URL(request.url).hostname; } catch { /* ignore non-URL requests */ }
+  if (requestHostname.endsWith('.ytimg.com') || requestHostname === 'i.ytimg.com' ||
+      requestHostname.endsWith('.ggpht.com') || requestHostname === 'lh3.googleusercontent.com') {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) => {
         return cache.match(request).then((cachedResponse) => {
