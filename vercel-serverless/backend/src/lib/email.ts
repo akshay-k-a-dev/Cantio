@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { randomInt } from 'crypto';
 
 // ─── Typed email error ────────────────────────────────────────────────────────
 export type EmailErrorCode =
@@ -56,7 +57,7 @@ function checkAndIncrementQuota(): void {
 }
 
 function generateOtp(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 1000000).toString();
 }
 
 function createTransporter() {

@@ -38,8 +38,12 @@ async function initializeApp() {
   });
 
   // Register JWT
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable must be set in production');
+  }
   await app.register(jwt, {
-    secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
+    secret: jwtSecret || 'dev-only-insecure-secret-change-before-production'
   });
 
   // Add authentication decorator

@@ -1,5 +1,10 @@
 import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
+
+const blendInviteSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
 
 export default async function blendsRoutes(fastify: FastifyInstance) {
   // Send blend invite
@@ -7,7 +12,12 @@ export default async function blendsRoutes(fastify: FastifyInstance) {
     onRequest: [fastify.authenticate]
   }, async (request, reply) => {
     try {
-      const { email } = request.body as { email: string };
+      const parsed = blendInviteSchema.safeParse(request.body);
+      if (!parsed.success) {
+        reply.code(400);
+        return { error: 'Validation failed', details: parsed.error.errors };
+      }
+      const { email } = parsed.data;
       const senderId = (request.user as any).id;
 
       // Find receiver by email
