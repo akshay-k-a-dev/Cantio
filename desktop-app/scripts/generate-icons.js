@@ -1,8 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const Jimp = require('jimp');
-let pngToIco = require('png-to-ico');
-if (pngToIco && typeof pngToIco !== 'function' && pngToIco.default) pngToIco = pngToIco.default;
 
 const ASSETS_DIR = path.join(__dirname, '..', 'assets');
 const FRONTEND_ICON = path.join(__dirname, '..', '..', 'vercel-serverless', 'frontend', 'public', 'icon.svg');
@@ -17,6 +14,7 @@ async function svgToPng(svgPath, outPng) {
 }
 
 async function createPlaceholderPng(outPng) {
+  const Jimp = require('jimp');
   const image = new Jimp(512, 512, '#1f2937'); // dark background
   const font = await Jimp.loadFont(Jimp.FONT_SANS_64_WHITE);
   const text = 'C';
@@ -28,6 +26,8 @@ async function createPlaceholderPng(outPng) {
 }
 
 async function makeIco(fromPng, outIco) {
+  let pngToIco = require('png-to-ico');
+  if (pngToIco && typeof pngToIco !== 'function' && pngToIco.default) pngToIco = pngToIco.default;
   const buffer = fs.readFileSync(fromPng);
   const icoBuf = await pngToIco(buffer);
   fs.writeFileSync(outIco, icoBuf);
@@ -36,6 +36,7 @@ async function makeIco(fromPng, outIco) {
 
 async function generateHicolorIcons(srcPng) {
   // Generate multiple sizes under assets/icons/hicolor/<size>x<size>/apps/cantio-desktop.png
+  const Jimp = require('jimp');
   const sizes = [16, 24, 32, 48, 64, 128, 256, 512];
   const topIconsDir = path.join(ASSETS_DIR, 'icons');
   if (!fs.existsSync(topIconsDir)) fs.mkdirSync(topIconsDir, { recursive: true });

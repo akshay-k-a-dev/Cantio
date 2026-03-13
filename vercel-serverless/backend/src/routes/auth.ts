@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { randomBytes } from 'crypto';
+import rateLimit from '@fastify/rate-limit';
 import { prisma } from '../lib/prisma.js';
 import { hashPassword, verifyPassword } from '../lib/auth.js';
 import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, sendOtpSchema, resetPasswordSchema } from '../lib/validation.js';
@@ -10,6 +12,12 @@ const registerWithOtpSchema = registerSchema.extend({
 });
 
 export default async function authRoutes(fastify: FastifyInstance) {
+  // Apply rate limiting to all auth routes (max 20 req/15 min per IP)
+  await fastify.register(rateLimit, {
+    max: 20,
+    timeWindow: '15 minutes'
+  });
+
   // Register
   fastify.post('/register', async (request, reply) => {
     try {
@@ -24,7 +32,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       }
       
       // Generate username from email if not provided
-      const username = body.username || email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_') + '_' + Math.random().toString(36).substr(2, 4);
+      const username = body.username || email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_') + '_' + randomBytes(4).toString('hex');
       
       // Check if user already exists
       const existingUser = await prisma.user.findFirst({

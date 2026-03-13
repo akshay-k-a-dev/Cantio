@@ -123,7 +123,7 @@ export class CacheManager {
   // Playlists
   async createPlaylist(title: string): Promise<Playlist> {
     const playlist: Playlist = {
-      id: `pl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `pl_${crypto.randomUUID()}`,
       title,
       tracks: [],
       createdAt: Date.now(),
