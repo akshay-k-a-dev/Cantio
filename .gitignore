@@ -4,8 +4,10 @@ dist/
 .DS_Store
 .env
 .env.local
+.env.production
 .idea
 *.log
+*.bak
 node_modules
 node_modules/
 *-player-script.js

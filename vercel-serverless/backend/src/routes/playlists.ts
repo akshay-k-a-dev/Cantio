@@ -1,6 +1,23 @@
 import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { createPlaylistSchema, addToPlaylistSchema } from '../lib/validation.js';
+
+const updatePlaylistSchema = z.object({
+  name: z.string().min(1, 'Playlist name is required').max(100).optional(),
+  description: z.string().max(500).optional(),
+  isPublic: z.boolean().optional(),
+});
+
+const bulkTracksSchema = z.object({
+  tracks: z.array(z.object({
+    trackId: z.string().min(1),
+    title: z.string().min(1),
+    artist: z.string().min(1),
+    thumbnail: z.string().optional(),
+    duration: z.number().int().positive().optional(),
+  })).min(1, 'tracks array must not be empty'),
+});
 
 export default async function playlistsRoutes(fastify: FastifyInstance) {
   // Get all user playlists
@@ -167,13 +184,13 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
-      const { tracks } = request.body as { tracks: Array<{ trackId: string; title: string; artist: string; thumbnail?: string; duration?: number }> };
-      const userId = (request.user as any).id;
-
-      if (!Array.isArray(tracks) || tracks.length === 0) {
+      const parsed = bulkTracksSchema.safeParse(request.body);
+      if (!parsed.success) {
         reply.code(400);
-        return { error: 'tracks array is required and must not be empty' };
+        return { error: 'Validation failed', details: parsed.error.errors };
       }
+      const { tracks } = parsed.data;
+      const userId = (request.user as any).id;
 
       const playlist = await prisma.playlist.findFirst({ where: { id, userId } });
       if (!playlist) {
@@ -250,7 +267,12 @@ export default async function playlistsRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
-      const body = request.body as any;
+      const parsed = updatePlaylistSchema.safeParse(request.body);
+      if (!parsed.success) {
+        reply.code(400);
+        return { error: 'Validation failed', details: parsed.error.errors };
+      }
+      const body = parsed.data;
       const userId = (request.user as any).id;
 
       const playlist = await prisma.playlist.update({

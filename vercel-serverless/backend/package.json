@@ -13,14 +13,14 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@fastify/cors": "^8.4.0",
-    "@fastify/jwt": "^7.2.4",
+    "@fastify/cors": "^11.0.0",
+    "@fastify/jwt": "^10.0.0",
     "@prisma/client": "^5.22.0",
     "@prisma/extension-accelerate": "^1.2.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.6.1",
-    "fastify": "^4.24.0",
-    "nodemailer": "^6.9.16",
+    "fastify": "^5.8.2",
+    "nodemailer": "^8.0.2",
     "youtubei.js": "^16.0.1",
     "zod": "^3.23.8"
   },
@@ -28,12 +28,19 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^6.4.17",
     "@types/node": "^20.0.0",
-    "@vercel/node": "^3.0.0",
+    "@vercel/node": "^5.6.15",
     "prisma": "^5.22.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.0"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "overrides": {
+    "tar": "^7.5.11",
+    "minimatch": "^10.2.3",
+    "path-to-regexp": "^6.3.0",
+    "undici": "^6.22.1",
+    "ajv": "^8.18.0"
   }
 }

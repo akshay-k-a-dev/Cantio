@@ -1,6 +1,12 @@
 import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { recordPlaySchema } from '../lib/validation.js';
+
+const historyQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
 
 export default async function historyRoutes(fastify: FastifyInstance) {
   // Get play history
@@ -9,13 +15,18 @@ export default async function historyRoutes(fastify: FastifyInstance) {
   }, async (request, reply) => {
     try {
       const userId = (request.user as any).id;
-      const { limit = 50, offset = 0 } = request.query as any;
+      const query = historyQuerySchema.safeParse(request.query);
+      if (!query.success) {
+        reply.code(400);
+        return { error: 'Invalid query parameters', details: query.error.errors };
+      }
+      const { limit, offset } = query.data;
 
       const history = await prisma.playHistory.findMany({
         where: { userId },
         orderBy: { playedAt: 'desc' },
-        take: parseInt(limit),
-        skip: parseInt(offset),
+        take: limit,
+        skip: offset,
         cacheStrategy: { ttl: 30, swr: 15 }
       });
 
