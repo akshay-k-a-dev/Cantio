@@ -1,7 +1,9 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
+import rateLimit from '@fastify/rate-limit';
 import { config } from 'dotenv';
+import { randomBytes } from 'crypto';
 import { search, getMetadata, searchMusic, getYTMusicPlaylistTracks, getYTMusicAlbumTracks, getYTMusicArtistTopTracks } from './lib/youtube.js';
 import authRoutes from './routes/auth.js';
 import likesRoutes from './routes/likes.js';
@@ -35,6 +37,13 @@ async function initializeApp() {
   await app.register(cors, {
     origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+  });
+
+  // Register rate limiting (applied globally; stricter limits on auth routes)
+  await app.register(rateLimit, {
+    global: false,
+    max: 100,
+    timeWindow: '1 minute'
   });
 
   // Register JWT
@@ -185,7 +194,7 @@ async function initializeApp() {
   // Guest session endpoint
   app.get('/api/guest', async (request, reply) => {
     return {
-      sessionId: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      sessionId: `guest_${Date.now()}_${randomBytes(6).toString('hex')}`,
       expiresIn: 3600000,
       createdAt: new Date().toISOString()
     };

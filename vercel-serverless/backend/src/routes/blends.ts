@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { randomInt } from 'crypto';
 import { prisma } from '../lib/prisma.js';
 
 const blendInviteSchema = z.object({
@@ -424,7 +425,7 @@ async function generateBlendTracks(blendId: string, user1Id: string, user2Id: st
   // Convert to array and shuffle
   const tracks = Array.from(trackMap.values());
   for (let i = tracks.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = randomInt(0, i + 1);
     [tracks[i], tracks[j]] = [tracks[j], tracks[i]];
   }
 
