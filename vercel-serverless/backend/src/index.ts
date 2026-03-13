@@ -39,9 +39,8 @@ async function initializeApp() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   });
 
-  // Register rate limiting (applied globally; stricter limits on auth routes)
+  // Register rate limiting globally to protect all routes
   await app.register(rateLimit, {
-    global: false,
     max: 100,
     timeWindow: '1 minute'
   });
@@ -194,7 +193,7 @@ async function initializeApp() {
   // Guest session endpoint
   app.get('/api/guest', async (request, reply) => {
     return {
-      sessionId: `guest_${Date.now()}_${randomBytes(6).toString('hex')}`,
+      sessionId: `guest_${randomBytes(16).toString('hex')}`,
       expiresIn: 3600000,
       createdAt: new Date().toISOString()
     };

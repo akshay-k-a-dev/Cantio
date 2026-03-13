@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { randomBytes } from 'crypto';
+import rateLimit from '@fastify/rate-limit';
 import { prisma } from '../lib/prisma.js';
 import { hashPassword, verifyPassword } from '../lib/auth.js';
 import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, sendOtpSchema, resetPasswordSchema } from '../lib/validation.js';
@@ -11,15 +12,14 @@ const registerWithOtpSchema = registerSchema.extend({
 });
 
 export default async function authRoutes(fastify: FastifyInstance) {
+  // Apply rate limiting to all auth routes (max 20 req/15 min per IP)
+  await fastify.register(rateLimit, {
+    max: 20,
+    timeWindow: '15 minutes'
+  });
+
   // Register
-  fastify.post('/register', {
-    config: {
-      rateLimit: {
-        max: 10,
-        timeWindow: '1 hour'
-      }
-    }
-  }, async (request, reply) => {
+  fastify.post('/register', async (request, reply) => {
     try {
       const body = registerWithOtpSchema.parse(request.body);
       const email = body.email.toLowerCase();
@@ -32,7 +32,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       }
       
       // Generate username from email if not provided
-      const username = body.username || email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_') + '_' + randomBytes(2).toString('hex');
+      const username = body.username || email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_') + '_' + randomBytes(4).toString('hex');
       
       // Check if user already exists
       const existingUser = await prisma.user.findFirst({
@@ -92,14 +92,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Send OTP (register verification or password reset)
-  fastify.post('/send-otp', {
-    config: {
-      rateLimit: {
-        max: 5,
-        timeWindow: '15 minutes'
-      }
-    }
-  }, async (request, reply) => {
+  fastify.post('/send-otp', async (request, reply) => {
     try {
       const body = sendOtpSchema.parse(request.body);
       const email = body.email.toLowerCase();
@@ -150,14 +143,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Reset password via OTP
-  fastify.post('/reset-password', {
-    config: {
-      rateLimit: {
-        max: 5,
-        timeWindow: '1 hour'
-      }
-    }
-  }, async (request, reply) => {
+  fastify.post('/reset-password', async (request, reply) => {
     try {
       const body = resetPasswordSchema.parse(request.body);
       const email = body.email.toLowerCase();
@@ -193,14 +179,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Login
-  fastify.post('/login', {
-    config: {
-      rateLimit: {
-        max: 20,
-        timeWindow: '15 minutes'
-      }
-    }
-  }, async (request, reply) => {
+  fastify.post('/login', async (request, reply) => {
     try {
       const body = loginSchema.parse(request.body);
 
