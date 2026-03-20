@@ -18,6 +18,8 @@ const API_BASE = getApiBase();
 
 // Wake Lock for background playback
 let wakeLock: WakeLockSentinel | null = null;
+let nextTransitionInProgress = false;
+let nextTransitionReleaseTimer: number | null = null;
 
 async function requestWakeLock() {
   if ('wakeLock' in navigator) {
@@ -679,6 +681,18 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   },
 
   next: async () => {
+    if (nextTransitionInProgress) {
+      console.log('⏭️  NEXT ignored: transition already in progress');
+      return;
+    }
+
+    nextTransitionInProgress = true;
+    if (nextTransitionReleaseTimer !== null) {
+      window.clearTimeout(nextTransitionReleaseTimer);
+      nextTransitionReleaseTimer = null;
+    }
+
+    try {
     const { queue, currentTrack } = get();
     const { shuffle, repeatMode, manualQueue, setRepeatMode } = useQueue.getState();
 
@@ -744,6 +758,13 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     set({ state: 'idle', currentTrack: null, progress: 0, duration: 0 });
     mediaSessionManager.updatePlaybackState('none');
     console.log('📭 Queue empty, stopped playback');
+    } finally {
+      // Keep a tiny cooldown so duplicate ENDED/error callbacks don't race this transition.
+      nextTransitionReleaseTimer = window.setTimeout(() => {
+        nextTransitionInProgress = false;
+        nextTransitionReleaseTimer = null;
+      }, 350);
+    }
   },
 
   prev: async () => {
