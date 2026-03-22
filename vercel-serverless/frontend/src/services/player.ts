@@ -154,10 +154,33 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     
     // Register media session handlers for background playback
     mediaSessionManager.setHandlers({
-      play: () => get().togglePlay(),
-      pause: () => get().togglePlay(),
+      play: () => {
+        if (get().state !== 'playing') {
+          get().togglePlay();
+        }
+      },
+      pause: () => {
+        if (get().state === 'playing') {
+          get().togglePlay();
+        }
+      },
       nextTrack: () => get().next(),
       previousTrack: () => get().prev(),
+      stop: () => {
+        if (get().state === 'playing') {
+          get().togglePlay();
+        }
+        mediaSessionManager.updatePlaybackState('paused');
+      },
+      seekBackward: (offset) => {
+        const { progress } = get();
+        get().seek(Math.max(0, progress - offset));
+      },
+      seekForward: (offset) => {
+        const { progress, duration } = get();
+        const maxDuration = duration || progress + offset;
+        get().seek(Math.min(maxDuration, progress + offset));
+      },
       seekTo: (details) => {
         if (details.seekTime !== undefined) {
           get().seek(details.seekTime);
