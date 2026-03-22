@@ -9,8 +9,8 @@ interface MediaSessionManager {
     nextTrack: () => void;
     previousTrack: () => void;
     stop: () => void;
-    seekBackward: (offset: number) => void;
-    seekForward: (offset: number) => void;
+    seekBackward: (details: any) => void;
+    seekForward: (details: any) => void;
     seekTo: (details: any) => void;
   }) => void;
 }
@@ -52,8 +52,8 @@ class MediaSessionManagerImpl implements MediaSessionManager {
     nextTrack: () => void;
     previousTrack: () => void;
     stop: () => void;
-    seekBackward: (offset: number) => void;
-    seekForward: (offset: number) => void;
+    seekBackward: (details: any) => void;
+    seekForward: (details: any) => void;
     seekTo: (details: any) => void;
   }) {
     if ('mediaSession' in navigator) {
@@ -94,15 +94,13 @@ class MediaSessionManagerImpl implements MediaSessionManager {
       });
 
       registerAction('seekbackward', (details: any) => {
-        const offset = details?.seekOffset ?? 10;
-        console.log('📱 Media session: seek backward', offset);
-        handlers.seekBackward(offset);
+        console.log('📱 Media session: seek backward', details?.seekOffset);
+        handlers.seekBackward(details);
       });
 
       registerAction('seekforward', (details: any) => {
-        const offset = details?.seekOffset ?? 10;
-        console.log('📱 Media session: seek forward', offset);
-        handlers.seekForward(offset);
+        console.log('📱 Media session: seek forward', details?.seekOffset);
+        handlers.seekForward(details);
       });
 
       registerAction('seekto', (details: any) => {

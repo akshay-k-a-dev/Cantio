@@ -172,14 +172,14 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
         }
         mediaSessionManager.updatePlaybackState('paused');
       },
-      seekBackward: (offset) => {
+      seekBackward: (details) => {
         const { progress } = get();
-        const localOffset = typeof offset === 'number' ? offset : 10;
+        const localOffset = typeof details?.seekOffset === 'number' ? details.seekOffset : 10;
         get().seek(Math.max(0, progress - localOffset));
       },
-      seekForward: (offset) => {
+      seekForward: (details) => {
         const { progress, duration } = get();
-        const localOffset = typeof offset === 'number' ? offset : 10;
+        const localOffset = typeof details?.seekOffset === 'number' ? details.seekOffset : 10;
         const maxDuration = duration || progress + localOffset;
         get().seek(Math.min(maxDuration, progress + localOffset));
       },
