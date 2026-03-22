@@ -174,12 +174,14 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
       },
       seekBackward: (offset) => {
         const { progress } = get();
-        get().seek(Math.max(0, progress - offset));
+        const localOffset = typeof offset === 'number' ? offset : 10;
+        get().seek(Math.max(0, progress - localOffset));
       },
       seekForward: (offset) => {
         const { progress, duration } = get();
-        const maxDuration = duration || progress + offset;
-        get().seek(Math.min(maxDuration, progress + offset));
+        const localOffset = typeof offset === 'number' ? offset : 10;
+        const maxDuration = duration || progress + localOffset;
+        get().seek(Math.min(maxDuration, progress + localOffset));
       },
       seekTo: (details) => {
         if (details.seekTime !== undefined) {
