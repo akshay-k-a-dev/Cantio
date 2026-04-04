@@ -82,8 +82,6 @@ export function AddToPlaylistDropdown({ track, onAddToQueue }: AddToPlaylistDrop
     }
   };
 
-  const canCreateMore = playlists.length < 15;
-
   return (
     <div ref={dropdownRef} className="relative">
       <button
@@ -172,20 +170,12 @@ export function AddToPlaylistDropdown({ track, onAddToQueue }: AddToPlaylistDrop
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (canCreateMore) {
-                      setShowCreateModal(true);
-                    } else {
-                      alert('Maximum 15 playlists allowed');
-                    }
+                    setShowCreateModal(true);
                   }}
-                  disabled={!canCreateMore}
-                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-white/10 transition-colors flex items-center gap-3"
                 >
                   <ListPlus size={16} />
                   <span>Create Playlist</span>
-                  {!canCreateMore && (
-                    <span className="text-xs text-gray-500 ml-auto">(15/15)</span>
-                  )}
                 </button>
               </div>
             ) : (

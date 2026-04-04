@@ -346,6 +346,8 @@ export async function getYTMusicArtistTopTracks(browseId: string): Promise<{ tra
     const shelf = await artist.getAllSongs();
     if (shelf?.contents?.length) {
       const tracks: VideoResult[] = [];
+      
+      // Process initial batch
       for (const item of shelf.contents) {
         if (!item || !(item as any).id) continue;           // skip ContinuationItem
         const videoId: string = (item as any).id;
@@ -360,7 +362,38 @@ export async function getYTMusicArtistTopTracks(browseId: string): Promise<{ tra
             || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
         });
       }
+      
+      // Paginate through all remaining pages (up to 500 tracks to avoid infinite loops)
+      let currentShelf = shelf;
+      const MAX_TRACKS = 500;
+      while (currentShelf?.has_continuation && tracks.length < MAX_TRACKS) {
+        try {
+          currentShelf = await currentShelf.getContinuation();
+          if (!currentShelf?.contents?.length) break;
+          
+          for (const item of currentShelf.contents) {
+            if (!item || !(item as any).id) continue;
+            const videoId: string = (item as any).id;
+            const trackTitle = getText((item as any).title);
+            if (!trackTitle) continue;
+            tracks.push({
+              videoId,
+              title: trackTitle,
+              artist: (item as any).artists?.[0]?.name || (item as any).author?.name || name,
+              duration: (item as any).duration?.seconds || 0,
+              thumbnail: getThumbnailUrl((item as any).thumbnail?.contents || (item as any).thumbnail)
+                || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+            });
+            if (tracks.length >= MAX_TRACKS) break;
+          }
+        } catch (paginationError) {
+          console.warn('[youtube.ts] Pagination error, stopping:', paginationError);
+          break;
+        }
+      }
+      
       if (tracks.length > 0) {
+        console.log(`[youtube.ts] Fetched ${tracks.length} tracks for artist ${name}`);
         return { tracks, name, thumbnail, subscribers };
       }
     }
