@@ -16,8 +16,7 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
-// Wake Lock for background playback
-let wakeLock: WakeLockSentinel | null = null;
+// Player state flags
 let nextTransitionInProgress = false;
 let nextTransitionReleaseTimer: number | null = null;
 let playerStoreInitialized = false;
@@ -29,31 +28,6 @@ const isStandalonePwa = () => {
   const navStandalone = (window.navigator as any).standalone === true;
   return window.matchMedia('(display-mode: standalone)').matches || navStandalone;
 };
-
-async function requestWakeLock() {
-  if ('wakeLock' in navigator) {
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      console.log('🔒 Wake lock acquired');
-      wakeLock.addEventListener('release', () => {
-        console.log('🔓 Wake lock released');
-      });
-    } catch (err) {
-      console.warn('Wake lock request failed:', err);
-    }
-  }
-}
-
-async function releaseWakeLock() {
-  if (wakeLock) {
-    try {
-      await wakeLock.release();
-      wakeLock = null;
-    } catch (err) {
-      // Ignore
-    }
-  }
-}
 
 // Visibility logging for diagnosing background playback behavior
 document.addEventListener('visibilitychange', () => {
@@ -218,6 +192,40 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
       });
     }
     
+    // Keyboard media controls for PC (F9-F12)
+    // F9: Search (not implemented here, handled by UI)
+    // F10: Previous track
+    // F11: Play/Pause
+    // F12: Next track
+    const handleKeyboardControls = (e: KeyboardEvent) => {
+      // Only handle if not typing in an input field
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+      
+      switch (e.key) {
+        case 'F10':
+          e.preventDefault();
+          console.log('⌨️ F10: Previous track');
+          get().prev();
+          break;
+        case 'F11':
+          e.preventDefault();
+          console.log('⌨️ F11: Play/Pause');
+          get().togglePlay();
+          break;
+        case 'F12':
+          e.preventDefault();
+          console.log('⌨️ F12: Next track');
+          get().next();
+          break;
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyboardControls);
+    console.log('⌨️ Keyboard media controls enabled (F10: Prev, F11: Play/Pause, F12: Next)');
+    
     // Sync liked tracks from database for logged-in users
     get().syncLikesFromDatabase();
     playerStoreInitialized = true;
@@ -310,9 +318,6 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
               console.warn('Notification attempt failed', e);
             }
             
-            // Acquire wake lock to prevent device sleep
-            requestWakeLock();
-            
             // Update media session playback state
             if ('mediaSession' in navigator) {
               navigator.mediaSession.playbackState = 'playing';
@@ -349,7 +354,6 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
             
           } else if (event.data === YT.PlayerState.PAUSED) {
             set({ state: 'paused' });
-            releaseWakeLock();
             if ('mediaSession' in navigator) {
               navigator.mediaSession.playbackState = 'paused';
             }
