@@ -12,20 +12,28 @@ if ('serviceWorker' in navigator) {
         console.log('✅ SW registered:', registration);
 
         // Check for updates
-        registration.addEventListener('updatefound', () => {
+        registration.onupdatefound = () => {
           const newWorker = registration.installing;
           if (newWorker) {
+            console.log('ℹ️ SW update found, installing...');
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available
-                if (confirm('New version available! Reload to update?')) {
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                  window.location.reload();
-                }
+                // New update available - manual update only
+                console.log('ℹ️ SW update available (manual apply only)');
               }
             });
           }
-        });
+        };
+
+        // Expose manual update trigger for optional UI wiring
+        (window as any).__APPLY_PWA_UPDATE__ = () => {
+          if (registration.waiting) {
+            console.log('ℹ️ Applying waiting SW update (no auto reload)');
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          } else {
+            console.log('ℹ️ No waiting SW update to apply');
+          }
+        };
       })
       .catch((error) => {
         console.error('❌ SW registration failed:', error);
@@ -33,7 +41,7 @@ if ('serviceWorker' in navigator) {
 
     // Handle controller change
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
+      console.log('ℹ️ SW controller changed (no auto reload)');
     });
   });
 }

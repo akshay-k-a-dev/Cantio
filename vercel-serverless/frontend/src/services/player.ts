@@ -20,6 +20,15 @@ const API_BASE = getApiBase();
 let wakeLock: WakeLockSentinel | null = null;
 let nextTransitionInProgress = false;
 let nextTransitionReleaseTimer: number | null = null;
+let playerStoreInitialized = false;
+let playerStoreInitPromise: Promise<void> | null = null;
+let playerInstanceInitialized = false;
+
+const isStandalonePwa = () => {
+  if (typeof window === 'undefined') return false;
+  const navStandalone = (window.navigator as any).standalone === true;
+  return window.matchMedia('(display-mode: standalone)').matches || navStandalone;
+};
 
 async function requestWakeLock() {
   if ('wakeLock' in navigator) {
@@ -46,15 +55,9 @@ async function releaseWakeLock() {
   }
 }
 
-// Re-acquire wake lock when page becomes visible again
-document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible' && wakeLock === null) {
-    // Check if we should have a wake lock (player is playing)
-    const playerStore = usePlayer.getState();
-    if (playerStore.state === 'playing') {
-      await requestWakeLock();
-    }
-  }
+// Visibility logging for diagnosing background playback behavior
+document.addEventListener('visibilitychange', () => {
+  console.log('[PWA] visibilitychange:', document.visibilityState);
 });
 
 export type PlayerState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
@@ -125,6 +128,16 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
   ytPlayerReady: false,
 
   init: async () => {
+    if (playerStoreInitialized) {
+      console.log('[PWA] Player store already initialized, skipping init');
+      return;
+    }
+    if (playerStoreInitPromise) {
+      await playerStoreInitPromise;
+      return;
+    }
+
+    playerStoreInitPromise = (async () => {
     await cache.init();
     
     // Now load from local cache first (for fast startup)
@@ -153,48 +166,79 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
     }
     
     // Register media session handlers for background playback
-    mediaSessionManager.setHandlers({
-      play: () => {
-        if (get().state !== 'playing') {
-          get().togglePlay();
-        }
-      },
-      pause: () => {
-        if (get().state === 'playing') {
-          get().togglePlay();
-        }
-      },
-      nextTrack: () => get().next(),
-      previousTrack: () => get().prev(),
-      stop: () => {
-        if (get().state === 'playing') {
-          get().togglePlay();
-        }
-        mediaSessionManager.updatePlaybackState('paused');
-      },
-      seekBackward: (details) => {
-        const { progress } = get();
-        const localOffset = typeof details?.seekOffset === 'number' ? details.seekOffset : 10;
-        get().seek(Math.max(0, progress - localOffset));
-      },
-      seekForward: (details) => {
-        const { progress, duration } = get();
-        const localOffset = typeof details?.seekOffset === 'number' ? details.seekOffset : 10;
-        const maxDuration = duration || progress + localOffset;
-        get().seek(Math.min(maxDuration, progress + localOffset));
-      },
-      seekTo: (details) => {
-        if (details.seekTime !== undefined) {
-          get().seek(details.seekTime);
-        }
-      },
-    });
+    if (isStandalonePwa()) {
+      mediaSessionManager.setHandlers({
+        play: () => {
+          if (get().state !== 'playing') {
+            get().togglePlay();
+          }
+        },
+        pause: () => {
+          if (get().state === 'playing') {
+            get().togglePlay();
+          }
+        },
+      });
+    } else {
+      mediaSessionManager.setHandlers({
+        play: () => {
+          if (get().state !== 'playing') {
+            get().togglePlay();
+          }
+        },
+        pause: () => {
+          if (get().state === 'playing') {
+            get().togglePlay();
+          }
+        },
+        nextTrack: () => get().next(),
+        previousTrack: () => get().prev(),
+        stop: () => {
+          if (get().state === 'playing') {
+            get().togglePlay();
+          }
+          mediaSessionManager.updatePlaybackState('paused');
+        },
+        seekBackward: (details) => {
+          const { progress } = get();
+          const localOffset = typeof details?.seekOffset === 'number' ? details.seekOffset : 10;
+          get().seek(Math.max(0, progress - localOffset));
+        },
+        seekForward: (details) => {
+          const { progress, duration } = get();
+          const localOffset = typeof details?.seekOffset === 'number' ? details.seekOffset : 10;
+          const maxDuration = duration || progress + localOffset;
+          get().seek(Math.min(maxDuration, progress + localOffset));
+        },
+        seekTo: (details) => {
+          if (details.seekTime !== undefined) {
+            get().seek(details.seekTime);
+          }
+        },
+      });
+    }
     
     // Sync liked tracks from database for logged-in users
     get().syncLikesFromDatabase();
+    playerStoreInitialized = true;
+    console.log('[PWA] Player store init complete');
+    })();
+
+    try {
+      await playerStoreInitPromise;
+    } finally {
+      playerStoreInitPromise = null;
+    }
   },
 
   initYouTubePlayer: async () => {
+    if (playerInstanceInitialized && get().ytPlayer && get().ytPlayerReady) {
+      console.log('[PWA] YouTube player already initialized, skipping');
+      return;
+    }
+
+    console.log('[PWA] Initializing YouTube player instance');
+
     // Create hidden container for YouTube player
     let container = document.getElementById('yt-player-container');
     if (!container) {
@@ -238,9 +282,12 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
           try {
             player.setVolume(get().volume * 100);
             set({ ytPlayerReady: true });
+            playerInstanceInitialized = true;
+            console.log('[PWA] YouTube player init complete');
           } catch (error) {
             console.warn('⚠️  Player volume set failed:', error);
             set({ ytPlayerReady: true }); // Still mark as ready
+            playerInstanceInitialized = true;
           }
         },
         onStateChange: (event: any) => {
@@ -301,53 +348,10 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
             trackProgress();
             
           } else if (event.data === YT.PlayerState.PAUSED) {
-            // Check if this was an intentional pause (user clicked) or browser auto-pause
-            const wasPlaying = get().state === 'playing';
-            const isHidden = document.visibilityState === 'hidden';
-            
-            if (isHidden && wasPlaying) {
-              // Browser auto-paused due to tab being hidden - aggressive resume
-              console.log('⚠️  Background pause detected, aggressively resuming...');
-              
-              // Multiple retry attempts with increasing delays
-              const retryResume = (attempt: number) => {
-                if (attempt > 5) return; // Give up after 5 attempts
-                
-                setTimeout(() => {
-                  try {
-                    const currentState = get().state;
-                    const ytState = player.getPlayerState();
-                    
-                    // Only resume if we still think we should be playing
-                    if (currentState === 'playing' && ytState === YT.PlayerState.PAUSED) {
-                      console.log(`🔄 Resume attempt ${attempt}...`);
-                      player.playVideo();
-                      
-                      // Check again after a short delay
-                      setTimeout(() => {
-                        const newState = player.getPlayerState();
-                        if (newState === YT.PlayerState.PAUSED && get().state === 'playing') {
-                          retryResume(attempt + 1);
-                        }
-                      }, 200);
-                    }
-                  } catch (e) {
-                    console.warn('Resume attempt failed:', e);
-                    retryResume(attempt + 1);
-                  }
-                }, 100 * attempt);
-              };
-              
-              retryResume(1);
-            } else {
-              // Legitimate pause from user
-              set({ state: 'paused' });
-              // Release wake lock when paused
-              releaseWakeLock();
-              // Update media session
-              if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'paused';
-              }
+            set({ state: 'paused' });
+            releaseWakeLock();
+            if ('mediaSession' in navigator) {
+              navigator.mediaSession.playbackState = 'paused';
             }
           } else if (event.data === YT.PlayerState.BUFFERING) {
             set({ state: 'loading' });
@@ -410,68 +414,12 @@ export const usePlayer = create<PlayerStore>((set, get) => ({
 
     set({ ytPlayer: player });
     
-    // Handle visibility changes for background playback
+    // Handle visibility changes for diagnostics only in PWA mode
     let visibilityHandler: (() => void) | null = null;
     
     visibilityHandler = () => {
-      const { state: playerState, ytPlayer: currentPlayer } = get();
-      const YT = window.YT;
-      
-      if (document.visibilityState === 'visible' && playerState === 'playing' && currentPlayer) {
-        // App coming to foreground - check if paused and resume
-        try {
-          const ytState = currentPlayer.getPlayerState();
-          
-          if (ytState === YT.PlayerState.PAUSED) {
-            console.log('🔄 Resuming on visibility change...');
-            setTimeout(() => currentPlayer.playVideo(), 50);
-          }
-        } catch (error) {
-          // Ignore errors
-        }
-      } else if (document.visibilityState === 'hidden' && playerState === 'playing' && currentPlayer) {
-        // App going to background - start proactive monitoring
-        console.log('📱 Going to background, starting playback monitor...');
-        
-        // Proactively check and resume if paused
-        const backgroundMonitor = setInterval(() => {
-          if (document.visibilityState !== 'hidden') {
-            clearInterval(backgroundMonitor);
-            return;
-          }
-          
-          try {
-            const currentState = get().state;
-            const currentQueue = get().queue;
-            const ytState = currentPlayer.getPlayerState();
-            
-            if (currentState === 'playing' && ytState === YT.PlayerState.PAUSED) {
-              console.log('🔄 Background monitor: resuming paused playback...');
-              currentPlayer.playVideo();
-            }
-            
-            // Also check for error state and try to recover if queue has items
-            if (currentState === 'error' && currentQueue.length > 0) {
-              console.log('🔄 Background recovery: queue has items, playing next...');
-              get().next();
-            }
-          } catch (e) {
-            // Player might be destroyed
-            clearInterval(backgroundMonitor);
-          }
-        }, 500); // Check every 500ms while in background
-        
-        // Keep monitor running as long as queue has items, otherwise timeout after 30s
-        const checkMonitorTimeout = () => {
-          const { queue, state } = get();
-          if (queue.length > 0 || state === 'playing') {
-            // Still have queue or playing, check again in 30s
-            setTimeout(checkMonitorTimeout, 30000);
-          } else {
-            clearInterval(backgroundMonitor);
-          }
-        };
-        setTimeout(checkMonitorTimeout, 30000);
+      if (isStandalonePwa()) {
+        console.log('[PWA] Player visibility handler:', document.visibilityState);
       }
     };
     
