@@ -21,8 +21,8 @@
     "@prisma/extension-accelerate": "^1.2.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.6.1",
-    "fastify": "^5.8.2",
-    "nodemailer": "^8.0.2",
+    "fastify": "^5.8.3",
+    "nodemailer": "^8.0.4",
     "youtubei.js": "^16.0.1",
     "zod": "^3.23.8"
   },
@@ -41,8 +41,11 @@
   "overrides": {
     "tar": "^7.5.11",
     "minimatch": "^10.2.3",
-    "path-to-regexp": "^6.3.0",
+    "path-to-regexp": "^8.4.0",
     "undici": "^6.22.1",
-    "ajv": "^8.18.0"
-  }
+    "ajv": "^8.18.0",
+    "picomatch": "^4.0.4",
+    "@xmldom/xmldom": "^0.8.12"
+  },
+  "//": "NOTE: fast-jwt@6.1.0 has CVE-2026-34950 (CRITICAL) - no patch available yet. Monitoring: https://github.com/nearform/fast-jwt/security/advisories/GHSA-mvf2-f6gm-w987"
 }

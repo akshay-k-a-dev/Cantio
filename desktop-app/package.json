@@ -22,7 +22,7 @@
     "electron-log": "^5.4.3"
   },
   "devDependencies": {
-    "electron": "^36.0.0",
+    "electron": "^39.8.5",
     "electron-builder": "^26.8.1",
     "png-to-ico": "^3.0.1"
   },
