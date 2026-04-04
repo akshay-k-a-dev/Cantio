@@ -29,9 +29,85 @@ const isStandalonePwa = () => {
   return window.matchMedia('(display-mode: standalone)').matches || navStandalone;
 };
 
+// Mobile detection
+const isMobileDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 0 && window.innerWidth < 768);
+};
+
+// Screen Wake Lock management for mobile - release after 15s idle
+let wakeLockSentinel: WakeLockSentinel | null = null;
+let idleTimer: number | null = null;
+const IDLE_TIMEOUT_MS = 15000; // 15 seconds
+
+const requestWakeLock = async () => {
+  if (!isMobileDevice()) return;
+  if (!('wakeLock' in navigator)) return;
+  
+  try {
+    // Only request if we don't already have one
+    if (!wakeLockSentinel) {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      console.log('[WakeLock] Screen wake lock acquired');
+      
+      wakeLockSentinel.addEventListener('release', () => {
+        console.log('[WakeLock] Screen wake lock released');
+        wakeLockSentinel = null;
+      });
+    }
+  } catch (err) {
+    console.log('[WakeLock] Failed to acquire:', err);
+  }
+};
+
+const releaseWakeLock = async () => {
+  if (wakeLockSentinel) {
+    try {
+      await wakeLockSentinel.release();
+      wakeLockSentinel = null;
+      console.log('[WakeLock] Screen wake lock released (idle timeout)');
+    } catch (err) {
+      console.log('[WakeLock] Failed to release:', err);
+    }
+  }
+};
+
+const resetIdleTimer = () => {
+  if (!isMobileDevice()) return;
+  
+  // Clear existing timer
+  if (idleTimer !== null) {
+    window.clearTimeout(idleTimer);
+  }
+  
+  // Request wake lock on activity
+  requestWakeLock();
+  
+  // Set new idle timer - release wake lock after 15s of inactivity
+  idleTimer = window.setTimeout(() => {
+    console.log('[WakeLock] User idle for 15s, releasing wake lock');
+    releaseWakeLock();
+  }, IDLE_TIMEOUT_MS);
+};
+
+// Set up idle detection for mobile devices
+if (typeof window !== 'undefined' && isMobileDevice()) {
+  const activityEvents = ['touchstart', 'touchmove', 'click', 'scroll', 'keydown'];
+  activityEvents.forEach(event => {
+    document.addEventListener(event, resetIdleTimer, { passive: true });
+  });
+  console.log('[WakeLock] Mobile idle detection enabled (15s timeout)');
+}
+
 // Visibility logging for diagnosing background playback behavior
 document.addEventListener('visibilitychange', () => {
   console.log('[PWA] visibilitychange:', document.visibilityState);
+  
+  // Release wake lock when app goes to background on mobile
+  if (document.visibilityState === 'hidden' && isMobileDevice()) {
+    releaseWakeLock();
+  }
 });
 
 export type PlayerState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
