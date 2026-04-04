@@ -59,8 +59,6 @@ export function PlaylistsPage() {
     }
   };
 
-  const canCreateMore = playlists.length < 15;
-
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
@@ -68,13 +66,12 @@ export function PlaylistsPage() {
         <div>
           <h1 className="text-3xl md:text-4xl font-black mb-2">Your Library</h1>
           <p className="text-gray-400 text-sm md:text-base">
-            {playlists.length} of 15 playlists
+            {playlists.length} {playlists.length === 1 ? 'playlist' : 'playlists'}
           </p>
         </div>
         <button
-          onClick={() => canCreateMore && setShowCreateModal(true)}
-          disabled={!canCreateMore}
-          className="bg-white text-black px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+          onClick={() => setShowCreateModal(true)}
+          className="bg-white text-black px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm md:text-base"
         >
           <Plus size={20} />
           <span className="hidden xs:inline">New Playlist</span>

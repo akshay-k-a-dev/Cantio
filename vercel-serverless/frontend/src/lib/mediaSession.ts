@@ -6,12 +6,12 @@ interface MediaSessionManager {
   setHandlers: (handlers: {
     play: () => void;
     pause: () => void;
-    nextTrack: () => void;
-    previousTrack: () => void;
-    stop: () => void;
-    seekBackward: (details: any) => void;
-    seekForward: (details: any) => void;
-    seekTo: (details: any) => void;
+    nextTrack?: () => void;
+    previousTrack?: () => void;
+    stop?: () => void;
+    seekBackward?: (details: any) => void;
+    seekForward?: (details: any) => void;
+    seekTo?: (details: any) => void;
   }) => void;
 }
 
@@ -49,12 +49,12 @@ class MediaSessionManagerImpl implements MediaSessionManager {
   setHandlers(handlers: {
     play: () => void;
     pause: () => void;
-    nextTrack: () => void;
-    previousTrack: () => void;
-    stop: () => void;
-    seekBackward: (details: any) => void;
-    seekForward: (details: any) => void;
-    seekTo: (details: any) => void;
+    nextTrack?: () => void;
+    previousTrack?: () => void;
+    stop?: () => void;
+    seekBackward?: (details: any) => void;
+    seekForward?: (details: any) => void;
+    seekTo?: (details: any) => void;
   }) {
     if ('mediaSession' in navigator) {
       const registerAction = (
@@ -78,35 +78,35 @@ class MediaSessionManagerImpl implements MediaSessionManager {
         handlers.pause();
       });
 
-      registerAction('nexttrack', () => {
+      registerAction('nexttrack', handlers.nextTrack ? () => {
         console.log('📱 Media session: next track');
-        handlers.nextTrack();
-      });
+        handlers.nextTrack?.();
+      } : null);
 
-      registerAction('previoustrack', () => {
+      registerAction('previoustrack', handlers.previousTrack ? () => {
         console.log('📱 Media session: previous track');
-        handlers.previousTrack();
-      });
+        handlers.previousTrack?.();
+      } : null);
 
-      registerAction('stop', () => {
+      registerAction('stop', handlers.stop ? () => {
         console.log('📱 Media session: stop');
-        handlers.stop();
-      });
+        handlers.stop?.();
+      } : null);
 
-      registerAction('seekbackward', (details: any) => {
+      registerAction('seekbackward', handlers.seekBackward ? (details: any) => {
         console.log('📱 Media session: seek backward', details?.seekOffset);
-        handlers.seekBackward(details);
-      });
+        handlers.seekBackward?.(details);
+      } : null);
 
-      registerAction('seekforward', (details: any) => {
+      registerAction('seekforward', handlers.seekForward ? (details: any) => {
         console.log('📱 Media session: seek forward', details?.seekOffset);
-        handlers.seekForward(details);
-      });
+        handlers.seekForward?.(details);
+      } : null);
 
-      registerAction('seekto', (details: any) => {
+      registerAction('seekto', handlers.seekTo ? (details: any) => {
         console.log('📱 Media session: seek to', details.seekTime);
-        handlers.seekTo(details);
-      });
+        handlers.seekTo?.(details);
+      } : null);
 
       console.log('📱 Media session handlers registered');
     }

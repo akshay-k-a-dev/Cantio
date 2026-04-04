@@ -103,9 +103,6 @@ export const usePlaylist = create<PlaylistState>((set, get) => ({
     if (!token) throw new Error('Not authenticated');
 
     const { playlists } = get();
-    if (playlists.length >= 15) {
-      throw new Error('Maximum 15 playlists allowed');
-    }
 
     // Optimistic update - create temp playlist immediately
     const tempId = `temp-${Date.now()}`;
