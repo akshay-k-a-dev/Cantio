@@ -20,8 +20,37 @@ on:
     - cron: '39 5 * * 1'
 
 jobs:
+  check-codeql-setup:
+    name: Check CodeQL setup mode
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: read
+    outputs:
+      default_setup_enabled: ${{ steps.check.outputs.default_setup_enabled }}
+    steps:
+    - name: Detect default setup status
+      id: check
+      shell: bash
+      run: |
+        set -euo pipefail
+        api_url="https://api.github.com/repos/${{ github.repository }}/code-scanning/default-setup"
+        response="$(curl -fsSL \
+          -H "Authorization: Bearer ${{ github.token }}" \
+          -H "Accept: application/vnd.github+json" \
+          "$api_url" || true)"
+
+        state="$(printf '%s' "$response" | jq -r '.state // empty')"
+        if [ "$state" = "configured" ]; then
+          echo "default_setup_enabled=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "default_setup_enabled=false" >> "$GITHUB_OUTPUT"
+        fi
+
   analyze:
     name: Analyze (${{ matrix.language }})
+    needs: check-codeql-setup
+    if: needs.check-codeql-setup.outputs.default_setup_enabled != 'true'
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
