@@ -32,12 +32,12 @@ export function parseSyncedLyrics(syncedLyrics: string): SyncedLine[] {
   const parsed: SyncedLine[] = [];
 
   for (const line of lines) {
-    const match = line.match(/\[(\d+):(\d+)\.(\d+)\]\s*(.*)$/);
+    const match = line.match(/\[(\d+):(\d+)(?:\.(\d+))?\]\s*(.*)$/);
     if (match) {
       const minutes = parseInt(match[1], 10);
       const seconds = parseInt(match[2], 10);
-      const centiseconds = parseInt(match[3], 10);
-      const time = minutes * 60 + seconds + centiseconds / 100;
+      const fraction = match[3] ? Number(`0.${match[3]}`) : 0;
+      const time = minutes * 60 + seconds + fraction;
       const text = match[4];
       parsed.push({ time, text });
     }

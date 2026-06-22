@@ -45,7 +45,7 @@ const LyricLine = memo(({
 LyricLine.displayName = 'LyricLine';
 
 export function LyricsPanel({ trackTitle, artistName, duration, currentTime, trackId }: LyricsPanelProps) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'synced' | 'plain'>('synced');
   const [noLyricsMessage] = useState(getRandomNoLyricsMessage());
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -55,7 +55,7 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
   const userScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Zustand store for caching
-  const { getCached, setLyrics, setCurrentTrack } = useLyricsStore();
+  const { getCached, setLyrics, clearTrack, setCurrentTrack } = useLyricsStore();
   
   // Create a cache key from track info
   const cacheKey = useMemo(() => 
@@ -73,7 +73,8 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
     let mounted = true;
 
     async function fetchLyrics() {
-      if (!trackTitle || !artistName || !duration || duration <= 0) {
+      if (!trackTitle || !artistName) {
+        setLoading(false);
         return;
       }
 
@@ -94,13 +95,14 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
       // If cached but no lyrics found, clear it and try again
       if (cached && !cached.lyrics) {
         console.log('📝 Cached entry has no lyrics, re-fetching:', trackTitle);
+        clearTrack(cacheKey);
       }
 
       setLoading(true);
       setCurrentLineIndex(0);
 
       console.log('📝 Fetching lyrics for:', trackTitle, 'by', artistName);
-      const result = await getLyrics(trackTitle, artistName, duration);
+      const result = await getLyrics(trackTitle, artistName, duration || 0);
       
       if (mounted) {
         // Only cache if we got a result with lyrics
@@ -109,8 +111,8 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
           setLyrics(cacheKey, result);
         } else {
           console.log('📝 No lyrics found for:', trackTitle);
-          // Don't cache null results - allow retry next time
-          setLyrics(cacheKey, null);
+          // Do not cache failed lookups; lyrics providers can be slow or transient.
+          clearTrack(cacheKey);
         }
         
         setCurrentTrack(cacheKey);
@@ -129,7 +131,7 @@ export function LyricsPanel({ trackTitle, artistName, duration, currentTime, tra
     return () => {
       mounted = false;
     };
-  }, [cacheKey, trackTitle, artistName, duration, getCached, setLyrics, setCurrentTrack]);
+  }, [cacheKey, trackTitle, artistName, duration, getCached, setLyrics, clearTrack, setCurrentTrack]);
 
   // Update current line based on playback time
   useEffect(() => {
