@@ -130,10 +130,12 @@ export default function PlayerBar() {
   };
 
   const handleClose = () => {
+    setShowLyrics(false);
     closeFullScreenPlayer();
   };
 
   const handleOpenFull = () => {
+    setShowLyrics(false);
     openFullScreenPlayer();
   };
 
@@ -290,11 +292,20 @@ export default function PlayerBar() {
           <div className="h-[72px] px-4 flex items-center justify-between">
             {/* LEFT: Track Info */}
             <div className="flex items-center gap-3 w-[280px] min-w-0">
-              <img
-                src={currentTrack.thumbnail}
-                alt={currentTrack.title}
-                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-              />
+              <button
+                type="button"
+                onClick={handleOpenFull}
+                className="group relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black"
+                title="Open fullscreen player"
+                aria-label="Open fullscreen player"
+              >
+                <img
+                  src={currentTrack.thumbnail}
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                <span className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors" />
+              </button>
               <div className="min-w-0 flex-1">
                 <p className="text-white text-sm font-medium truncate">{currentTrack.title}</p>
                 <p className="text-white/50 text-xs truncate">{currentTrack.artist}</p>
@@ -496,7 +507,7 @@ export default function PlayerBar() {
         )}
       </AnimatePresence>
 
-      {/* FULL SCREEN MOBILE PLAYER */}
+      {/* FULL SCREEN PLAYER */}
       <AnimatePresence>
         {isFullScreen && (
           <motion.div
@@ -504,7 +515,7 @@ export default function PlayerBar() {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-0 z-[999] md:hidden flex flex-col"
+            className="fixed inset-0 z-[999] flex flex-col"
             style={{
               background: `linear-gradient(180deg, rgba(30, 30, 30, 0.98) 0%, rgba(10, 10, 10, 0.99) 100%)`,
             }}
@@ -520,12 +531,13 @@ export default function PlayerBar() {
             />
 
             {/* Content overlay */}
-            <div className="relative z-10 flex flex-col h-full">
+            <div className="relative z-10 flex flex-col h-full w-full md:max-w-4xl md:mx-auto">
               {/* Header */}
-              <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 pt-safe">
+              <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 pt-safe">
                 <button
                   onClick={handleClose}
                   className="p-1.5 sm:p-2 -ml-1 sm:-ml-2 text-white/70 hover:text-white active:scale-95 transition"
+                  title="Close fullscreen player"
                 >
                   <ChevronDown size={24} className="sm:hidden" />
                   <ChevronDown size={28} className="hidden sm:block" />
@@ -555,7 +567,7 @@ export default function PlayerBar() {
                     transition={{ duration: 0.3 }}
                     src={currentTrack.thumbnail}
                     alt={currentTrack.title}
-                    className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[340px] aspect-square rounded-lg sm:rounded-xl object-cover shadow-2xl"
+                    className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[420px] lg:max-w-[460px] aspect-square rounded-lg sm:rounded-xl object-cover shadow-2xl"
                   />
                 ) : (
                   <motion.div
@@ -563,7 +575,7 @@ export default function PlayerBar() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="w-full h-full max-w-2xl"
+                    className="w-full h-full max-w-2xl md:max-w-none md:px-8 lg:px-12"
                   >
                     <LyricsPanel
                       trackTitle={currentTrack.title}
@@ -578,8 +590,8 @@ export default function PlayerBar() {
               {/* Track Info + Like */}
               <div className="px-4 sm:px-6 md:px-8 flex items-start justify-between">
                 <div className="min-w-0 flex-1 mr-2 sm:mr-4">
-                  <h2 className="text-white text-lg sm:text-xl font-bold truncate">{currentTrack.title}</h2>
-                  <p className="text-white/60 text-sm sm:text-base mt-0.5 sm:mt-1 truncate">{currentTrack.artist}</p>
+                  <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold truncate">{currentTrack.title}</h2>
+                  <p className="text-white/60 text-sm sm:text-base md:text-lg mt-0.5 sm:mt-1 truncate">{currentTrack.artist}</p>
                 </div>
                 <button
                   onClick={handleToggleLike}
@@ -674,7 +686,7 @@ export default function PlayerBar() {
               </div>
 
               {/* Bottom Actions */}
-              <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 mt-6 sm:mt-8 mb-6 sm:mb-8 pb-safe relative">
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-6 md:px-8 mt-6 sm:mt-8 mb-6 sm:mb-8 pb-safe relative">
                 <div className="relative">
                   <AddToPlaylistDropdown
                     track={{
@@ -687,9 +699,37 @@ export default function PlayerBar() {
                     onAddToQueue={() => {}}
                   />
                 </div>
+                <div className="hidden md:flex items-center gap-2 min-w-[180px]">
+                  <button
+                    onClick={handleToggleMute}
+                    className="p-2 text-white/50 hover:text-white active:scale-95 transition"
+                    title={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+                  >
+                    {isMuted || volume === 0 ? (
+                      <VolumeX size={22} />
+                    ) : volume < 0.5 ? (
+                      <Volume1 size={22} />
+                    ) : (
+                      <Volume2 size={22} />
+                    )}
+                  </button>
+                  <div
+                    ref={volumeRef}
+                    className="w-32 h-1.5 bg-white/20 rounded-full cursor-pointer group"
+                    onClick={handleVolumeChange}
+                  >
+                    <div
+                      className="h-full bg-white/70 group-hover:bg-green-500 rounded-full relative transition-colors"
+                      style={{ width: `${isMuted ? 0 : volume * 100}%` }}
+                    >
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                </div>
                 <button 
                   onClick={handleShare}
                   className="p-2 sm:p-3 text-white/50 hover:text-white active:scale-95 transition"
+                  title="Share track"
                 >
                   <Share2 size={20} className="sm:hidden" />
                   <Share2 size={22} className="hidden sm:block" />
@@ -697,6 +737,7 @@ export default function PlayerBar() {
                 <button
                   onClick={openQueue}
                   className="p-2 sm:p-3 text-white/50 active:scale-95 transition"
+                  title="Open queue"
                 >
                   <ListMusic size={20} className="sm:hidden" />
                   <ListMusic size={22} className="hidden sm:block" />
