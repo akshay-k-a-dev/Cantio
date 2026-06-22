@@ -124,9 +124,14 @@ export async function getLyrics(
   duration: number
 ): Promise<LyricsData | null> {
   const targetDuration = Math.round(duration);
+  const attemptedSearches = new Set<string>();
   
   // Helper to search with timeout
-  async function searchLyricsApi(track: string, artist: string, timeout: number = 8000): Promise<LyricsData | null> {
+  async function searchLyricsApi(track: string, artist: string, timeout: number = 15000): Promise<LyricsData | null> {
+    const searchKey = `${track.trim().toLowerCase()}::${artist.trim().toLowerCase()}`;
+    if (attemptedSearches.has(searchKey)) return null;
+    attemptedSearches.add(searchKey);
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     
@@ -175,7 +180,7 @@ export async function getLyrics(
     const firstCombo = combinations[0];
     const artist = firstCombo.artist || artistName;
     console.log('📝 Try 1:', firstCombo.track, 'by', artist);
-    let result = await searchLyricsApi(firstCombo.track, artist, 8000);
+    let result = await searchLyricsApi(firstCombo.track, artist, 15000);
     if (result) return result;
   }
   
@@ -184,13 +189,13 @@ export async function getLyrics(
     const secondCombo = combinations[1];
     const artist = secondCombo.artist || artistName;
     console.log('📝 Try 2:', secondCombo.track, 'by', artist);
-    let result = await searchLyricsApi(secondCombo.track, artist, 6000);
+    let result = await searchLyricsApi(secondCombo.track, artist, 12000);
     if (result) return result;
   }
   
   // Try 3: Original track name with artist (fallback for already clean titles)
   console.log('📝 Try 3 (fallback):', trackName, 'by', artistName);
-  let result = await searchLyricsApi(trackName, artistName, 5000);
+  let result = await searchLyricsApi(trackName, artistName, 12000);
   if (result) return result;
   
   return null;
