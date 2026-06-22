@@ -559,16 +559,20 @@ export default function PlayerBar() {
               {/* Album Art / Lyrics */}
               <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 overflow-hidden">
                 {!showLyrics ? (
-                  <motion.img
+                  <motion.div
                     key={currentTrack.videoId}
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    src={currentTrack.thumbnail}
-                    alt={currentTrack.title}
-                    className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[420px] lg:max-w-[460px] aspect-square rounded-lg sm:rounded-xl object-cover shadow-2xl"
-                  />
+                    className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[420px] lg:max-w-[460px] aspect-square rounded-[10px] overflow-hidden shadow-2xl"
+                  >
+                    <img
+                      src={currentTrack.thumbnail}
+                      alt={currentTrack.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </motion.div>
                 ) : (
                   <motion.div
                     initial={{ opacity: 0 }}
