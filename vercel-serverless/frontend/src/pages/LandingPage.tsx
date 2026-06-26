@@ -52,8 +52,8 @@ const DOWNLOADS = [
   },
   {
     label: 'Android',
-    file: 'app-release.apk',
-    href: 'https://github.com/akshay-k-a-dev/Cantio_Mobile/releases/download/android/app-release.apk',
+    file: 'GitHub Releases',
+    href: 'https://github.com/akshay-k-a-dev/Cantio_Mobile/releases',
     gradient: 'from-green-500 to-lime-500',
     icon: <Smartphone className="w-5 h-5" />,
     available: true,

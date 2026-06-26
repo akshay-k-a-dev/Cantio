@@ -21,7 +21,9 @@ export class EmailError extends Error {
   }
 }
 
-// ─── OTP store ───────────────────────────────────────────────────────────────
+import { prisma } from './prisma.js';
+
+// ─── OTP store types ─────────────────────────────────────────────────────────
 interface OtpEntry {
   otp: string;
   expiresAt: number;
@@ -29,31 +31,72 @@ interface OtpEntry {
   purpose: 'register' | 'reset';
 }
 
-const otpStore = new Map<string, OtpEntry>();
-
 const OTP_TTL_MS       = 10 * 60 * 1000; // 10 min validity
 const RESEND_COOLDOWN  = 60;             // seconds before another OTP is allowed
 
 // ─── Global daily quota guard ────────────────────────────────────────────────
 // Gmail free: ~500 emails/day; Workspace: ~2000. We cap at 480 to stay safe.
 const DAILY_QUOTA = 480;
-let dailySentCount  = 0;
-let quotaResetAt    = Date.now() + 24 * 60 * 60 * 1000;
+const QUOTA_KEY = 'email_daily_quota';
 
-function checkAndIncrementQuota(): void {
-  if (Date.now() > quotaResetAt) {
-    dailySentCount = 0;
-    quotaResetAt   = Date.now() + 24 * 60 * 60 * 1000;
+interface QuotaData {
+  count: number;
+  resetAt: number;
+}
+
+async function checkAndIncrementQuota(): Promise<void> {
+  const now = Date.now();
+  const record = await prisma.systemCache.findUnique({ where: { key: QUOTA_KEY } });
+  let data: QuotaData = { count: 0, resetAt: now + 24 * 60 * 60 * 1000 };
+
+  if (record) {
+    try {
+      data = JSON.parse(record.value);
+    } catch (_) {}
   }
-  if (dailySentCount >= DAILY_QUOTA) {
-    const secsUntilReset = Math.ceil((quotaResetAt - Date.now()) / 1000);
+
+  if (now > data.resetAt) {
+    data.count = 0;
+    data.resetAt = now + 24 * 60 * 60 * 1000;
+  }
+
+  if (data.count >= DAILY_QUOTA) {
+    const secsUntilReset = Math.ceil((data.resetAt - now) / 1000);
     throw new EmailError(
       'Email service daily limit reached. Please try again tomorrow.',
       'QUOTA_EXCEEDED',
       secsUntilReset,
     );
   }
-  dailySentCount++;
+
+  data.count++;
+  await prisma.systemCache.upsert({
+    where: { key: QUOTA_KEY },
+    create: {
+      key: QUOTA_KEY,
+      value: JSON.stringify(data),
+    },
+    update: {
+      value: JSON.stringify(data),
+      updatedAt: new Date(),
+    },
+  });
+}
+
+async function decrementQuota(): Promise<void> {
+  const record = await prisma.systemCache.findUnique({ where: { key: QUOTA_KEY } });
+  if (!record) return;
+  try {
+    const data: QuotaData = JSON.parse(record.value);
+    data.count = Math.max(0, data.count - 1);
+    await prisma.systemCache.update({
+      where: { key: QUOTA_KEY },
+      data: {
+        value: JSON.stringify(data),
+        updatedAt: new Date(),
+      },
+    });
+  } catch (_) {}
 }
 
 function generateOtp(): string {
@@ -99,58 +142,89 @@ function classifySmtpError(err: any): EmailError {
   return new EmailError('Failed to send email. Please try again.', 'UNKNOWN');
 }
 
-export function checkResendCooldown(email: string): void {
-  const entry = otpStore.get(email.toLowerCase());
-  if (!entry) return;
-  const elapsed = Math.floor((Date.now() - entry.sentAt) / 1000);
-  if (elapsed < RESEND_COOLDOWN) {
-    throw new EmailError(
-      `Please wait ${RESEND_COOLDOWN - elapsed} seconds before requesting another code.`,
-      'RATE_LIMITED',
-      RESEND_COOLDOWN - elapsed,
-    );
+export async function checkResendCooldown(email: string): Promise<void> {
+  const key = `otp:${email.toLowerCase()}`;
+  const record = await prisma.systemCache.findUnique({ where: { key } });
+  if (!record) return;
+  try {
+    const entry: OtpEntry = JSON.parse(record.value);
+    const elapsed = Math.floor((Date.now() - entry.sentAt) / 1000);
+    if (elapsed < RESEND_COOLDOWN) {
+      throw new EmailError(
+        `Please wait ${RESEND_COOLDOWN - elapsed} seconds before requesting another code.`,
+        'RATE_LIMITED',
+        RESEND_COOLDOWN - elapsed,
+      );
+    }
+  } catch (e) {
+    if (e instanceof EmailError) throw e;
   }
 }
 
-export function storeOtp(email: string, purpose: 'register' | 'reset'): string {
+export async function storeOtp(email: string, purpose: 'register' | 'reset'): Promise<string> {
   const now = Date.now();
   const otp = generateOtp();
-  otpStore.set(email.toLowerCase(), {
+  const key = `otp:${email.toLowerCase()}`;
+  const entry: OtpEntry = {
     otp,
     expiresAt: now + OTP_TTL_MS,
     sentAt: now,
     purpose,
+  };
+  await prisma.systemCache.upsert({
+    where: { key },
+    create: {
+      key,
+      value: JSON.stringify(entry),
+    },
+    update: {
+      value: JSON.stringify(entry),
+      updatedAt: new Date(),
+    },
   });
   return otp;
 }
 
-export function verifyOtp(email: string, otp: string, purpose: 'register' | 'reset'): boolean {
-  const entry = otpStore.get(email.toLowerCase());
-  if (!entry) return false;
-  if (entry.purpose !== purpose) return false;
-  if (Date.now() > entry.expiresAt) {
-    otpStore.delete(email.toLowerCase());
+export async function verifyOtp(email: string, otp: string, purpose: 'register' | 'reset'): Promise<boolean> {
+  const key = `otp:${email.toLowerCase()}`;
+  const record = await prisma.systemCache.findUnique({ where: { key } });
+  if (!record) return false;
+  try {
+    const entry: OtpEntry = JSON.parse(record.value);
+    if (entry.purpose !== purpose) return false;
+    if (Date.now() > entry.expiresAt) {
+      await prisma.systemCache.deleteMany({ where: { key } });
+      return false;
+    }
+    if (entry.otp !== otp) return false;
+    await prisma.systemCache.deleteMany({ where: { key } }); // consume OTP
+    return true;
+  } catch (e) {
     return false;
   }
-  if (entry.otp !== otp) return false;
-  otpStore.delete(email.toLowerCase()); // consume OTP
-  return true;
 }
 
-export function hasValidOtp(email: string, purpose: 'register' | 'reset'): boolean {
-  const entry = otpStore.get(email.toLowerCase());
-  if (!entry) return false;
-  if (entry.purpose !== purpose) return false;
-  if (Date.now() > entry.expiresAt) {
-    otpStore.delete(email.toLowerCase());
+export async function hasValidOtp(email: string, purpose: 'register' | 'reset'): Promise<boolean> {
+  const key = `otp:${email.toLowerCase()}`;
+  const record = await prisma.systemCache.findUnique({ where: { key } });
+  if (!record) return false;
+  try {
+    const entry: OtpEntry = JSON.parse(record.value);
+    if (entry.purpose !== purpose) return false;
+    if (Date.now() > entry.expiresAt) {
+      await prisma.systemCache.deleteMany({ where: { key } });
+      return false;
+    }
+    return true;
+  } catch (e) {
     return false;
   }
-  return true;
 }
 
 export async function sendOtpEmail(email: string, otp: string, purpose: 'register' | 'reset'): Promise<void> {
   // Check daily quota before even opening a connection
-  checkAndIncrementQuota();
+  await checkAndIncrementQuota();
+
 
   const transporter = createTransporter();
 
@@ -222,9 +296,9 @@ export async function sendOtpEmail(email: string, otp: string, purpose: 'registe
         </body>
       </html>
     `,
-  }).catch((err: any) => {
+  }).catch(async (err: any) => {
     // Undo the quota increment — the mail was never delivered
-    dailySentCount = Math.max(0, dailySentCount - 1);
+    await decrementQuota();
     throw classifySmtpError(err);
   });
 }

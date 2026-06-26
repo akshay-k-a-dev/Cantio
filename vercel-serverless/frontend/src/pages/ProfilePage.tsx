@@ -343,7 +343,9 @@ export default function ProfilePage() {
 
               {/* Android */}
               <a
-                href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases/download/android/app-release.apk"
+                href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-purple-500/50 rounded-xl transition-all group"
               >
                 <div className="flex items-center justify-between">
@@ -353,7 +355,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <h3 className="font-semibold group-hover:text-purple-400 transition-colors">Android</h3>
-                      <p className="text-sm text-gray-400">app-release.apk</p>
+                      <p className="text-sm text-gray-400">GitHub Releases</p>
                     </div>
                   </div>
                   <Download className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />

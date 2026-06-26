@@ -135,8 +135,8 @@ export function DocsPage() {
             <p className="text-gray-400 mb-3">
               A standalone Android app is available for download as an APK. The iOS app is currently in progress.
             </p>
-            <a href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases/download/android/app-release.apk" className="text-purple-400 hover:text-purple-300">
-              Download Android APK →
+            <a href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases" className="text-purple-400 hover:text-purple-300">
+              Go to Android Releases →
             </a>
           </div>
         </div>

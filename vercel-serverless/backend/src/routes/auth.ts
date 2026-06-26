@@ -29,7 +29,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       const email = body.email.toLowerCase();
 
       // Verify OTP before creating account
-      const otpValid = verifyOtp(email, body.otp, 'register');
+      const otpValid = await verifyOtp(email, body.otp, 'register');
       if (!otpValid) {
         reply.code(400);
         return { error: 'Invalid or expired verification code' };
@@ -148,8 +148,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
         }
       }
 
-      checkResendCooldown(email);
-      const otp = storeOtp(email, body.purpose);
+      await checkResendCooldown(email);
+      const otp = await storeOtp(email, body.purpose);
       await sendOtpEmail(email, otp, body.purpose);
       return { success: true, message: 'OTP sent to your email' };
     } catch (error: any) {
@@ -185,7 +185,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       const body = resetPasswordSchema.parse(request.body);
       const email = body.email.toLowerCase();
 
-      const otpValid = verifyOtp(email, body.otp, 'reset');
+      const otpValid = await verifyOtp(email, body.otp, 'reset');
       if (!otpValid) {
         reply.code(400);
         return { error: 'Invalid or expired verification code' };

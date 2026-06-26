@@ -34,7 +34,7 @@ export default function AndroidDownloadPopup() {
   };
 
   const handleDownload = () => {
-    window.location.href = 'https://github.com/akshay-k-a-dev/Cantio_Mobile/releases/download/android/app-release.apk';
+    window.open('https://github.com/akshay-k-a-dev/Cantio_Mobile/releases', '_blank');
     handleClose();
   };
 
@@ -74,7 +74,7 @@ export default function AndroidDownloadPopup() {
                   Cantio Mobile is Here! 📱
                 </h2>
                 <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-                  The standalone Android APK is now available for download. Experience Cantio as a native app with background playback, notification integration, and optimized mobile performance.
+                  The standalone Android app is now available. Experience Cantio as a native app with background playback, notification integration, and optimized mobile performance.
                 </p>
               </div>
 
@@ -84,7 +84,7 @@ export default function AndroidDownloadPopup() {
                   className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-900/40 transform hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <Download className="w-5 h-5" />
-                  Download APK
+                  Get Android App
                 </button>
                 <button
                   onClick={handleClose}
