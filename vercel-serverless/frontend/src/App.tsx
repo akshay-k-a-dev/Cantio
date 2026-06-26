@@ -24,6 +24,7 @@ import MobileNav from './components/MobileNav';
 import MobileHeader from './components/MobileHeader';
 import { BlendInviteNotifications } from './components/BlendInviteNotifications';
 import DownloadPopup from './components/DownloadPopup';
+import AndroidDownloadPopup from './components/AndroidDownloadPopup';
 import { LandingPage } from './pages/LandingPage';
 import OnboardingPage from './pages/OnboardingPage';
 
@@ -119,6 +120,7 @@ export function App() {
         <Route path="/*" element={<AppContent />} />
       </Routes>
       <Analytics />
+      <AndroidDownloadPopup />
     </BrowserRouter>
   );
 }

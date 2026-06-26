@@ -130,11 +130,14 @@ export function DocsPage() {
           <div className="p-6 border border-gray-800 rounded-lg">
             <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-pink-400" />
-              Mobile Apps (In Progress)
+              Mobile Apps
             </h3>
-            <p className="text-gray-400">
-              Native iOS and Android apps are being developed using Flutter. Until release, use the PWA which provides most features.
+            <p className="text-gray-400 mb-3">
+              A standalone Android app is available for download as an APK. The iOS app is currently in progress.
             </p>
+            <a href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases/download/android/app-release.apk" className="text-purple-400 hover:text-purple-300">
+              Download Android APK →
+            </a>
           </div>
         </div>
       </section>
@@ -167,7 +170,7 @@ export function DocsPage() {
               <p><strong className="text-white">Backend:</strong> Fastify, TypeScript, Prisma, PostgreSQL</p>
               <p><strong className="text-white">Music API:</strong> Innertube (YouTubei.js)</p>
               <p><strong className="text-white">Desktop:</strong> Electron</p>
-              <p><strong className="text-white">Mobile:</strong> Flutter (in progress)</p>
+              <p><strong className="text-white">Mobile:</strong> Flutter (Android APK released, iOS in progress)</p>
             </div>
           </div>
         </div>

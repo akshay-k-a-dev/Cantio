@@ -52,11 +52,11 @@ const DOWNLOADS = [
   },
   {
     label: 'Android',
-    file: 'Coming Soon',
-    href: null,
+    file: 'app-release.apk',
+    href: 'https://github.com/akshay-k-a-dev/Cantio_Mobile/releases/download/android/app-release.apk',
     gradient: 'from-green-500 to-lime-500',
     icon: <Smartphone className="w-5 h-5" />,
-    available: false,
+    available: true,
   },
 ];
 
@@ -216,7 +216,7 @@ export function LandingPage() {
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold px-8 py-3.5 rounded-full text-base transition-all"
             >
               <Download className="w-5 h-5" />
-              Download Desktop
+              Download Apps
             </a>
           </div>
         </motion.div>
@@ -364,8 +364,8 @@ export function LandingPage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Native apps</p>
-            <h2 className="text-3xl sm:text-4xl font-black">Download the desktop app</h2>
-            <p className="text-gray-400 mt-3">Electron-based. Ships with a local media engine and offline support.</p>
+            <h2 className="text-3xl sm:text-4xl font-black">Download desktop & mobile apps</h2>
+            <p className="text-gray-400 mt-3">Get the native apps for Windows, Linux, and Android. Experience local engines and offline support.</p>
           </div>
           <div className="space-y-4">
             {DOWNLOADS.map((d, i) => (

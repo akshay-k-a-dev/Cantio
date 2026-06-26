@@ -41,7 +41,7 @@ const features = [
     items: [
       { title: 'Web App (PWA)', desc: 'Installable on any device. Works on mobile, tablet, desktop.' },
       { title: 'Desktop Apps', desc: 'Native Electron apps for Windows and Linux' },
-      { title: 'Mobile (In Progress)', desc: 'Flutter-based iOS and Android apps coming soon' },
+      { title: 'Mobile App', desc: 'Standalone Android APK available. iOS app in progress.' },
       { title: 'Cross-Platform Sync', desc: 'Seamlessly move between web, desktop, and mobile' },
     ]
   }

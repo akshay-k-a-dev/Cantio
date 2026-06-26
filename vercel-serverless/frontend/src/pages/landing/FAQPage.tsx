@@ -75,11 +75,11 @@ const faqItems = [
     items: [
       {
         q: 'What platforms does Cantio work on?',
-        a: 'Web (PWA), Windows desktop, Linux desktop, and mobile apps (iOS/Android in progress). Cross-platform sync available when logged in.'
+        a: 'Web (PWA), Windows desktop, Linux desktop, and Android mobile app. Cross-platform sync available when logged in.'
       },
       {
         q: 'Is there an Android/iPhone app?',
-        a: 'Mobile apps are in progress. For now, you can use the PWA on mobile which is almost identical in functionality.'
+        a: 'Yes, a standalone Android APK is available for download. An iOS app is planned. You can also use the Web App as a PWA on any mobile device.'
       },
       {
         q: 'Can I use Cantio on Mac?',
