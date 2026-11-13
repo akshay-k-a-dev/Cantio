@@ -129,7 +129,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50"
+                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50"
                   placeholder="Your name"
                 />
               </div>
@@ -145,7 +145,7 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50"
+                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50"
                   placeholder="your@email.com"
                 />
               </div>
@@ -162,7 +162,7 @@ export default function RegisterPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50 pr-12"
                     placeholder="••••••••"
                   />
                   <button
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50 pr-12"
                     placeholder="••••••••"
                   />
                   <button
@@ -213,8 +213,8 @@ export default function RegisterPage() {
             </form>
           ) : (
             <form onSubmit={handleContinueToPreferences} className="space-y-5">
-              <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-start gap-3">
-                <Mail className="w-5 h-5 text-purple-400 mt-0.5 shrink-0" />
+              <div className="p-4 rounded-xl bg-[#518EAC]/10 border border-[#518EAC]/20 flex items-start gap-3">
+                <Mail className="w-5 h-5 text-[#518EAC] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm text-gray-300">Verification code sent to</p>
                   <p className="text-sm font-medium text-white">{email}</p>
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   required
                   disabled={loading}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 text-center text-2xl font-bold tracking-widest"
+                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50 text-center text-2xl font-bold tracking-widest"
                   placeholder="000000"
                 />
               </div>
@@ -259,7 +259,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={resendCooldown > 0 || loading}
-                  className="text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-[#518EAC] hover:text-[#A4C4D4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
                 </button>
@@ -272,7 +272,7 @@ export default function RegisterPage() {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                className="text-[#518EAC] hover:text-[#A4C4D4] font-medium transition-colors"
               >
                 Sign in
               </Link>

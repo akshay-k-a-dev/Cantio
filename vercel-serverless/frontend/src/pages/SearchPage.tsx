@@ -229,22 +229,22 @@ export function SearchPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                    <p className={`text-sm font-medium truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                       {track.title}
                     </p>
                     <p className="text-xs text-gray-400 truncate mt-0.5">{track.artist}</p>
                   </div>
                   {isPlaying && (
                     <div className="flex gap-0.5 items-center flex-shrink-0">
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                     </div>
                   )}
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={(e) => handleToggleLike(e, track)}
-                      className={`p-2 rounded-full transition-colors ${liked ? 'text-green-500' : 'text-gray-400'}`}
+                      className={`p-2 rounded-full transition-colors ${liked ? 'text-[#A4C4D4]' : 'text-gray-400'}`}
                     >
                       <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
                     </button>

@@ -82,7 +82,7 @@ export function LikedPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 size={48} className="text-purple-500 animate-spin mb-4" />
+        <Loader2 size={48} className="text-[#518EAC] animate-spin mb-4" />
         <p className="text-gray-400">Loading liked songs...</p>
       </div>
     );
@@ -107,7 +107,7 @@ export function LikedPage() {
     <div className="max-w-7xl mx-auto">
       {/* Playlist Header - responsive */}
       <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6 mb-6 md:mb-8">
-        <div className="w-32 h-32 md:w-60 md:h-60 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg md:rounded shadow-2xl flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
+        <div className="w-32 h-32 md:w-60 md:h-60 bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] rounded-lg md:rounded shadow-2xl flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
           <Heart size={48} className="md:hidden" fill="white" />
           <Heart size={100} className="hidden md:block" fill="white" />
         </div>
@@ -135,7 +135,7 @@ export function LikedPage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handlePlayAll}
-          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-green-500 flex items-center justify-center shadow-xl hover:bg-green-400 transition-colors"
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#518EAC] flex items-center justify-center shadow-xl hover:bg-[#619CA9] transition-colors"
         >
           <Play size={22} fill="black" className="text-black ml-1" />
         </motion.button>
@@ -171,9 +171,9 @@ export function LikedPage() {
               <div className="hidden md:block text-gray-400 text-sm group-hover:hidden">
                 {isPlaying ? (
                   <div className="flex gap-0.5">
-                    <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
-                    <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
-                    <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                    <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                    <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                    <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                   </div>
                 ) : (
                   index + 1
@@ -192,7 +192,7 @@ export function LikedPage() {
 
               {/* Title + Artist (mobile layout) */}
               <div className="flex-1 min-w-0 md:hidden">
-                <p className={`truncate text-sm font-medium ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                <p className={`truncate text-sm font-medium ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                   {track.title}
                 </p>
                 <p className="text-xs text-gray-400 truncate mt-0.5">
@@ -203,9 +203,9 @@ export function LikedPage() {
               {/* Playing indicator - mobile */}
               {isPlaying && (
                 <div className="flex gap-0.5 items-center md:hidden">
-                  <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
-                  <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
-                  <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                  <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                  <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                  <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                 </div>
               )}
 
@@ -217,7 +217,7 @@ export function LikedPage() {
                   className="w-10 h-10 rounded"
                 />
                 <div className="min-w-0">
-                  <p className={`truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                  <p className={`truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                     {track.title}
                   </p>
                 </div>

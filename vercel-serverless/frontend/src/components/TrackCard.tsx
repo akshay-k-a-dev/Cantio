@@ -48,19 +48,19 @@ export default function TrackCard({ track, index }: TrackCardProps) {
           
           {/* Play overlay */}
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="bg-purple-600 rounded-full p-2">
+            <div className="bg-[#518EAC] rounded-full p-2">
               <Play size={16} fill="white" className="text-white" />
             </div>
           </div>
 
           {/* Playing indicator */}
           {isCurrentTrack && isPlaying && (
-            <div className="absolute inset-0 bg-purple-600/20 flex items-center justify-center">
+            <div className="absolute inset-0 bg-[#518EAC]/20 flex items-center justify-center">
               <div className="flex gap-0.5">
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="w-0.5 bg-purple-500"
+                    className="w-0.5 bg-[#518EAC]"
                     animate={{
                       height: ['4px', '12px', '4px'],
                     }}
@@ -78,7 +78,7 @@ export default function TrackCard({ track, index }: TrackCardProps) {
 
         {/* Track info */}
         <div className="flex-1 min-w-0">
-          <h3 className={`text-sm font-medium truncate ${isCurrentTrack ? 'text-purple-400' : 'text-white'}`}>
+          <h3 className={`text-sm font-medium truncate ${isCurrentTrack ? 'text-[#518EAC]' : 'text-white'}`}>
             {track.title}
           </h3>
           <p className="text-xs text-gray-400 truncate">{track.artist}</p>

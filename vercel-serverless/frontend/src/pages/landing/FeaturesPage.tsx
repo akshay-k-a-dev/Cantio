@@ -56,7 +56,7 @@ export function FeaturesPage() {
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#619CA9] bg-clip-text text-transparent">
             Powerful Features
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -70,15 +70,15 @@ export function FeaturesPage() {
         <section key={idx} className={`px-4 sm:px-6 lg:px-8 py-16 ${idx % 2 === 1 ? 'bg-gray-900/50' : ''} ${idx < features.length - 1 ? 'border-b border-gray-800' : ''}`}>
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-2">
-              <category.icon className="w-8 h-8 text-purple-400" />
+              <category.icon className="w-8 h-8 text-[#518EAC]" />
               <h2 className="text-3xl font-bold">{category.category}</h2>
             </div>
-            <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-pink-500" />
+            <div className="h-1 w-20 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C]" />
           </div>
           
           <div className="grid md:grid-cols-2 gap-6">
             {category.items.map((item, i) => (
-              <div key={i} className="p-6 bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 hover:border-purple-500/50 rounded-lg transition">
+              <div key={i} className="p-6 bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 hover:border-[#518EAC]/50 rounded-lg transition">
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
                 <p className="text-gray-400">{item.desc}</p>
               </div>
@@ -103,37 +103,37 @@ export function FeaturesPage() {
             <tbody>
               <tr className="border-b border-gray-800">
                 <td className="py-3 px-4">No Account Required</td>
-                <td className="text-center"><span className="text-green-400">✓</span></td>
+                <td className="text-center"><span className="text-[#518EAC]">✓</span></td>
                 <td className="text-center">✗</td>
                 <td className="text-center">✗</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-3 px-4">Zero Tracking</td>
-                <td className="text-center"><span className="text-green-400">✓</span></td>
+                <td className="text-center"><span className="text-[#518EAC]">✓</span></td>
                 <td className="text-center">✗</td>
                 <td className="text-center">✗</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-3 px-4">No Ads</td>
-                <td className="text-center"><span className="text-green-400">✓</span></td>
+                <td className="text-center"><span className="text-[#518EAC]">✓</span></td>
                 <td className="text-center">Premium only</td>
                 <td className="text-center">✓</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-3 px-4">Open Source</td>
-                <td className="text-center"><span className="text-green-400">✓</span></td>
+                <td className="text-center"><span className="text-[#518EAC]">✓</span></td>
                 <td className="text-center">✗</td>
                 <td className="text-center">✗</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-3 px-4">Optional Cloud Sync</td>
-                <td className="text-center"><span className="text-green-400">✓</span></td>
+                <td className="text-center"><span className="text-[#518EAC]">✓</span></td>
                 <td className="text-center">Required</td>
                 <td className="text-center">Required</td>
               </tr>
               <tr>
                 <td className="py-3 px-4">Forever Free</td>
-                <td className="text-center"><span className="text-green-400">✓</span></td>
+                <td className="text-center"><span className="text-[#518EAC]">✓</span></td>
                 <td className="text-center">Limited</td>
                 <td className="text-center">Subscription</td>
               </tr>
@@ -148,7 +148,7 @@ export function FeaturesPage() {
         <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
           All these features. Zero tracking. Start streaming now.
         </p>
-        <a href="/" className="inline-block px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+        <a href="/" className="inline-block px-8 py-3 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg font-semibold transition">
           Try Cantio Now
         </a>
       </section>

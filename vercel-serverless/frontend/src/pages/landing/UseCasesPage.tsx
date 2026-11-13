@@ -79,7 +79,7 @@ export function UseCasesPage() {
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#619CA9] bg-clip-text text-transparent">
             Who Uses Cantio?
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -92,16 +92,16 @@ export function UseCasesPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-2 gap-8">
           {useCases.map((useCase, idx) => (
-            <div key={idx} className="p-8 bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 hover:border-purple-500/50 rounded-lg transition">
+            <div key={idx} className="p-8 bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 hover:border-[#518EAC]/50 rounded-lg transition">
               <div className="flex items-start gap-4">
-                <useCase.icon className="w-8 h-8 text-purple-400 flex-shrink-0 mt-1" />
+                <useCase.icon className="w-8 h-8 text-[#518EAC] flex-shrink-0 mt-1" />
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2">{useCase.title}</h3>
                   <p className="text-gray-400 mb-4">{useCase.desc}</p>
                   <ul className="space-y-2">
                     {useCase.details.map((detail, i) => (
                       <li key={i} className="text-sm text-gray-500 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
+                        <span className="w-1.5 h-1.5 bg-[#518EAC] rounded-full" />
                         {detail}
                       </li>
                     ))}
@@ -117,20 +117,20 @@ export function UseCasesPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-16 bg-gray-900/50 border-y border-gray-800">
         <h2 className="text-3xl font-bold mb-12 text-center">Common Scenarios</h2>
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/20 rounded-lg p-6">
+          <div className="bg-gradient-to-r from-[#0F4C6C]/20 to-[#619CA9]/20 border border-[#518EAC]/20 rounded-lg p-6">
             <h3 className="font-bold text-lg mb-2">Scenario 1: The Privacy Advocate</h3>
             <p className="text-gray-300 mb-3">
               Sarah uses Spotify but hates that all her listening data is tracked and used for targeted ads. She discovers Cantio and can finally listen to music the way she wants—without surveillance. She uses it in guest mode most of the time, but occasionally logs in to sync her likes across devices.
             </p>
-            <p className="text-sm text-purple-400">Why Cantio? Zero tracking. Optional sync. Full control.</p>
+            <p className="text-sm text-[#518EAC]">Why Cantio? Zero tracking. Optional sync. Full control.</p>
           </div>
 
-          <div className="bg-gradient-to-r from-pink-900/20 to-cyan-900/20 border border-pink-500/20 rounded-lg p-6">
+          <div className="bg-gradient-to-r from-[#0F4C6C]/20 to-cyan-900/20 border border-[#619CA9]/20 rounded-lg p-6">
             <h3 className="font-bold text-lg mb-2">Scenario 2: The Developer</h3>
             <p className="text-gray-300 mb-3">
               Marcus is building a music recommendation engine and wants to study how Cantio integrates with YouTube Music's API. He clones the repo, reads the code, runs it locally, and even contributes improvements to the project. He loves the transparency and learns best practices.
             </p>
-            <p className="text-sm text-pink-400">Why Cantio? Open source. Auditable. Community-driven.</p>
+            <p className="text-sm text-[#619CA9]">Why Cantio? Open source. Auditable. Community-driven.</p>
           </div>
 
           <div className="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-500/20 rounded-lg p-6">
@@ -168,7 +168,7 @@ export function UseCasesPage() {
             </ul>
           </div>
           <div className="p-6 bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 rounded-lg">
-            <h3 className="font-bold mb-4 text-green-400">❌ vs. Apple Music</h3>
+            <h3 className="font-bold mb-4 text-[#518EAC]">❌ vs. Apple Music</h3>
             <ul className="space-y-2 text-gray-400">
               <li>✓ Works on Windows and Linux</li>
               <li>✓ No Apple lock-in</li>
@@ -178,7 +178,7 @@ export function UseCasesPage() {
             </ul>
           </div>
           <div className="p-6 bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 rounded-lg">
-            <h3 className="font-bold mb-4 text-purple-400">❌ vs. Proprietary Players</h3>
+            <h3 className="font-bold mb-4 text-[#518EAC]">❌ vs. Proprietary Players</h3>
             <ul className="space-y-2 text-gray-400">
               <li>✓ Fully auditable code</li>
               <li>✓ No hidden data collection</li>
@@ -196,7 +196,7 @@ export function UseCasesPage() {
         <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
           If you value privacy, prefer open source, or just want to listen to music without tracking, the answer is yes.
         </p>
-        <a href="/" className="inline-block px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+        <a href="/" className="inline-block px-8 py-3 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg font-semibold transition">
           Try Cantio Now
         </a>
       </section>

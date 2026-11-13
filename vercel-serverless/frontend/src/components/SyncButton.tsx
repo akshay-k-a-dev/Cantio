@@ -37,7 +37,7 @@ export function SyncButton() {
   return (
     <div className="bg-gray-800 rounded-lg p-6">
       <div className="flex items-start gap-4">
-        <Upload className="text-purple-500 flex-shrink-0 mt-1" size={24} />
+        <Upload className="text-[#518EAC] flex-shrink-0 mt-1" size={24} />
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-200 mb-2">
             Sync Local Data to Cloud
@@ -54,7 +54,7 @@ export function SyncButton() {
               px-4 py-2 rounded-lg font-medium transition-all
               ${syncing 
                 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-                : 'bg-purple-600 hover:bg-purple-700 text-white'
+                : 'bg-[#0F4C6C] hover:bg-[#518EAC] text-white'
               }
             `}
           >
@@ -75,7 +75,7 @@ export function SyncButton() {
           {status !== 'idle' && (
             <div className={`
               mt-4 p-3 rounded-lg flex items-start gap-2
-              ${status === 'success' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}
+              ${status === 'success' ? 'bg-[#0F4C6C]/40 text-[#A4C4D4]' : 'bg-red-900/30 text-red-400'}
             `}>
               {status === 'success' ? (
                 <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />

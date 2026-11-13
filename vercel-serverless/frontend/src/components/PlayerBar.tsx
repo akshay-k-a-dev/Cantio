@@ -34,6 +34,15 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+function getHighResThumbnail(thumbnail: string): string {
+  if (!thumbnail) return thumbnail;
+  // Replace hqdefault/mqdefault/sddefault with maxresdefault for YT thumbnails
+  return thumbnail
+    .replace(/\/(hqdefault|mqdefault|sddefault|default)(\.jpg)/i, '/maxresdefault$2')
+    // Also handle webp variants
+    .replace(/\/(hqdefault|mqdefault|sddefault|default)(\.webp)/i, '/maxresdefault$2');
+}
+
 export default function PlayerBar() {
   const {
     currentTrack,
@@ -282,7 +291,7 @@ export default function PlayerBar() {
             onClick={handleSeek}
           >
             <div
-              className="h-full bg-green-500 group-hover:bg-green-400 relative transition-colors"
+              className="h-full bg-[#518EAC] group-hover:bg-[#619CA9] relative transition-colors"
               style={{ width: `${progressPercent}%` }}
             >
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -295,7 +304,7 @@ export default function PlayerBar() {
               <button
                 type="button"
                 onClick={handleOpenFull}
-                className="group relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black"
+                className="group relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#518EAC] focus:ring-offset-2 focus:ring-offset-black"
                 title="Open fullscreen player"
                 aria-label="Open fullscreen player"
               >
@@ -312,7 +321,7 @@ export default function PlayerBar() {
               </div>
               <button
                 onClick={handleToggleLike}
-                className={`p-2 rounded-full hover:bg-white/10 transition flex-shrink-0 ${trackIsLiked ? 'text-green-500' : 'text-white/60'}`}
+                className={`p-2 rounded-full hover:bg-white/10 transition flex-shrink-0 ${trackIsLiked ? 'text-[#518EAC]' : 'text-white/60'}`}
               >
                 <Heart size={18} fill={trackIsLiked ? 'currentColor' : 'none'} />
               </button>
@@ -335,13 +344,13 @@ export default function PlayerBar() {
                 <button
                   onClick={toggleShuffle}
                   className={`p-2 transition rounded-full hover:bg-white/10 relative ${
-                    shuffle ? 'text-green-500' : 'text-white/60 hover:text-white'
+                    shuffle ? 'text-[#518EAC]' : 'text-white/60 hover:text-white'
                   }`}
                   title={shuffle ? 'Shuffle on' : 'Shuffle off'}
                 >
                   <Shuffle size={18} />
                   {shuffle && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#518EAC]" />
                   )}
                 </button>
 
@@ -372,13 +381,13 @@ export default function PlayerBar() {
                 <button
                   onClick={cycleRepeatMode}
                   className={`p-2 transition rounded-full hover:bg-white/10 relative ${
-                    repeatMode !== 'off' ? 'text-green-500' : 'text-white/60 hover:text-white'
+                    repeatMode !== 'off' ? 'text-[#518EAC]' : 'text-white/60 hover:text-white'
                   }`}
                   title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'queue' ? 'Repeat queue' : 'Repeat track'}
                 >
                   {repeatMode === 'track' ? <Repeat1 size={18} /> : <Repeat size={18} />}
                   {repeatMode !== 'off' && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#518EAC]" />
                   )}
                 </button>
               </div>
@@ -394,7 +403,7 @@ export default function PlayerBar() {
               {/* Lyrics Toggle */}
               <button
                 onClick={() => setShowLyrics(!showLyrics)}
-                className={`p-2 transition rounded-full hover:bg-white/10 ${showLyrics ? 'text-green-500' : 'text-white/60 hover:text-white'}`}
+                className={`p-2 transition rounded-full hover:bg-white/10 ${showLyrics ? 'text-[#518EAC]' : 'text-white/60 hover:text-white'}`}
                 title={showLyrics ? 'Hide lyrics' : 'Show lyrics'}
               >
                 <FileText size={18} />
@@ -432,7 +441,7 @@ export default function PlayerBar() {
                   onClick={handleVolumeChange}
                 >
                   <div
-                    className="h-full bg-white/70 group-hover:bg-green-500 rounded-full relative transition-colors"
+                    className="h-full bg-white/70 group-hover:bg-[#518EAC] rounded-full relative transition-colors"
                     style={{ width: `${isMuted ? 0 : volume * 100}%` }}
                   >
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -455,7 +464,7 @@ export default function PlayerBar() {
           >
             {/* Progress bar */}
             <div className="h-0.5 w-full bg-white/10">
-              <div className="h-full bg-green-500" style={{ width: `${progressPercent}%` }} />
+              <div className="h-full bg-[#518EAC]" style={{ width: `${progressPercent}%` }} />
             </div>
 
             <div
@@ -524,7 +533,7 @@ export default function PlayerBar() {
             <div
               className="absolute inset-0 opacity-30 blur-3xl scale-110"
               style={{
-                backgroundImage: `url(${currentTrack.thumbnail})`,
+                backgroundImage: `url(${getHighResThumbnail(currentTrack.thumbnail)})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -568,9 +577,10 @@ export default function PlayerBar() {
                     className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[420px] lg:max-w-[460px] aspect-square rounded-[10px] overflow-hidden shadow-2xl"
                   >
                     <img
-                      src={currentTrack.thumbnail}
+                      src={getHighResThumbnail(currentTrack.thumbnail)}
                       alt={currentTrack.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = currentTrack.thumbnail; }}
                     />
                   </motion.div>
                 ) : (
@@ -600,7 +610,7 @@ export default function PlayerBar() {
                 </div>
                 <button
                   onClick={handleToggleLike}
-                  className={`p-1.5 sm:p-2 -mr-1.5 sm:-mr-2 transition active:scale-95 flex-shrink-0 ${trackIsLiked ? 'text-green-500' : 'text-white/50'}`}
+                  className={`p-1.5 sm:p-2 -mr-1.5 sm:-mr-2 transition active:scale-95 flex-shrink-0 ${trackIsLiked ? 'text-[#518EAC]' : 'text-white/50'}`}
                 >
                   <Heart size={22} className="sm:hidden" fill={trackIsLiked ? 'currentColor' : 'none'} />
                   <Heart size={26} className="hidden sm:block" fill={trackIsLiked ? 'currentColor' : 'none'} />
@@ -633,13 +643,13 @@ export default function PlayerBar() {
                 {/* Shuffle */}
                 <button
                   onClick={toggleShuffle}
-                  className={`p-2 sm:p-3 active:scale-95 transition relative ${shuffle ? 'text-green-500' : 'text-white/50'}`}
+                  className={`p-2 sm:p-3 active:scale-95 transition relative ${shuffle ? 'text-[#518EAC]' : 'text-white/50'}`}
                   title={shuffle ? 'Shuffle on' : 'Shuffle off'}
                 >
                   <Shuffle size={22} className="sm:hidden" />
                   <Shuffle size={24} className="hidden sm:block" />
                   {shuffle && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#518EAC]" />
                   )}
                 </button>
 
@@ -677,7 +687,7 @@ export default function PlayerBar() {
                 {/* Repeat */}
                 <button
                   onClick={cycleRepeatMode}
-                  className={`p-2 sm:p-3 active:scale-95 transition relative ${repeatMode !== 'off' ? 'text-green-500' : 'text-white/50'}`}
+                  className={`p-2 sm:p-3 active:scale-95 transition relative ${repeatMode !== 'off' ? 'text-[#518EAC]' : 'text-white/50'}`}
                   title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'queue' ? 'Repeat queue' : 'Repeat track'}
                 >
                   {repeatMode === 'track'
@@ -685,7 +695,7 @@ export default function PlayerBar() {
                     : <><Repeat size={22} className="sm:hidden" /><Repeat size={24} className="hidden sm:block" /></>
                   }
                   {repeatMode !== 'off' && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-green-500" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#518EAC]" />
                   )}
                 </button>
               </div>
@@ -724,7 +734,7 @@ export default function PlayerBar() {
                     onClick={handleVolumeChange}
                   >
                     <div
-                      className="h-full bg-white/70 group-hover:bg-green-500 rounded-full relative transition-colors"
+                      className="h-full bg-white/70 group-hover:bg-[#518EAC] rounded-full relative transition-colors"
                       style={{ width: `${isMuted ? 0 : volume * 100}%` }}
                     >
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />

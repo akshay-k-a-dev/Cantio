@@ -22,18 +22,17 @@ class MediaSessionManagerImpl implements MediaSessionManager {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title,
         artist: track.artist || 'Unknown Artist',
-        artwork: [
-          {
-            src: track.thumbnail,
-            sizes: '480x360',
-            type: 'image/jpeg',
-          },
-          {
-            src: track.thumbnail.replace('hqdefault', 'maxresdefault'),
-            sizes: '1280x720',
-            type: 'image/jpeg',
-          },
-        ],
+        artwork: (() => {
+          const base = track.thumbnail || '';
+          const hq = base;
+          const maxres = base
+            .replace(/\/(hqdefault|mqdefault|sddefault|default)(\.jpg)/i, '/maxresdefault$2')
+            .replace(/\/(hqdefault|mqdefault|sddefault|default)(\.webp)/i, '/maxresdefault$2');
+          return [
+            { src: maxres, sizes: '1280x720', type: 'image/jpeg' },
+            { src: hq,     sizes: '480x360',  type: 'image/jpeg' },
+          ];
+        })(),
       });
       console.log('📱 Media session metadata updated:', track.title);
     }

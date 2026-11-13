@@ -53,8 +53,8 @@ export default function AndroidDownloadPopup() {
             className="relative z-10 w-full max-w-md bg-gradient-to-br from-gray-900 via-gray-950 to-black border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden"
           >
             {/* Glowing accent light */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-green-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-lime-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#518EAC]/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#0F4C6C]/20 rounded-full blur-3xl pointer-events-none" />
 
             <button
               onClick={handleClose}
@@ -65,7 +65,7 @@ export default function AndroidDownloadPopup() {
             </button>
 
             <div className="flex flex-col items-center text-center space-y-5">
-              <div className="bg-gradient-to-br from-green-400 to-emerald-600 p-4 rounded-2xl shadow-lg shadow-green-900/30 ring-4 ring-green-500/10">
+              <div className="bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] p-4 rounded-2xl shadow-lg shadow-[#0F4C6C]/30 ring-4 ring-[#518EAC]/10">
                 <Smartphone className="w-10 h-10 text-white" />
               </div>
 
@@ -81,7 +81,7 @@ export default function AndroidDownloadPopup() {
               <div className="flex flex-col sm:flex-row gap-3 w-full pt-2">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-900/40 transform hover:-translate-y-0.5 active:translate-y-0"
+                  className="flex-1 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:from-[#619CA9] hover:to-[#518EAC] text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#0F4C6C]/40 transform hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <Download className="w-5 h-5" />
                   Get Android App

@@ -10,7 +10,7 @@ export function DocsPage() {
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#619CA9] bg-clip-text text-transparent">
             Documentation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -28,7 +28,7 @@ export function DocsPage() {
             <div className="text-3xl mb-4">🎵</div>
             <h3 className="font-bold text-lg mb-3">1. Open the App</h3>
             <p className="text-gray-400 text-sm">
-              Go to <a href="https://music.akshayka.dev" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300">music.akshayka.dev</a> and start streaming immediately.
+              Go to <a href="https://music.akshayka.dev" target="_blank" rel="noopener noreferrer" className="text-[#518EAC] hover:text-[#A4C4D4]">music.akshayka.dev</a> and start streaming immediately.
             </p>
           </div>
           
@@ -100,11 +100,11 @@ export function DocsPage() {
         <div className="space-y-6">
           <div className="p-6 border border-gray-800 rounded-lg">
             <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-purple-400" />
+              <Zap className="w-5 h-5 text-[#518EAC]" />
               Web App (Recommended)
             </h3>
             <p className="text-gray-400 mb-3">
-              No installation needed. Just visit <code className="bg-black/50 px-2 py-1 rounded text-purple-300">music.akshayka.dev</code> and start playing.
+              No installation needed. Just visit <code className="bg-black/50 px-2 py-1 rounded text-[#A4C4D4]">music.akshayka.dev</code> and start playing.
             </p>
             <p className="text-gray-400">
               To install as PWA: Open in your browser → Menu → "Install Cantio" (desktop) or "Add to Home Screen" (mobile).
@@ -118,24 +118,24 @@ export function DocsPage() {
             </h3>
             <p className="text-gray-400 mb-4">Available for Windows and Linux:</p>
             <ul className="space-y-2 text-gray-400 mb-4">
-              <li>• Windows: <code className="bg-black/50 px-2 py-1 rounded text-purple-300">Cantio.Setup.1.0.0.exe</code></li>
-              <li>• Linux (Debian): <code className="bg-black/50 px-2 py-1 rounded text-purple-300">cantio-desktop_1.0.0_amd64.deb</code></li>
-              <li>• Linux (AppImage): <code className="bg-black/50 px-2 py-1 rounded text-purple-300">Cantio-1.0.0.AppImage</code></li>
+              <li>• Windows: <code className="bg-black/50 px-2 py-1 rounded text-[#A4C4D4]">Cantio.Setup.1.0.0.exe</code></li>
+              <li>• Linux (Debian): <code className="bg-black/50 px-2 py-1 rounded text-[#A4C4D4]">cantio-desktop_1.0.0_amd64.deb</code></li>
+              <li>• Linux (AppImage): <code className="bg-black/50 px-2 py-1 rounded text-[#A4C4D4]">Cantio-1.0.0.AppImage</code></li>
             </ul>
-            <a href="https://github.com/akshay-k-a-dev/Cantio/releases" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300">
+            <a href="https://github.com/akshay-k-a-dev/Cantio/releases" target="_blank" rel="noopener noreferrer" className="text-[#518EAC] hover:text-[#A4C4D4]">
               Download from GitHub Releases →
             </a>
           </div>
 
           <div className="p-6 border border-gray-800 rounded-lg">
             <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-pink-400" />
+              <BookOpen className="w-5 h-5 text-[#619CA9]" />
               Mobile Apps
             </h3>
             <p className="text-gray-400 mb-3">
               A standalone Android app is available for download as an APK. The iOS app is currently in progress.
             </p>
-            <a href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases" className="text-purple-400 hover:text-purple-300">
+            <a href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases" className="text-[#518EAC] hover:text-[#A4C4D4]">
               Go to Android Releases →
             </a>
           </div>
@@ -149,7 +149,7 @@ export function DocsPage() {
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <div className="p-6 border border-gray-800 rounded-lg">
             <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-              <Github className="w-5 h-5 text-purple-400" />
+              <Github className="w-5 h-5 text-[#518EAC]" />
               Clone & Run Locally
             </h3>
             <div className="space-y-3 text-gray-400 text-sm">
@@ -175,7 +175,7 @@ export function DocsPage() {
           </div>
         </div>
 
-        <div className="p-6 border border-purple-500/30 bg-purple-900/10 rounded-lg">
+        <div className="p-6 border border-[#518EAC]/30 bg-[#0F4C6C]/10 rounded-lg">
           <h3 className="font-bold text-lg mb-4">🤝 Contributing</h3>
           <p className="text-gray-300 mb-4">
             Cantio welcomes contributions! To contribute:
@@ -186,7 +186,7 @@ export function DocsPage() {
             <li>Make your changes</li>
             <li>Submit a pull request</li>
           </ol>
-          <a href="https://github.com/akshay-k-a-dev/Cantio/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 mt-4 inline-block">
+          <a href="https://github.com/akshay-k-a-dev/Cantio/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="text-[#518EAC] hover:text-[#A4C4D4] mt-4 inline-block">
             View Contribution Guidelines →
           </a>
         </div>
@@ -202,27 +202,27 @@ export function DocsPage() {
 
         <div className="space-y-4">
           <div className="p-4 bg-black/50 rounded-lg border border-gray-800">
-            <p className="font-mono text-purple-300 mb-2">GET /api/search?q=query</p>
+            <p className="font-mono text-[#A4C4D4] mb-2">GET /api/search?q=query</p>
             <p className="text-gray-400 text-sm">Search YouTube Music for tracks</p>
           </div>
 
           <div className="p-4 bg-black/50 rounded-lg border border-gray-800">
-            <p className="font-mono text-purple-300 mb-2">GET /api/track/:id</p>
+            <p className="font-mono text-[#A4C4D4] mb-2">GET /api/track/:id</p>
             <p className="text-gray-400 text-sm">Get track metadata and stream URL</p>
           </div>
 
           <div className="p-4 bg-black/50 rounded-lg border border-gray-800">
-            <p className="font-mono text-purple-300 mb-2">POST /api/auth/register</p>
+            <p className="font-mono text-[#A4C4D4] mb-2">POST /api/auth/register</p>
             <p className="text-gray-400 text-sm">Create a new account</p>
           </div>
 
           <div className="p-4 bg-black/50 rounded-lg border border-gray-800">
-            <p className="font-mono text-purple-300 mb-2">GET /api/user/likes</p>
+            <p className="font-mono text-[#A4C4D4] mb-2">GET /api/user/likes</p>
             <p className="text-gray-400 text-sm">Get liked songs for logged-in user</p>
           </div>
         </div>
 
-        <a href="https://github.com/akshay-k-a-dev/Cantio/tree/main/vercel-serverless/backend" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 mt-6 inline-block">
+        <a href="https://github.com/akshay-k-a-dev/Cantio/tree/main/vercel-serverless/backend" target="_blank" rel="noopener noreferrer" className="text-[#518EAC] hover:text-[#A4C4D4] mt-6 inline-block">
           View Full Backend Documentation →
         </a>
       </section>
@@ -249,7 +249,7 @@ export function DocsPage() {
         <h2 className="text-3xl font-bold mb-8 text-center">Additional Resources</h2>
         
         <div className="grid md:grid-cols-3 gap-6">
-          <a href="https://github.com/akshay-k-a-dev/Cantio" target="_blank" rel="noopener noreferrer" className="p-6 border border-gray-800 hover:border-purple-500/50 rounded-lg transition">
+          <a href="https://github.com/akshay-k-a-dev/Cantio" target="_blank" rel="noopener noreferrer" className="p-6 border border-gray-800 hover:border-[#518EAC]/50 rounded-lg transition">
             <h3 className="font-bold text-lg mb-2">📚 GitHub Repository</h3>
             <p className="text-gray-400 text-sm">Source code, issues, and pull requests</p>
           </a>
@@ -259,7 +259,7 @@ export function DocsPage() {
             <p className="text-gray-400 text-sm">Found a bug? Let us know on GitHub</p>
           </a>
 
-          <a href="mailto:auth.cantio@gmail.com" className="p-6 border border-gray-800 hover:border-pink-500/50 rounded-lg transition">
+          <a href="mailto:auth.cantio@gmail.com" className="p-6 border border-gray-800 hover:border-[#619CA9]/50 rounded-lg transition">
             <h3 className="font-bold text-lg mb-2">💬 Get Support</h3>
             <p className="text-gray-400 text-sm">Email us at auth.cantio@gmail.com</p>
           </a>
@@ -271,7 +271,7 @@ export function DocsPage() {
         <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
         <p className="text-gray-400 mb-8">Start using or building Cantio today.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/" className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+          <a href="/" className="px-8 py-3 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg font-semibold transition">
             Try Cantio Now
           </a>
           <a href="https://github.com/akshay-k-a-dev/Cantio" target="_blank" rel="noopener noreferrer" className="px-8 py-3 border border-gray-600 hover:border-gray-400 rounded-lg font-semibold transition">

@@ -10,7 +10,7 @@ export function SecurityPage() {
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#619CA9] bg-clip-text text-transparent">
             Privacy & Security
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -23,8 +23,8 @@ export function SecurityPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-16 bg-gray-900/50 border-y border-gray-800">
         <h2 className="text-3xl font-bold mb-12 text-center">Our Privacy Commitments</h2>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="p-6 bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/20 rounded-lg">
-            <Eye className="w-8 h-8 text-purple-400 mb-4" />
+          <div className="p-6 bg-gradient-to-br from-[#0F4C6C]/20 to-transparent border border-[#518EAC]/20 rounded-lg">
+            <Eye className="w-8 h-8 text-[#518EAC] mb-4" />
             <h3 className="font-bold text-lg mb-3">Zero Tracking</h3>
             <p className="text-gray-400">
               No analytics, no telemetry, no behavioral tracking. We don't monitor what you listen to.
@@ -37,8 +37,8 @@ export function SecurityPage() {
               We never sell, share, or monetize your data. Ever. Our business model doesn't depend on it.
             </p>
           </div>
-          <div className="p-6 bg-gradient-to-br from-pink-900/20 to-transparent border border-pink-500/20 rounded-lg">
-            <Shield className="w-8 h-8 text-pink-400 mb-4" />
+          <div className="p-6 bg-gradient-to-br from-[#0F4C6C]/20 to-transparent border border-[#619CA9]/20 rounded-lg">
+            <Shield className="w-8 h-8 text-[#619CA9] mb-4" />
             <h3 className="font-bold text-lg mb-3">Open Source Transparency</h3>
             <p className="text-gray-400">
               Our code is public on GitHub. Audit it yourself and verify our privacy claims.
@@ -54,7 +54,7 @@ export function SecurityPage() {
         <div className="space-y-8">
           <div className="border border-gray-800 rounded-lg p-8">
             <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-              <Database className="w-6 h-6 text-purple-400" />
+              <Database className="w-6 h-6 text-[#518EAC]" />
               Guest Mode (No Account)
             </h3>
             <p className="text-gray-300 mb-4">
@@ -90,7 +90,7 @@ export function SecurityPage() {
 
           <div className="border border-gray-800 rounded-lg p-8">
             <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-pink-400" />
+              <AlertCircle className="w-6 h-6 text-[#619CA9]" />
               What We Never Collect
             </h3>
             <ul className="space-y-2 text-gray-400">
@@ -137,8 +137,8 @@ export function SecurityPage() {
         <h2 className="text-3xl font-bold mb-8">Your Rights</h2>
         
         <div className="space-y-4">
-          <div className="p-4 bg-purple-900/20 border border-purple-500/30 rounded-lg">
-            <h3 className="font-semibold text-purple-300 mb-2">📥 Right to Access</h3>
+          <div className="p-4 bg-[#0F4C6C]/20 border border-[#518EAC]/30 rounded-lg">
+            <h3 className="font-semibold text-[#A4C4D4] mb-2">📥 Right to Access</h3>
             <p className="text-gray-300">You can download all your data from Cantio at any time.</p>
           </div>
           
@@ -147,13 +147,13 @@ export function SecurityPage() {
             <p className="text-gray-300">You can edit or delete your playlists, likes, and account information anytime.</p>
           </div>
           
-          <div className="p-4 bg-pink-900/20 border border-pink-500/30 rounded-lg">
-            <h3 className="font-semibold text-pink-300 mb-2">🗑️ Right to Delete</h3>
+          <div className="p-4 bg-[#0F4C6C]/20 border border-[#619CA9]/30 rounded-lg">
+            <h3 className="font-semibold text-[#A4C4D4] mb-2">🗑️ Right to Delete</h3>
             <p className="text-gray-300">Delete your account and all associated data permanently. No traces remain.</p>
           </div>
           
-          <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-            <h3 className="font-semibold text-green-300 mb-2">📱 Data Portability</h3>
+          <div className="p-4 bg-[#0F4C6C]/20 border border-[#518EAC]/30 rounded-lg">
+            <h3 className="font-semibold text-[#A4C4D4] mb-2">📱 Data Portability</h3>
             <p className="text-gray-300">Export your playlists and liked songs in standard formats to use elsewhere.</p>
           </div>
         </div>
@@ -195,7 +195,7 @@ export function SecurityPage() {
             <p className="text-gray-400">
               Cantio is open source under the MIT license. You can review, fork, and modify the code.
             </p>
-            <a href="https://github.com/akshay-k-a-dev/Cantio/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 mt-2 inline-block">
+            <a href="https://github.com/akshay-k-a-dev/Cantio/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="text-[#518EAC] hover:text-[#A4C4D4] mt-2 inline-block">
               View Full License →
             </a>
           </div>
@@ -224,7 +224,7 @@ export function SecurityPage() {
             We take privacy seriously. If you have any concerns or questions about how Cantio handles your data, please reach out.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="mailto:auth.cantio@gmail.com" className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+            <a href="mailto:auth.cantio@gmail.com" className="px-6 py-2 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg transition">
               Email: auth.cantio@gmail.com
             </a>
             <a href="https://github.com/akshay-k-a-dev/Cantio" target="_blank" rel="noopener noreferrer" className="px-6 py-2 border border-gray-600 hover:border-gray-400 rounded-lg transition">

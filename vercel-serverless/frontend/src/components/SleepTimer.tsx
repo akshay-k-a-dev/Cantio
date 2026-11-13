@@ -54,14 +54,14 @@ export default function SleepTimerButton() {
         onClick={() => setOpen(!open)}
         className={`p-2 rounded-full transition-colors relative ${
           isActive
-            ? 'text-purple-400 hover:text-purple-300 bg-purple-500/10'
+            ? 'text-[#518EAC] hover:text-[#A4C4D4] bg-[#518EAC]/10'
             : 'text-gray-400 hover:text-white hover:bg-white/10'
         }`}
         title={isActive ? `Sleep timer: ${mode === 'end_of_song' ? 'end of song' : formatRemaining(remaining)}` : 'Sleep timer'}
       >
         <Moon size={18} />
         {isActive && (
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-purple-500 rounded-full" />
+          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#518EAC] rounded-full" />
         )}
       </button>
 
@@ -82,7 +82,7 @@ export default function SleepTimerButton() {
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-purple-400" />
+                  <Clock size={16} className="text-[#518EAC]" />
                   <span className="text-sm font-semibold text-white">Sleep Timer</span>
                 </div>
                 <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white transition-colors">
@@ -92,10 +92,10 @@ export default function SleepTimerButton() {
 
               {/* Active timer status */}
               {isActive && (
-                <div className="px-4 py-3 bg-purple-500/10 border-b border-white/5">
+                <div className="px-4 py-3 bg-[#518EAC]/10 border-b border-white/5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-purple-400 font-medium">Timer active</p>
+                      <p className="text-xs text-[#518EAC] font-medium">Timer active</p>
                       <p className="text-lg font-bold text-white">
                         {mode === 'end_of_song' ? 'End of song' : formatRemaining(remaining)}
                       </p>
@@ -120,7 +120,7 @@ export default function SleepTimerButton() {
                   >
                     <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{label}</span>
                     {isActive && mode === 'duration' && Math.abs(remaining - seconds) < 5 && (
-                      <Check size={14} className="text-purple-400" />
+                      <Check size={14} className="text-[#518EAC]" />
                     )}
                   </button>
                 ))}
@@ -132,7 +132,7 @@ export default function SleepTimerButton() {
                 >
                   <span className="text-sm text-gray-300 group-hover:text-white transition-colors">End of current song</span>
                   {isActive && mode === 'end_of_song' && (
-                    <Check size={14} className="text-purple-400" />
+                    <Check size={14} className="text-[#518EAC]" />
                   )}
                 </button>
 
@@ -145,13 +145,13 @@ export default function SleepTimerButton() {
                     value={customMin}
                     onChange={(e) => setCustomMin(e.target.value)}
                     placeholder="Custom (min)"
-                    className="flex-1 px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                    className="flex-1 px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#518EAC]/50"
                     onKeyDown={(e) => e.key === 'Enter' && handleCustom()}
                   />
                   <button
                     onClick={handleCustom}
                     disabled={!customMin || parseInt(customMin) <= 0}
-                    className="px-3 py-2 text-sm font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm font-medium bg-[#0F4C6C] hover:bg-[#518EAC] disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                   >
                     Set
                   </button>

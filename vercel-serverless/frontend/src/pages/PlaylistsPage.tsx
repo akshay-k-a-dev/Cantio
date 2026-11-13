@@ -241,7 +241,7 @@ function PlaylistCard({ playlist, onDelete }: PlaylistCardProps) {
       onClick={() => navigate(`/playlist/${playlist.id}`)}
     >
       {/* Thumbnail */}
-      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] rounded-lg flex items-center justify-center flex-shrink-0">
         <Music size={28} className="sm:hidden text-white/80" />
         <Music size={32} className="hidden sm:block text-white/80" />
       </div>

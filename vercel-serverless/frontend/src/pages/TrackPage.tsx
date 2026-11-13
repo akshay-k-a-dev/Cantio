@@ -94,7 +94,7 @@ export function TrackPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <Loader2 className="w-12 h-12 animate-spin text-green-500" />
+        <Loader2 className="w-12 h-12 animate-spin text-[#518EAC]" />
         <p className="text-white/60 text-sm">Loading track...</p>
       </div>
     );
@@ -108,7 +108,7 @@ export function TrackPage() {
         <p className="text-white/60 text-sm">{error}</p>
         <button
           onClick={() => navigate('/')}
-          className="mt-4 px-6 py-2 bg-green-500 hover:bg-green-600 text-black font-medium rounded-full transition"
+          className="mt-4 px-6 py-2 bg-[#518EAC] hover:bg-[#619CA9] text-black font-medium rounded-full transition"
         >
           Go to Home
         </button>

@@ -46,7 +46,7 @@ export function BlendsPage() {
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 text-sm md:text-base"
+          className="bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 text-sm md:text-base"
         >
           <Plus size={20} />
           <span className="hidden xs:inline">Create Blend</span>
@@ -82,7 +82,7 @@ export function BlendsPage() {
           </p>
           <button
             onClick={() => setShowInviteModal(true)}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-2 text-sm sm:text-base"
+            className="bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-2 text-sm sm:text-base"
           >
             <Plus size={18} className="sm:hidden" />
             <Plus size={20} className="hidden sm:block" />
@@ -118,7 +118,7 @@ export function BlendsPage() {
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="friend@example.com"
                     autoFocus
-                    className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#518EAC]"
                   />
                 </div>
                 {error && (
@@ -140,7 +140,7 @@ export function BlendsPage() {
                 <button
                   type="submit"
                   disabled={!inviteEmail.trim() || sending}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 rounded-lg font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:opacity-90 rounded-lg font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {sending ? (
                     <>
@@ -172,9 +172,9 @@ function BlendCard({ blend }: BlendCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={() => navigate(`/blends/${blend.id}`)}
-      className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-lg p-3 sm:p-4 cursor-pointer border border-white/10 hover:border-white/20 transition-all flex items-center gap-3 sm:gap-4"
+      className="bg-gradient-to-br from-[#0F4C6C]/40 to-[#0F4C6C]/20 rounded-lg p-3 sm:p-4 cursor-pointer border border-white/10 hover:border-white/20 transition-all flex items-center gap-3 sm:gap-4"
     >
-      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[#518EAC] flex items-center justify-center flex-shrink-0">
         <Users size={24} className="sm:hidden text-white" />
         <Users size={28} className="hidden sm:block text-white" />
       </div>

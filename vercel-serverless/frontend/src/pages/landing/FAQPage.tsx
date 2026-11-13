@@ -160,13 +160,13 @@ function FAQAccordion({ item }: { item: typeof faqItems[0]['items'][0] }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border border-gray-800 rounded-lg overflow-hidden hover:border-purple-500/30 transition">
+    <div className="border border-gray-800 rounded-lg overflow-hidden hover:border-[#518EAC]/30 transition">
       <button
         onClick={() => setOpen(!open)}
         className="w-full p-4 flex items-center justify-between hover:bg-gray-900/50 transition text-left"
       >
         <span className="font-semibold">{item.q}</span>
-        <ChevronDown className={`w-5 h-5 text-purple-400 transition ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-5 h-5 text-[#518EAC] transition ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="px-4 pb-4 text-gray-400 border-t border-gray-800">
@@ -186,7 +186,7 @@ export function FAQPage() {
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#619CA9] bg-clip-text text-transparent">
             Frequently Asked Questions
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -199,7 +199,7 @@ export function FAQPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-16">
         {faqItems.map((section, idx) => (
           <div key={idx} className={`mb-12 ${idx < faqItems.length - 1 ? 'pb-12 border-b border-gray-800' : ''}`}>
-            <h2 className="text-2xl font-bold mb-6 text-purple-400">{section.category}</h2>
+            <h2 className="text-2xl font-bold mb-6 text-[#518EAC]">{section.category}</h2>
             <div className="space-y-3">
               {section.items.map((item, i) => (
                 <FAQAccordion key={i} item={item} />
@@ -233,10 +233,10 @@ export function FAQPage() {
           <h2 className="text-2xl font-bold mb-4">Didn't find your answer?</h2>
           <p className="text-gray-400 mb-6">Get in touch with the Cantio community.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://github.com/akshay-k-a-dev/Cantio/issues" target="_blank" rel="noopener noreferrer" className="px-6 py-2 border border-purple-600 hover:bg-purple-600/10 rounded-lg transition">
+            <a href="https://github.com/akshay-k-a-dev/Cantio/issues" target="_blank" rel="noopener noreferrer" className="px-6 py-2 border border-[#518EAC] hover:bg-[#518EAC]/10 rounded-lg transition">
               Report Issue on GitHub
             </a>
-            <a href="mailto:auth.cantio@gmail.com" className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+            <a href="mailto:auth.cantio@gmail.com" className="px-6 py-2 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg transition">
               Email Support
             </a>
           </div>
@@ -247,7 +247,7 @@ export function FAQPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-20 text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Try Cantio?</h2>
         <p className="text-gray-400 mb-8">No account needed. Stream music now, no strings attached.</p>
-        <a href="/" className="inline-block px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+        <a href="/" className="inline-block px-8 py-3 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg font-semibold transition">
           Start Listening Now
         </a>
       </section>

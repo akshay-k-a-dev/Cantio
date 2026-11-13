@@ -158,7 +158,7 @@ export function HomePage() {
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-purple-400 font-medium mb-0.5">
+            <p className="text-[10px] uppercase tracking-wider text-[#518EAC] font-medium mb-0.5">
               Now Playing
             </p>
             <h3 className="text-sm font-semibold text-white truncate">
@@ -171,7 +171,7 @@ export function HomePage() {
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-1 bg-purple-500 rounded-full"
+                  className="w-1 bg-[#518EAC] rounded-full"
                   animate={{
                     height: ['4px', '16px', '4px'],
                   }}
@@ -196,12 +196,12 @@ export function HomePage() {
       animate={{ opacity: 1, y: 0 }}
       className="mb-6 sm:mb-8"
     >
-      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-900/40 via-purple-800/20 to-transparent border border-white/5 p-5 sm:p-6 md:p-8">
-        <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#0F4C6C]/40 via-[#0F4C6C]/20 to-transparent border border-white/5 p-5 sm:p-6 md:p-8">
+        <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-[#518EAC]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <Sparkles size={16} className="text-purple-400 sm:w-[18px] sm:h-[18px]" />
-            <span className="text-[10px] sm:text-xs font-medium text-purple-400 uppercase tracking-wider">
+            <Sparkles size={16} className="text-[#518EAC] sm:w-[18px] sm:h-[18px]" />
+            <span className="text-[10px] sm:text-xs font-medium text-[#518EAC] uppercase tracking-wider">
               Ad-Free Music
             </span>
           </div>
@@ -249,7 +249,7 @@ export function HomePage() {
       {loading && (
         <div className="flex items-center justify-center py-12 sm:py-16">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 size={24} className="text-purple-400 animate-spin sm:w-7 sm:h-7" />
+            <Loader2 size={24} className="text-[#518EAC] animate-spin sm:w-7 sm:h-7" />
             <p className="text-xs sm:text-sm text-gray-500">Loading your music...</p>
           </div>
         </div>
@@ -265,7 +265,7 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="mb-3 sm:mb-4 flex items-center gap-2">
-                <Sparkles size={18} className="text-purple-400" />
+                <Sparkles size={18} className="text-[#518EAC]" />
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold text-white">For You</h3>
                   <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
@@ -321,7 +321,7 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="mb-3 sm:mb-4 flex items-center gap-2">
-                <TrendingUp size={18} className="text-purple-400" />
+                <TrendingUp size={18} className="text-[#518EAC]" />
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold text-white">
                     What Others Love
@@ -458,7 +458,7 @@ export function HomePage() {
                           {/* Play all */}
                           <button
                             onClick={() => handlePlayArtist(selectedArtist)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs sm:text-sm font-medium rounded-full transition"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F4C6C] hover:bg-[#518EAC] text-white text-xs sm:text-sm font-medium rounded-full transition"
                           >
                             <Play size={14} fill="white" />
                             Play All

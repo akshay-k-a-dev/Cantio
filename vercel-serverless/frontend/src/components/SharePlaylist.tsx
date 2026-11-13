@@ -112,7 +112,7 @@ export default function SharePlaylist({
         onClick={() => setOpen(!open)}
         className={`p-2 rounded-full transition-colors ${
           currentPublic
-            ? 'text-purple-400 hover:text-purple-300 bg-purple-500/10'
+            ? 'text-[#518EAC] hover:text-[#A4C4D4] bg-[#518EAC]/10'
             : 'text-gray-400 hover:text-white hover:bg-white/10'
         }`}
         title="Share playlist"
@@ -141,8 +141,8 @@ export default function SharePlaylist({
                 <div className="flex items-center gap-2 text-sm">
                   {currentPublic ? (
                     <>
-                      <Globe size={16} className="text-green-400" />
-                      <span className="text-green-400 font-medium">Public</span>
+                      <Globe size={16} className="text-[#518EAC]" />
+                      <span className="text-[#518EAC] font-medium">Public</span>
                     </>
                   ) : (
                     <>
@@ -164,7 +164,7 @@ export default function SharePlaylist({
                       title="Copy link"
                     >
                       {copied ? (
-                        <Check size={16} className="text-green-400" />
+                        <Check size={16} className="text-[#518EAC]" />
                       ) : (
                         <Link2 size={16} className="text-gray-400" />
                       )}
@@ -178,7 +178,7 @@ export default function SharePlaylist({
                     <button
                       onClick={handleShare}
                       disabled={loading}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#0F4C6C] hover:bg-[#518EAC] disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       {loading ? <Loader2 size={14} className="animate-spin" /> : <Globe size={14} />}
                       Make Public
@@ -188,7 +188,7 @@ export default function SharePlaylist({
                       {'share' in navigator && (
                         <button
                           onClick={handleNativeShare}
-                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-lg transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#0F4C6C] hover:bg-[#518EAC] text-white text-sm font-medium rounded-lg transition-colors"
                         >
                           <Share2 size={14} />
                           Share

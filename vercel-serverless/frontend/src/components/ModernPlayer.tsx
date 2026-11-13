@@ -6,6 +6,13 @@ import { useQueue } from '../lib/queueStore';
 import { AddToPlaylistDropdown } from './AddToPlaylistDropdown';
 import { LyricsPanel } from './LyricsPanel';
 
+function getHighResThumbnail(thumbnail: string): string {
+  if (!thumbnail) return thumbnail;
+  return thumbnail
+    .replace(/\/(hqdefault|mqdefault|sddefault|default)(\.jpg)/i, '/maxresdefault$2')
+    .replace(/\/(hqdefault|mqdefault|sddefault|default)(\.webp)/i, '/maxresdefault$2');
+}
+
 export default function ModernPlayer() {
   const {
     currentTrack,
@@ -68,7 +75,7 @@ export default function ModernPlayer() {
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-8">
+    <div className="h-screen w-full bg-gradient-to-br from-[#010101] via-[#0F4C6C] to-[#010101] flex items-center justify-center p-8">
       <div className="w-full max-w-2xl">
         <AnimatePresence mode="wait">
           {currentTrack ? (
@@ -92,9 +99,10 @@ export default function ModernPlayer() {
                     className="relative w-full h-full"
                   >
                     <img
-                      src={currentTrack.thumbnail}
+                      src={getHighResThumbnail(currentTrack.thumbnail)}
                       alt={currentTrack.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = currentTrack.thumbnail; }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     
@@ -164,7 +172,7 @@ export default function ModernPlayer() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-lg text-purple-200 truncate"
+                  className="text-lg text-[#A4C4D4] truncate"
                 >
                   {currentTrack.artist}
                 </motion.p>
@@ -178,7 +186,7 @@ export default function ModernPlayer() {
                   className="h-2 bg-white/20 rounded-full cursor-pointer group mb-2 overflow-hidden"
                 >
                   <motion.div
-                    className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full relative"
+                    className="h-full bg-gradient-to-r from-[#518EAC] to-[#619CA9] rounded-full relative"
                     style={{ width: `${(progress / duration) * 100}%` }}
                     layout
                   >
@@ -188,7 +196,7 @@ export default function ModernPlayer() {
                     />
                   </motion.div>
                 </div>
-                <div className="flex justify-between text-sm text-purple-200">
+                <div className="flex justify-between text-sm text-[#A4C4D4]">
                   <span>{formatTime(progress)}</span>
                   <span>{formatTime(duration)}</span>
                 </div>
@@ -203,14 +211,14 @@ export default function ModernPlayer() {
                   onClick={toggleShuffle}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors relative ${
                     shuffle
-                      ? 'bg-purple-500/30 text-purple-300'
+                      ? 'bg-[#518EAC]/30 text-[#A4C4D4]'
                       : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
                   }`}
                   title={shuffle ? 'Shuffle on' : 'Shuffle off'}
                 >
                   <Shuffle className="w-5 h-5" />
                   {shuffle && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-400" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#518EAC]" />
                   )}
                 </motion.button>
 
@@ -230,7 +238,7 @@ export default function ModernPlayer() {
                   whileTap={{ scale: 0.95 }}
                   onClick={togglePlay}
                   disabled={state === 'loading'}
-                  className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-2xl hover:shadow-purple-500/50 transition-shadow disabled:opacity-50"
+                  className="w-20 h-20 rounded-full bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] flex items-center justify-center text-white shadow-2xl hover:shadow-[#518EAC]/50 transition-shadow disabled:opacity-50"
                 >
                   {state === 'loading' ? (
                     <Loader2 className="w-8 h-8 animate-spin" />
@@ -258,14 +266,14 @@ export default function ModernPlayer() {
                   onClick={cycleRepeatMode}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors relative ${
                     repeatMode !== 'off'
-                      ? 'bg-purple-500/30 text-purple-300'
+                      ? 'bg-[#518EAC]/30 text-[#A4C4D4]'
                       : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
                   }`}
                   title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'queue' ? 'Repeat queue' : 'Repeat track'}
                 >
                   {repeatMode === 'track' ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
                   {repeatMode !== 'off' && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-400" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#518EAC]" />
                   )}
                 </motion.button>
               </div>
@@ -280,7 +288,7 @@ export default function ModernPlayer() {
                   className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                 >
                   <Heart
-                    className={`w-5 h-5 ${liked ? 'fill-pink-500 text-pink-500' : ''}`}
+                    className={`w-5 h-5 ${liked ? 'fill-[#A4C4D4] text-[#A4C4D4]' : ''}`}
                   />
                 </motion.button>
 
@@ -314,7 +322,7 @@ export default function ModernPlayer() {
                     className="flex-1 h-2 bg-white/20 rounded-full cursor-pointer group overflow-hidden"
                   >
                     <motion.div
-                      className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full relative"
+                      className="h-full bg-gradient-to-r from-[#518EAC] to-[#619CA9] rounded-full relative"
                       style={{ width: `${volume * 100}%` }}
                       layout
                     >

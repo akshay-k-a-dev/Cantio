@@ -47,7 +47,7 @@
 @layer base {
   body {
     @apply text-white min-h-screen;
-    background: linear-gradient(180deg, #0c0f14 0%, #0a0a0a 100%);
+    background: linear-gradient(180deg, #010101 0%, #040d14 100%);
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none;
   }

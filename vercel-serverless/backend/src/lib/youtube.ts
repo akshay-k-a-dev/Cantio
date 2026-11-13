@@ -119,7 +119,14 @@ function extractArtistFromItem(item: any): string {
   // 1. YTM artists[] array (MusicResponsiveListItem from WEB_REMIX)
   if (Array.isArray(item.artists) && item.artists.length > 0) {
     const names = item.artists
-      .map((a: any) => a?.name || getText(a))
+      .map((a: any) => {
+        const n = a?.name;
+        if (typeof n === 'string' && n.trim()) return n.trim();
+        const t = getText(a);
+        // reject fallback garbage from getText
+        if (t && t !== '[object Object]') return t;
+        return '';
+      })
       .filter(Boolean);
     if (names.length > 0) return cleanArtistName(names.join(', '));
   }
@@ -127,7 +134,14 @@ function extractArtistFromItem(item: any): string {
   // 2. authors[] — alternate YTM format (MusicCardShelfItem, etc.)
   if (Array.isArray(item.authors) && item.authors.length > 0) {
     const names = item.authors
-      .map((a: any) => a?.name || getText(a))
+      .map((a: any) => {
+        const n = a?.name;
+        if (typeof n === 'string' && n.trim()) return n.trim();
+        const t = getText(a);
+        // reject fallback garbage from getText
+        if (t && t !== '[object Object]') return t;
+        return '';
+      })
       .filter(Boolean);
     if (names.length > 0) return cleanArtistName(names.join(', '));
   }
@@ -222,8 +236,19 @@ export function normalizeTrack(
 
   // Artist: try item-level extraction first, then caller-provided fallback
   let artist = extractArtistFromItem(item);
-  if (!artist && fallbacks?.artist) artist = fallbacks.artist;
-  if (!artist) artist = 'Unknown Artist';
+  const isInvalidArtist =
+    !artist ||
+    artist.toUpperCase() === 'N/A' ||
+    artist.toLowerCase() === 'unknown' ||
+    artist.toLowerCase() === 'unknown artist' ||
+    /^\d+:\d+$/.test(artist);
+
+  if (isInvalidArtist && fallbacks?.artist) {
+    artist = fallbacks.artist;
+  }
+  if (!artist || artist.toUpperCase() === 'N/A') {
+    artist = 'Unknown Artist';
+  }
   // Always clean "- Topic" suffix from final artist name
   artist = cleanArtistName(artist);
 
@@ -296,34 +321,55 @@ export async function searchMusicSongs(query: string, limit: number = 10): Promi
   const yt = await getYouTubeMusic();
 
   try {
-    const raw = await (yt as any).music.search(query, { type: 'song' });
-    const items: any[] = raw?.contents?.flatMap((section: any) => section?.contents || section?.items || [])
-      ?? raw?.items
+    let page = await (yt as any).music.search(query, { type: 'song' });
+    const items: any[] = page?.contents?.flatMap((section: any) => section?.contents || section?.items || [])
+      ?? page?.items
       ?? [];
 
     const results: VideoResult[] = [];
     const seen = new Set<string>();
     const seenTitles = new Set<string>();
 
-    for (const item of items) {
-      if (results.length >= limit) break;
-      if (!item) continue;
+    const processItems = (itemList: any[]) => {
+      for (const item of itemList) {
+        if (results.length >= limit) break;
+        if (!item) continue;
 
-      const normalized = normalizeTrack(item);
-      if (!normalized) continue;
-      if (seen.has(normalized.videoId)) continue;
+        const normalized = normalizeTrack(item);
+        if (!normalized) continue;
+        if (seen.has(normalized.videoId)) continue;
 
-      // Title-level dedup
-      const titleKey = normalizeTitleKey(normalized.title);
-      if (seenTitles.has(titleKey)) continue;
+        // Title-level dedup
+        const titleKey = normalizeTitleKey(normalized.title);
+        if (seenTitles.has(titleKey)) continue;
 
-      // Duration filter (if duration is 0, let it through — YTM sometimes omits duration)
-      if (normalized.duration > 0 && !isValidMusicTrack(normalized)) continue;
+        // Duration filter (if duration is 0, let it through — YTM sometimes omits duration)
+        if (normalized.duration > 0 && !isValidMusicTrack(normalized)) continue;
 
-      // Mark source as YT Music for transparency
-      seen.add(normalized.videoId);
-      seenTitles.add(titleKey);
-      results.push(normalized);
+        seen.add(normalized.videoId);
+        seenTitles.add(titleKey);
+        results.push(normalized);
+      }
+    };
+
+    processItems(items);
+
+    // Page through continuations if more results are needed
+    let continuationCount = 0;
+    while (page?.has_continuation && results.length < limit && continuationCount < 5 && typeof page.getContinuation === 'function') {
+      try {
+        continuationCount++;
+        page = await page.getContinuation();
+        const nextItems = page?.contents?.flatMap((section: any) => section?.contents || section?.items || [])
+          ?? page?.contents
+          ?? page?.items
+          ?? [];
+        if (!nextItems || nextItems.length === 0) break;
+        processItems(nextItems);
+      } catch (contError) {
+        console.warn('[youtube.ts] Search continuation error:', contError);
+        break;
+      }
     }
 
     return results;
@@ -648,8 +694,24 @@ export async function getYTMusicAlbumTracks(browseId: string): Promise<{ tracks:
   const album = await (yt as any).music.getAlbum(browseId);
 
   const title: string = getText(album?.header?.title) || 'Unknown Album';
-  // strapline_text_one holds the artist name; subtitle is "EP • Year"
-  const artist: string = getText(album?.header?.strapline_text_one) || 'Unknown Artist';
+
+  // Extract artist from album header with extensive fallbacks
+  const headerArtists = Array.isArray(album?.header?.artists)
+    ? album.header.artists.map((a: any) => a?.name || getText(a)).filter((n: string) => n && n.toUpperCase() !== 'N/A').join(', ')
+    : '';
+
+  const albumArtist: string =
+    (headerArtists && headerArtists.toUpperCase() !== 'N/A' ? headerArtists : '') ||
+    getText(album?.header?.author?.name) ||
+    album?.header?.author?.name ||
+    getText(album?.header?.author) ||
+    getText(album?.header?.strapline_text_one) ||
+    getText(album?.header?.artists?.[0]?.name) ||
+    album?.header?.artists?.[0]?.name ||
+    cleanArtistName(getText(album?.header?.subtitle)?.split(/[•·]/)?.[0]?.trim() || '') ||
+    'Unknown Artist';
+
+  const artist = albumArtist.toUpperCase() === 'N/A' ? 'Unknown Artist' : albumArtist;
   const thumbnail: string = getThumbnailUrl(album?.header?.thumbnail?.contents || album?.header?.thumbnail);
   // year lives inside subtitle text e.g. "EP • 2005"
   const subtitleText: string = getText(album?.header?.subtitle) || '';
@@ -661,10 +723,27 @@ export async function getYTMusicAlbumTracks(browseId: string): Promise<{ tracks:
 
   const tracks: VideoResult[] = [];
   for (const item of rawItems) {
-    // Pass album-level artist as fallback so tracks without individual artist info
-    // still get the album artist rather than 'Unknown Artist'
-    const normalized = normalizeTrack(item, { artist, thumbnail });
-    if (normalized) tracks.push(normalized);
+    // Explicitly check track artists vs albumArtist
+    let trackArtist = '';
+    if (Array.isArray(item.artists) && item.artists.length > 0) {
+      const names = item.artists
+        .map((a: any) => a?.name || getText(a))
+        .filter((n: string) => n && typeof n === 'string' && n.trim() && n.toUpperCase() !== 'N/A');
+      if (names.length > 0) {
+        trackArtist = cleanArtistName(names.join(', '));
+      }
+    }
+
+    // Fall back to album's artist if track has none or says N/A
+    const fallbackArtist = trackArtist || artist;
+
+    const normalized = normalizeTrack(item, { artist: fallbackArtist, thumbnail });
+    if (normalized) {
+      if (!normalized.artist || normalized.artist.toUpperCase() === 'N/A' || normalized.artist.toLowerCase() === 'unknown artist') {
+        normalized.artist = artist;
+      }
+      tracks.push(normalized);
+    }
   }
 
   return { tracks, title, artist, thumbnail, year };
@@ -683,37 +762,38 @@ export async function getYTMusicArtistTopTracks(browseId: string): Promise<{ tra
     const shelf = await artist.getAllSongs();
     if (shelf?.contents?.length) {
       const tracks: VideoResult[] = [];
-      
-      // Process initial batch
-      for (const item of shelf.contents) {
-        if (!item || !(item as any).id) continue;           // skip ContinuationItem
-        // Pass artist name as fallback so tracks always have a valid artist
-        const normalized = normalizeTrack(item, { artist: name, thumbnail });
-        if (normalized) tracks.push(normalized);
-      }
-      
-      // Paginate through all remaining pages (up to 500 tracks to avoid infinite loops)
-      let currentShelf = shelf;
-      const MAX_TRACKS = 500;
-      while (currentShelf?.has_continuation && tracks.length < MAX_TRACKS) {
-        try {
-          currentShelf = await currentShelf.getContinuation();
-          if (!currentShelf?.contents?.length) break;
-          
-          for (const item of currentShelf.contents) {
-            if (!item || !(item as any).id) continue;
-            const normalized = normalizeTrack(item, { artist: name, thumbnail });
-            if (normalized) {
-              tracks.push(normalized);
-              if (tracks.length >= MAX_TRACKS) break;
-            }
+      const seen = new Set<string>();
+
+      const addItems = (items: any[]) => {
+        for (const item of items) {
+          if (!item || !(item as any).id) continue;           // skip ContinuationItem
+          const normalized = normalizeTrack(item, { artist: name, thumbnail });
+          if (normalized && !seen.has(normalized.videoId)) {
+            seen.add(normalized.videoId);
+            tracks.push(normalized);
           }
+        }
+      };
+
+      addItems(shelf.contents);
+
+      // Paginate through continuations up to a safe limit (200 tracks or 8 pages) to prevent Vercel serverless function timeouts
+      let currentShelf = shelf;
+      const MAX_TRACKS = 200;
+      let pageCount = 0;
+      while (currentShelf?.has_continuation && tracks.length < MAX_TRACKS && pageCount < 8) {
+        try {
+          pageCount++;
+          currentShelf = await currentShelf.getContinuation();
+          const moreContents = currentShelf?.contents || [];
+          if (!moreContents.length) break;
+          addItems(moreContents);
         } catch (paginationError) {
           console.warn('[youtube.ts] Pagination error, stopping:', paginationError);
           break;
         }
       }
-      
+
       if (tracks.length > 0) {
         console.log(`[youtube.ts] Fetched ${tracks.length} tracks for artist ${name}`);
         return { tracks, name, thumbnail, subscribers };

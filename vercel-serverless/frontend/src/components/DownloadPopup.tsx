@@ -52,7 +52,7 @@ export default function DownloadPopup() {
         </button>
 
         <div className="flex flex-col items-center text-center space-y-4">
-          <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-4 rounded-full">
+          <div className="bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] p-4 rounded-full">
             <MonitorPlay className="w-12 h-12 text-white" />
           </div>
 
@@ -68,7 +68,7 @@ export default function DownloadPopup() {
           <div className="flex gap-3 w-full">
             <button
               onClick={handleDownload}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-all flex items-center justify-center gap-2"
+              className="flex-1 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:from-[#619CA9] hover:to-[#518EAC] text-white font-semibold py-3 px-6 rounded-lg transition-all flex items-center justify-center gap-2"
             >
               <Download className="w-5 h-5" />
               Download Now

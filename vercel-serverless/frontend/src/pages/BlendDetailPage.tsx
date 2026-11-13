@@ -161,13 +161,13 @@ export function BlendDetailPage() {
 
       {/* Blend Header - Mobile Optimized */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
-        <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+        <div className="w-28 h-28 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] rounded-2xl flex items-center justify-center flex-shrink-0">
           <Users size={48} className="sm:hidden text-white/80" />
           <Users size={64} className="hidden sm:block md:hidden text-white/80" />
           <Users size={80} className="hidden md:block text-white/80" />
         </div>
         <div className="flex-1 pt-0 sm:pt-4">
-          <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-purple-400 mb-1 sm:mb-2">
+          <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#518EAC] mb-1 sm:mb-2">
             Blend
           </p>
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-black mb-2 sm:mb-4">{currentBlend.name}</h1>
@@ -187,7 +187,7 @@ export function BlendDetailPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePlayAll}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity shadow-xl"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] rounded-full flex items-center justify-center hover:opacity-90 transition-opacity shadow-xl"
           >
             <Play size={20} fill="white" className="text-white ml-1" />
           </motion.button>
@@ -237,9 +237,9 @@ export function BlendDetailPage() {
                 <div className="w-5 sm:w-6 text-center text-gray-400 text-xs sm:text-sm flex-shrink-0">
                   {isPlaying ? (
                     <div className="flex gap-0.5 items-center justify-center">
-                      <div className="w-0.5 h-3 bg-purple-500 animate-pulse" />
-                      <div className="w-0.5 h-3 bg-purple-500 animate-pulse delay-75" />
-                      <div className="w-0.5 h-3 bg-purple-500 animate-pulse delay-150" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                     </div>
                   ) : (
                     <span>{index + 1}</span>
@@ -255,7 +255,7 @@ export function BlendDetailPage() {
 
                 {/* Track Info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-xs sm:text-sm font-medium truncate ${isPlaying ? 'text-purple-500' : 'text-white'}`}>
+                  <p className={`text-xs sm:text-sm font-medium truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                     {track.title}
                   </p>
                   <div className="flex items-center gap-1 sm:gap-2 mt-0.5 flex-wrap">
@@ -263,7 +263,7 @@ export function BlendDetailPage() {
                       {track.artist}
                     </p>
                     <span className="text-gray-600 hidden sm:inline">•</span>
-                    <p className={`text-[10px] sm:text-xs ${isFromCurrentUser ? 'text-purple-400' : 'text-pink-400'}`}>
+                    <p className={`text-[10px] sm:text-xs ${isFromCurrentUser ? 'text-[#518EAC]' : 'text-[#619CA9]'}`}>
                       {isFromCurrentUser ? 'You' : fromUser}
                     </p>
                   </div>
@@ -273,7 +273,7 @@ export function BlendDetailPage() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     onClick={(e) => handleToggleLike(e, track)}
-                    className={`p-1.5 sm:p-2 rounded-full transition-colors ${liked ? 'text-purple-500' : 'text-gray-400 sm:opacity-0 sm:group-hover:opacity-100'}`}
+                    className={`p-1.5 sm:p-2 rounded-full transition-colors ${liked ? 'text-[#A4C4D4]' : 'text-gray-400 sm:opacity-0 sm:group-hover:opacity-100'}`}
                   >
                     <Heart size={14} className="sm:hidden" fill={liked ? 'currentColor' : 'none'} />
                     <Heart size={16} className="hidden sm:block" fill={liked ? 'currentColor' : 'none'} />

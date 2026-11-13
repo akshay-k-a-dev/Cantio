@@ -73,7 +73,7 @@ export function PWAInstallPrompt() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4 animate-fade-in">
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-slide-up border border-gray-700">
             <div className="flex items-start gap-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] rounded-2xl flex items-center justify-center flex-shrink-0">
                 <span className="text-3xl">🎵</span>
               </div>
               <div className="flex-1">
@@ -84,15 +84,15 @@ export function PWAInstallPrompt() {
             
             <div className="space-y-2 mb-6 text-sm">
               <div className="flex items-center gap-2 text-gray-300">
-                <span className="text-green-400">✓</span>
+                <span className="text-[#518EAC]">✓</span>
                 <span>Works offline with cached music</span>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
-                <span className="text-green-400">✓</span>
+                <span className="text-[#518EAC]">✓</span>
                 <span>Add to home screen</span>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
-                <span className="text-green-400">✓</span>
+                <span className="text-[#518EAC]">✓</span>
                 <span>Fast and app-like experience</span>
               </div>
             </div>
@@ -106,7 +106,7 @@ export function PWAInstallPrompt() {
               </button>
               <button
                 onClick={handleInstall}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-500/50"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:from-[#619CA9] hover:to-[#518EAC] text-white rounded-xl font-bold transition-all shadow-lg shadow-[#0F4C6C]/50"
               >
                 Install App
               </button>
@@ -119,7 +119,7 @@ export function PWAInstallPrompt() {
       {showButton && !showInstall && deferredPrompt && (
         <button
           onClick={handleButtonClick}
-          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-full shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all hover:scale-105 z-40 flex items-center gap-2 font-medium"
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] text-white px-4 py-3 rounded-full shadow-2xl shadow-[#0F4C6C]/50 hover:shadow-[#518EAC]/70 transition-all hover:scale-105 z-40 flex items-center gap-2 font-medium"
         >
           <span className="text-xl">📲</span>
           <span className="hidden md:inline">Install App</span>

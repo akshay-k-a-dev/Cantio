@@ -69,7 +69,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50"
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50"
                 placeholder="your@email.com"
               />
             </div>
@@ -86,7 +86,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all disabled:opacity-50 pr-12"
+                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-2 focus:ring-[#518EAC]/20 outline-none transition-all disabled:opacity-50 pr-12"
                   placeholder="••••••••"
                   minLength={6}
                 />
@@ -103,7 +103,7 @@ export default function LoginPage() {
             <div className="text-right -mt-2">
               <Link
                 to="/forgot-password"
-                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-sm text-[#518EAC] hover:text-[#A4C4D4] transition-colors"
               >
                 Forgot password?
               </Link>
@@ -123,7 +123,7 @@ export default function LoginPage() {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                className="text-[#518EAC] hover:text-[#A4C4D4] font-medium transition-colors"
               >
                 Sign up
               </Link>

@@ -162,7 +162,7 @@ export function YTMusicDetailPage() {
       {meta && (
         <div className="flex items-start gap-6">
           {/* Thumbnail */}
-          <div className={`w-40 h-40 md:w-48 md:h-48 flex-shrink-0 overflow-hidden ${type === 'artist' ? 'rounded-full' : 'rounded-2xl'} bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center`}>
+          <div className={`w-40 h-40 md:w-48 md:h-48 flex-shrink-0 overflow-hidden ${type === 'artist' ? 'rounded-full' : 'rounded-2xl'} bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center`}>
             {meta.thumbnail ? (
               <img
                 src={meta.thumbnail}
@@ -195,7 +195,7 @@ export function YTMusicDetailPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePlayAll}
-            className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-400 transition-colors shadow-xl"
+            className="w-14 h-14 bg-[#518EAC] rounded-full flex items-center justify-center hover:bg-[#619CA9] transition-colors shadow-xl"
           >
             <Play size={24} fill="black" className="text-black ml-1" />
           </motion.button>
@@ -205,7 +205,7 @@ export function YTMusicDetailPage() {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               onClick={() => navigate(`/playlist/${savedPlaylistId}`)}
-              className="flex items-center gap-2 bg-green-500/20 text-green-400 border border-green-500/40 px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-green-500/30 transition-colors"
+              className="flex items-center gap-2 bg-[#518EAC]/20 text-[#A4C4D4] border border-[#518EAC]/40 px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-[#518EAC]/30 transition-colors"
             >
               <Check size={16} />
               Saved — View Playlist
@@ -244,9 +244,9 @@ export function YTMusicDetailPage() {
                 <div className="w-6 text-center text-gray-400 text-sm flex-shrink-0">
                   {isPlaying ? (
                     <div className="flex gap-0.5 items-center justify-center">
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                     </div>
                   ) : (
                     <span className="group-hover:hidden">{index + 1}</span>
@@ -263,10 +263,10 @@ export function YTMusicDetailPage() {
 
                 {/* Track Info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                  <p className={`text-sm font-medium truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                     {track.title}
                   </p>
-                  <p className="text-xs text-gray-400 truncate mt-0.5">{track.artist}</p>
+                  <p className="text-xs text-gray-400 truncate mt-0.5">{track.artist && track.artist.toUpperCase() !== 'N/A' ? track.artist : (meta?.subtitle && meta.subtitle.toUpperCase() !== 'N/A' && meta.subtitle !== 'Album' ? meta.subtitle : 'Unknown Artist')}</p>
                 </div>
 
                 {/* Duration */}
@@ -280,7 +280,7 @@ export function YTMusicDetailPage() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     onClick={(e) => handleToggleLike(e, track)}
-                    className={`p-2 rounded-full transition-colors ${liked ? 'text-green-500' : 'text-gray-400 opacity-0 group-hover:opacity-100'}`}
+                    className={`p-2 rounded-full transition-colors ${liked ? 'text-[#A4C4D4]' : 'text-gray-400 opacity-0 group-hover:opacity-100'}`}
                   >
                     <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
                   </button>

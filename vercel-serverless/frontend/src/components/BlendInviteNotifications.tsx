@@ -52,7 +52,7 @@ export function BlendInviteNotifications() {
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 100 }}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl"
+            className="bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl"
           >
             <div className="flex items-start gap-2 sm:gap-3">
               <div className="w-8 sm:w-10 h-8 sm:h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -71,7 +71,7 @@ export function BlendInviteNotifications() {
             <div className="flex items-center gap-2 mt-2 sm:mt-3">
               <button
                 onClick={() => handleAccept(invite.id)}
-                className="flex-1 py-1.5 sm:py-2 bg-white hover:bg-white/90 text-purple-600 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-colors"
+                className="flex-1 py-1.5 sm:py-2 bg-white hover:bg-white/90 text-[#0F4C6C] rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 transition-colors"
               >
                 <Check size={14} className="sm:hidden" />
                 <Check size={16} className="hidden sm:block" />

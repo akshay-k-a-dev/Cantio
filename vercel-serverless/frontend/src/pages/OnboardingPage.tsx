@@ -208,7 +208,7 @@ export default function OnboardingPage() {
   if (checking) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-12rem)]">
-        <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#518EAC] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -226,8 +226,8 @@ export default function OnboardingPage() {
           {/* Header */}
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles size={20} className="text-purple-400" />
-              <span className="text-xs font-medium text-purple-400 uppercase tracking-wider">
+              <Sparkles size={20} className="text-[#518EAC]" />
+              <span className="text-xs font-medium text-[#518EAC] uppercase tracking-wider">
                 Personalize Your Experience
               </span>
             </div>
@@ -249,7 +249,7 @@ export default function OnboardingPage() {
               <div
                 key={i}
                 className={`h-1 flex-1 rounded-full transition-colors ${
-                  i <= step ? 'bg-purple-500' : 'bg-white/10'
+                  i <= step ? 'bg-[#518EAC]' : 'bg-white/10'
                 }`}
               />
             ))}
@@ -265,7 +265,7 @@ export default function OnboardingPage() {
               transition={{ duration: 0.2 }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400">
+                <div className="p-2 rounded-lg bg-[#518EAC]/20 text-[#A4C4D4]">
                   {STEPS[step].icon}
                 </div>
                 <div>
@@ -283,7 +283,7 @@ export default function OnboardingPage() {
                       onClick={() => toggleItem(languages, setLanguages, lang)}
                       className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                         languages.includes(lang)
-                          ? 'bg-purple-600 text-white'
+                          ? 'bg-[#518EAC] text-white'
                           : 'bg-white/5 text-gray-300 hover:bg-white/10'
                       }`}
                     >
@@ -303,12 +303,12 @@ export default function OnboardingPage() {
                       onChange={e => setArtistInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addArtist())}
                       placeholder="Search artist, e.g., Arjith Singh"
-                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 outline-none text-sm text-white placeholder-gray-500"
+                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 focus:border-[#518EAC] focus:ring-1 focus:ring-[#518EAC]/30 outline-none text-sm text-white placeholder-gray-500"
                     />
                     <button
                       onClick={() => addArtist()}
                       disabled={!artistInput.trim()}
-                      className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-30 text-white text-sm font-medium rounded-lg transition-colors"
+                      className="px-4 py-2.5 bg-[#0F4C6C] hover:bg-[#518EAC] disabled:opacity-30 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       Add
                     </button>
@@ -317,7 +317,7 @@ export default function OnboardingPage() {
                     <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-black/20">
                       {artistSearchLoading && (
                         <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-400">
-                          <Loader2 size={16} className="animate-spin text-purple-400" />
+                          <Loader2 size={16} className="animate-spin text-[#518EAC]" />
                           Searching artists...
                         </div>
                       )}
@@ -340,7 +340,7 @@ export default function OnboardingPage() {
                               className="h-10 w-10 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-300">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#518EAC]/20 text-[#A4C4D4]">
                               <Mic2 size={18} />
                             </div>
                           )}
@@ -358,7 +358,7 @@ export default function OnboardingPage() {
                     {artists.map(name => (
                       <span
                         key={name}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-600/20 text-purple-300 rounded-full text-sm"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#518EAC]/20 text-[#A4C4D4] rounded-full text-sm"
                       >
                         {artistImages[name] && (
                           <img
@@ -389,7 +389,7 @@ export default function OnboardingPage() {
                       onClick={() => toggleItem(genres, setGenres, genre)}
                       className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                         genres.includes(genre)
-                          ? 'bg-purple-600 text-white'
+                          ? 'bg-[#518EAC] text-white'
                           : 'bg-white/5 text-gray-300 hover:bg-white/10'
                       }`}
                     >
@@ -424,7 +424,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleFinish}
                   disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-[#0F4C6C] hover:bg-[#518EAC] disabled:opacity-50 text-white rounded-lg transition-colors"
                 >
                   {saving ? 'Saving...' : 'Finish'}
                   <Sparkles size={16} />
@@ -433,7 +433,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(step + 1)}
                   disabled={saving}
-                  className="flex items-center gap-1 px-5 py-2 text-sm font-medium bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-5 py-2 text-sm font-medium bg-[#0F4C6C] hover:bg-[#518EAC] text-white rounded-lg transition-colors"
                 >
                   Next
                   <ChevronRight size={16} />

@@ -97,7 +97,7 @@ export function ComparisonPage() {
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#619CA9] bg-clip-text text-transparent">
             Cantio vs The Competition
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -114,7 +114,7 @@ export function ComparisonPage() {
               <tr className="border-b border-gray-700">
                 <th className="text-left py-4 px-4 font-semibold text-gray-300">Feature</th>
                 <th className="text-center py-4 px-4 font-semibold">
-                  <div className="text-purple-400">Cantio</div>
+                  <div className="text-[#518EAC]">Cantio</div>
                   <div className="text-xs text-gray-400">Privacy-First</div>
                 </th>
                 <th className="text-center py-4 px-4 font-semibold">
@@ -137,7 +137,7 @@ export function ComparisonPage() {
                   <td className="py-4 px-4 font-medium text-gray-300">{row.feature}</td>
                   <td className="text-center py-4 px-4">
                     {row.cantio === true ? (
-                      <Check className="w-5 h-5 text-green-400 mx-auto" />
+                      <Check className="w-5 h-5 text-[#518EAC] mx-auto" />
                     ) : row.cantio === false ? (
                       <X className="w-5 h-5 text-red-400 mx-auto" />
                     ) : (
@@ -146,7 +146,7 @@ export function ComparisonPage() {
                   </td>
                   <td className="text-center py-4 px-4">
                     {row.spotify === true ? (
-                      <Check className="w-5 h-5 text-green-400 mx-auto" />
+                      <Check className="w-5 h-5 text-[#518EAC] mx-auto" />
                     ) : row.spotify === false ? (
                       <X className="w-5 h-5 text-red-400 mx-auto" />
                     ) : (
@@ -155,7 +155,7 @@ export function ComparisonPage() {
                   </td>
                   <td className="text-center py-4 px-4">
                     {row.apple === true ? (
-                      <Check className="w-5 h-5 text-green-400 mx-auto" />
+                      <Check className="w-5 h-5 text-[#518EAC] mx-auto" />
                     ) : row.apple === false ? (
                       <X className="w-5 h-5 text-red-400 mx-auto" />
                     ) : (
@@ -164,7 +164,7 @@ export function ComparisonPage() {
                   </td>
                   <td className="text-center py-4 px-4">
                     {row.youtube === true ? (
-                      <Check className="w-5 h-5 text-green-400 mx-auto" />
+                      <Check className="w-5 h-5 text-[#518EAC] mx-auto" />
                     ) : row.youtube === false ? (
                       <X className="w-5 h-5 text-red-400 mx-auto" />
                     ) : (
@@ -184,12 +184,12 @@ export function ComparisonPage() {
 
         <div className="space-y-8">
           {/* vs Spotify */}
-          <div className="border border-gray-800 rounded-lg p-8 bg-gradient-to-br from-green-900/10 to-transparent">
+          <div className="border border-gray-800 rounded-lg p-8 bg-gradient-to-br from-[#0F4C6C]/10 to-transparent">
             <h3 className="text-2xl font-bold mb-4">Cantio vs Spotify</h3>
             
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h4 className="font-semibold text-green-400 mb-3">✓ Cantio Wins On</h4>
+                <h4 className="font-semibold text-[#518EAC] mb-3">✓ Cantio Wins On</h4>
                 <ul className="space-y-2 text-gray-300">
                   <li>• No forced account or sign-up</li>
                   <li>• Zero data tracking or analytics</li>
@@ -213,8 +213,8 @@ export function ComparisonPage() {
               </div>
             </div>
 
-            <div className="mt-6 p-4 bg-green-900/20 border border-green-700/50 rounded">
-              <p className="text-green-300">
+            <div className="mt-6 p-4 bg-[#0F4C6C]/20 border border-[#518EAC]/50 rounded">
+              <p className="text-[#A4C4D4]">
                 <strong>Bottom Line:</strong> If you prioritize privacy and want to listen without tracking, Cantio is superior. If you want the most polished experience with advanced features, Spotify still leads—but at the cost of your data.
               </p>
             </div>
@@ -226,7 +226,7 @@ export function ComparisonPage() {
             
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h4 className="font-semibold text-green-400 mb-3">✓ Cantio Wins On</h4>
+                <h4 className="font-semibold text-[#518EAC] mb-3">✓ Cantio Wins On</h4>
                 <ul className="space-y-2 text-gray-300">
                   <li>• No Google account required</li>
                   <li>• Better privacy (no Google tracking)</li>
@@ -257,12 +257,12 @@ export function ComparisonPage() {
           </div>
 
           {/* vs Apple Music */}
-          <div className="border border-gray-800 rounded-lg p-8 bg-gradient-to-br from-pink-900/10 to-transparent">
+          <div className="border border-gray-800 rounded-lg p-8 bg-gradient-to-br from-[#619CA9]/10 to-transparent">
             <h3 className="text-2xl font-bold mb-4">Cantio vs Apple Music</h3>
             
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h4 className="font-semibold text-green-400 mb-3">✓ Cantio Wins On</h4>
+                <h4 className="font-semibold text-[#518EAC] mb-3">✓ Cantio Wins On</h4>
                 <ul className="space-y-2 text-gray-300">
                   <li>• Works on Windows and Linux</li>
                   <li>• No subscription required</li>
@@ -284,8 +284,8 @@ export function ComparisonPage() {
               </div>
             </div>
 
-            <div className="mt-6 p-4 bg-pink-900/20 border border-pink-700/50 rounded">
-              <p className="text-pink-300">
+            <div className="mt-6 p-4 bg-[#619CA9]/20 border border-[#619CA9]/50 rounded">
+              <p className="text-[#A4C4D4]">
                 <strong>Bottom Line:</strong> Apple Music is great if you're in the Apple ecosystem. Cantio is better if you use multiple platforms and value privacy over audio quality.
               </p>
             </div>
@@ -297,7 +297,7 @@ export function ComparisonPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-16 bg-gray-900/50 border-y border-gray-800">
         <h2 className="text-3xl font-bold mb-12 text-center">Choose Cantio If You...</h2>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="p-6 bg-gradient-to-br from-purple-900/20 to-transparent border border-purple-500/20 rounded-lg">
+          <div className="p-6 bg-gradient-to-br from-[#0F4C6C]/20 to-transparent border border-[#518EAC]/20 rounded-lg">
             <h3 className="font-bold text-lg mb-3">🔒 Value Privacy</h3>
             <p className="text-gray-300">Don't want your listening habits tracked or sold to advertisers.</p>
           </div>
@@ -305,11 +305,11 @@ export function ComparisonPage() {
             <h3 className="font-bold text-lg mb-3">👨‍💻 Love Open Source</h3>
             <p className="text-gray-300">Want auditable code and community-driven development.</p>
           </div>
-          <div className="p-6 bg-gradient-to-br from-pink-900/20 to-transparent border border-pink-500/20 rounded-lg">
+          <div className="p-6 bg-gradient-to-br from-[#619CA9]/20 to-transparent border border-[#619CA9]/20 rounded-lg">
             <h3 className="font-bold text-lg mb-3">💰 Prefer Free</h3>
             <p className="text-gray-300">Want unlimited music without paying subscription fees.</p>
           </div>
-          <div className="p-6 bg-gradient-to-br from-green-900/20 to-transparent border border-green-500/20 rounded-lg">
+          <div className="p-6 bg-gradient-to-br from-[#518EAC]/20 to-transparent border border-[#518EAC]/20 rounded-lg">
             <h3 className="font-bold text-lg mb-3">🖥️ Use Windows/Linux</h3>
             <p className="text-gray-300">Need a desktop app that works on non-Apple platforms.</p>
           </div>
@@ -328,7 +328,7 @@ export function ComparisonPage() {
       <section className="px-4 sm:px-6 lg:px-8 py-20 text-center">
         <h2 className="text-3xl font-bold mb-4">Make Your Choice</h2>
         <p className="text-gray-400 mb-8">No account needed. Try Cantio now and see the difference.</p>
-        <a href="/" className="inline-block px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+        <a href="/" className="inline-block px-8 py-3 bg-[#518EAC] hover:bg-[#619CA9] rounded-lg font-semibold transition">
           Start Listening Now
         </a>
       </section>

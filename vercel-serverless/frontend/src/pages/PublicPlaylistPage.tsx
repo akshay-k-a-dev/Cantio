@@ -178,7 +178,7 @@ export function PublicPlaylistPage() {
       </button>
 
       <div className="flex items-start gap-6">
-        <div className="w-48 h-48 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+        <div className="w-48 h-48 bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] rounded-2xl flex items-center justify-center flex-shrink-0">
           <Music size={80} className="text-white/80" />
         </div>
         <div className="flex-1 pt-4">
@@ -200,7 +200,7 @@ export function PublicPlaylistPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePlayAll}
-                className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-400 transition-colors shadow-xl"
+                className="w-14 h-14 bg-[#518EAC] rounded-full flex items-center justify-center hover:bg-[#619CA9] transition-colors shadow-xl"
               >
                 <Play size={24} fill="black" className="text-black ml-1" />
               </motion.button>
@@ -222,8 +222,8 @@ export function PublicPlaylistPage() {
                 disabled={saving || saved}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                   saved
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                    : 'bg-purple-600 hover:bg-purple-500 text-white'
+                    ? 'bg-[#518EAC]/20 text-[#A4C4D4] border border-[#518EAC]/30'
+                    : 'bg-[#0F4C6C] hover:bg-[#518EAC] text-white'
                 } disabled:opacity-70 disabled:cursor-not-allowed`}
               >
                 {saving ? (
@@ -264,9 +264,9 @@ export function PublicPlaylistPage() {
                 <div className="w-6 text-center text-gray-400 text-sm">
                   {isPlaying ? (
                     <div className="flex gap-0.5 items-center justify-center">
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                     </div>
                   ) : (
                     <span>{index + 1}</span>
@@ -278,7 +278,7 @@ export function PublicPlaylistPage() {
                   className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                  <p className={`text-sm font-medium truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                     {track.title}
                   </p>
                   <p className="text-xs text-gray-400 truncate mt-0.5">

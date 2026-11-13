@@ -46,7 +46,7 @@ const DOWNLOADS = [
     label: 'Linux (AppImage)',
     file: 'Cantio-1.0.0.AppImage',
     href: 'https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/Cantio-1.0.0.AppImage',
-    gradient: 'from-green-500 to-emerald-500',
+    gradient: 'from-[#518EAC] to-[#0F4C6C]',
     icon: <MonitorPlay className="w-5 h-5" />,
     available: true,
   },
@@ -54,7 +54,7 @@ const DOWNLOADS = [
     label: 'Android',
     file: 'GitHub Releases',
     href: 'https://github.com/akshay-k-a-dev/Cantio_Mobile/releases',
-    gradient: 'from-green-500 to-lime-500',
+    gradient: 'from-[#518EAC] to-[#619CA9]',
     icon: <Smartphone className="w-5 h-5" />,
     available: true,
   },
@@ -64,8 +64,8 @@ const DOWNLOADS = [
 const FEATURES = [
   {
     icon: <ShieldOff className="w-6 h-6" />,
-    color: 'text-purple-400',
-    bg: 'bg-purple-500/10',
+    color: 'text-[#518EAC]',
+    bg: 'bg-[#518EAC]/10',
     title: 'Zero tracking',
     desc: 'No analytics, no telemetry, no ads. Your listening history stays on your device.',
   },
@@ -78,15 +78,15 @@ const FEATURES = [
   },
   {
     icon: <HardDrive className="w-6 h-6" />,
-    color: 'text-green-400',
-    bg: 'bg-green-500/10',
+    color: 'text-[#518EAC]',
+    bg: 'bg-[#518EAC]/10',
     title: 'Local + streaming',
     desc: 'Stream from YouTube Music or play local files. One experience, your choice of source.',
   },
   {
     icon: <Layers className="w-6 h-6" />,
-    color: 'text-pink-400',
-    bg: 'bg-pink-500/10',
+    color: 'text-[#619CA9]',
+    bg: 'bg-[#619CA9]/10',
     title: 'Cross-device playlists',
     desc: 'Playlists sync instantly between web, desktop and mobile when signed in.',
   },
@@ -136,7 +136,7 @@ export function LandingPage() {
       {/* ── Nav ──────────────────────────────────────────────────── */}
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-black/70 backdrop-blur-md border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center">
             <Music className="w-4 h-4 text-white" />
           </div>
           <span className="text-lg font-black tracking-tight">Cantio</span>
@@ -172,8 +172,8 @@ export function LandingPage() {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative flex flex-col items-center justify-center text-center min-h-screen px-6 pt-24 pb-20 overflow-hidden">
         {/* background glow blobs */}
-        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-purple-700/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-pink-700/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-[#0F4C6C]/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-[#0F4C6C]/20 rounded-full blur-[120px] pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -189,7 +189,7 @@ export function LandingPage() {
 
           {/* headline */}
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-none mb-6">
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#A4C4D4] via-[#518EAC] to-[#0F4C6C] bg-clip-text text-transparent">
               Cantio
             </span>
           </h1>
@@ -206,7 +206,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href="/"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-xl shadow-purple-900/40"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:from-[#619CA9] hover:to-[#518EAC] text-white font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-xl shadow-[#0F4C6C]/40"
             >
               <Globe className="w-5 h-5" />
               Launch Web App
@@ -229,7 +229,7 @@ export function LandingPage() {
           className="relative z-10 mt-16 w-full max-w-sm mx-auto bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm"
         >
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center flex-shrink-0">
               <Music className="w-7 h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0 text-left">
@@ -239,14 +239,14 @@ export function LandingPage() {
           </div>
           {/* fake progress bar */}
           <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-2">
-            <div className="h-full w-3/5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
+            <div className="h-full w-3/5 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] rounded-full" />
           </div>
           <div className="flex justify-between text-xs text-gray-500">
             <span>2:14</span><span>3:45</span>
           </div>
           <div className="flex justify-center items-center gap-6 mt-4 text-gray-300">
             <Shuffle className="w-4 h-4" />
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center">
               <Music className="w-4 h-4 text-white" />
             </div>
             <RefreshCw className="w-4 h-4" />
@@ -264,7 +264,7 @@ export function LandingPage() {
               viewport={{ once: true }}
               transition={{ delay: 0 }}
             >
-              <p className="text-xs font-bold uppercase tracking-widest text-purple-400 mb-3">What it is</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#518EAC] mb-3">What it is</p>
               <h2 className="text-2xl font-black mb-3">A music player that respects you</h2>
               <p className="text-gray-400">Cantio streams music and organises your library without secretly selling your taste to advertisers. It's just a music player.</p>
             </motion.div>
@@ -274,7 +274,7 @@ export function LandingPage() {
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              <p className="text-xs font-bold uppercase tracking-widest text-pink-400 mb-3">Why it's different</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#619CA9] mb-3">Why it's different</p>
               <h2 className="text-2xl font-black mb-3">Open source, no paywall</h2>
               <p className="text-gray-400">No premium tier, no feature lock. Every feature — sync, playlists, Blends, lyrics — is free for everyone, forever.</p>
             </motion.div>
@@ -337,8 +337,8 @@ export function LandingPage() {
                 transition={{ delay: i * 0.08 }}
                 className="flex gap-5"
               >
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-white/10 flex items-center justify-center">
-                  <span className="text-sm font-black text-purple-300">{s.num}</span>
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#518EAC]/20 to-[#0F4C6C]/20 border border-[#518EAC]/20 flex items-center justify-center">
+                  <span className="text-sm font-black text-[#A4C4D4]">{s.num}</span>
                 </div>
                 <div>
                   <h3 className="font-bold mb-1">{s.title}</h3>
@@ -350,7 +350,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-12">
             <a
               href="/"
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold px-8 py-3.5 rounded-full transition-all shadow-xl shadow-purple-900/40"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:from-[#619CA9] hover:to-[#518EAC] text-white font-bold px-8 py-3.5 rounded-full transition-all shadow-xl shadow-[#0F4C6C]/40"
             >
               <Globe className="w-5 h-5" />
               Launch Web App
@@ -379,18 +379,18 @@ export function LandingPage() {
                 {d.available && d.href ? (
                   <a
                     href={d.href}
-                    className="flex items-center justify-between p-4 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-purple-500/40 rounded-2xl transition-all group"
+                    className="flex items-center justify-between p-4 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-[#518EAC]/40 rounded-2xl transition-all group"
                   >
                     <div className="flex items-center gap-4">
                       <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${d.gradient} flex items-center justify-center text-white flex-shrink-0`}>
                         {d.icon}
                       </div>
                       <div>
-                        <p className="font-semibold group-hover:text-purple-300 transition-colors">{d.label}</p>
+                        <p className="font-semibold group-hover:text-[#A4C4D4] transition-colors">{d.label}</p>
                         <p className="text-sm text-gray-400">{d.file}</p>
                       </div>
                     </div>
-                    <Download className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors flex-shrink-0" />
+                    <Download className="w-5 h-5 text-gray-400 group-hover:text-[#518EAC] transition-colors flex-shrink-0" />
                   </a>
                 ) : (
                   <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.07] rounded-2xl opacity-50">
@@ -410,9 +410,9 @@ export function LandingPage() {
           </div>
 
           {/* Web App CTA row */}
-          <div className="mt-6 p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-between gap-4 flex-wrap">
+          <div className="mt-6 p-4 bg-gradient-to-r from-[#0F4C6C]/20 to-[#518EAC]/20 border border-[#518EAC]/20 rounded-2xl flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center flex-shrink-0">
                 <Globe className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -422,7 +422,7 @@ export function LandingPage() {
             </div>
             <a
               href="/"
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:from-purple-400 hover:to-pink-400 transition-all flex-shrink-0"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:from-[#619CA9] hover:to-[#518EAC] transition-all flex-shrink-0"
             >
               Open App
               <ChevronRight className="w-4 h-4" />
@@ -443,12 +443,12 @@ export function LandingPage() {
             {/* About */}
             <Link
               to="/landing/about"
-              className="p-5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-purple-500/40 rounded-2xl transition-all group"
+              className="p-5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-[#518EAC]/40 rounded-2xl transition-all group"
             >
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-3 group-hover:bg-purple-500/20 transition">
+              <div className="w-10 h-10 rounded-lg bg-[#518EAC]/10 flex items-center justify-center text-[#518EAC] mb-3 group-hover:bg-[#518EAC]/20 transition">
                 <FileText className="w-5 h-5" />
               </div>
-              <h3 className="font-bold mb-1 group-hover:text-purple-300 transition">About Cantio</h3>
+              <h3 className="font-bold mb-1 group-hover:text-[#A4C4D4] transition">About Cantio</h3>
               <p className="text-sm text-gray-500">Mission, values, and tech stack</p>
             </Link>
 
@@ -467,12 +467,12 @@ export function LandingPage() {
             {/* Use Cases */}
             <Link
               to="/landing/use-cases"
-              className="p-5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-pink-500/40 rounded-2xl transition-all group"
+              className="p-5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-[#619CA9]/40 rounded-2xl transition-all group"
             >
-              <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400 mb-3 group-hover:bg-pink-500/20 transition">
+              <div className="w-10 h-10 rounded-lg bg-[#619CA9]/10 flex items-center justify-center text-[#619CA9] mb-3 group-hover:bg-[#619CA9]/20 transition">
                 <Users className="w-5 h-5" />
               </div>
-              <h3 className="font-bold mb-1 group-hover:text-pink-300 transition">Use Cases</h3>
+              <h3 className="font-bold mb-1 group-hover:text-[#A4C4D4] transition">Use Cases</h3>
               <p className="text-sm text-gray-500">Who benefits most from Cantio</p>
             </Link>
 
@@ -491,12 +491,12 @@ export function LandingPage() {
             {/* FAQ */}
             <Link
               to="/landing/faq"
-              className="p-5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-green-500/40 rounded-2xl transition-all group"
+              className="p-5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-[#518EAC]/40 rounded-2xl transition-all group"
             >
-              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 mb-3 group-hover:bg-green-500/20 transition">
+              <div className="w-10 h-10 rounded-lg bg-[#518EAC]/10 flex items-center justify-center text-[#518EAC] mb-3 group-hover:bg-[#518EAC]/20 transition">
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <h3 className="font-bold mb-1 group-hover:text-green-300 transition">FAQ</h3>
+              <h3 className="font-bold mb-1 group-hover:text-[#A4C4D4] transition">FAQ</h3>
               <p className="text-sm text-gray-500">28+ questions answered</p>
             </Link>
 
@@ -547,7 +547,7 @@ export function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center">
                   <Music className="w-3 h-3 text-white" />
                 </div>
                 <span className="font-bold text-white">Cantio</span>

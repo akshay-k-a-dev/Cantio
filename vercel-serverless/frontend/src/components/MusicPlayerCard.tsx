@@ -69,7 +69,7 @@ export function MusicPlayerCard() {
       className="glass rounded-2xl overflow-hidden shadow-2xl"
     >
       {/* Album Art */}
-      <div className="relative aspect-square w-full bg-gradient-to-br from-purple-600 to-pink-600">
+      <div className="relative aspect-square w-full bg-gradient-to-br from-[#518EAC] to-[#0F4C6C]">
         {currentTrack.thumbnail ? (
           <img
             src={currentTrack.thumbnail}
@@ -108,7 +108,7 @@ export function MusicPlayerCard() {
             className="h-2 bg-white/10 rounded-full cursor-pointer group"
           >
             <motion.div
-              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full relative"
+              className="h-full bg-gradient-to-r from-[#518EAC] to-[#619CA9] rounded-full relative"
               style={{ width: `${(progress / duration) * 100 || 0}%` }}
             >
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -126,7 +126,7 @@ export function MusicPlayerCard() {
             onClick={handleLike}
             className={`p-3 rounded-full transition-all ${
               liked
-                ? 'bg-pink-500 text-white'
+                ? 'bg-[#518EAC] text-[#A4C4D4]'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
@@ -144,7 +144,7 @@ export function MusicPlayerCard() {
             <button
               onClick={togglePlay}
               disabled={isLoading}
-              className="p-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50"
+              className="p-4 rounded-full bg-gradient-to-r from-[#518EAC] to-[#0F4C6C] hover:from-[#619CA9] hover:to-[#518EAC] transition-all disabled:opacity-50"
             >
               {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
             </button>
@@ -177,7 +177,7 @@ export function MusicPlayerCard() {
                   max="100"
                   value={volume * 100}
                   onChange={(e) => setVolume(Number(e.target.value) / 100)}
-                  className="w-24 accent-purple-500"
+                  className="w-24 accent-[#518EAC]"
                 />
               </motion.div>
             )}

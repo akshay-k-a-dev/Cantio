@@ -171,7 +171,7 @@ export function PlaylistDetailPage() {
 
       {/* Playlist Header */}
       <div className="flex items-start gap-6">
-        <div className="w-48 h-48 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+        <div className="w-48 h-48 bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] rounded-2xl flex items-center justify-center flex-shrink-0">
           <Music size={80} className="text-white/80" />
         </div>
         <div className="flex-1 pt-4">
@@ -197,7 +197,7 @@ export function PlaylistDetailPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePlayAll}
-            className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-400 transition-colors shadow-xl"
+            className="w-14 h-14 bg-[#518EAC] rounded-full flex items-center justify-center hover:bg-[#619CA9] transition-colors shadow-xl"
           >
             <Play size={24} fill="black" className="text-black ml-1" />
           </motion.button>
@@ -240,9 +240,9 @@ export function PlaylistDetailPage() {
                 <div className="w-6 text-center text-gray-400 text-sm">
                   {isPlaying ? (
                     <div className="flex gap-0.5 items-center justify-center">
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-75" />
-                      <div className="w-0.5 h-3 bg-green-500 animate-pulse delay-150" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-75" />
+                      <div className="w-0.5 h-3 bg-[#518EAC] animate-pulse delay-150" />
                     </div>
                   ) : (
                     <span>{index + 1}</span>
@@ -258,7 +258,7 @@ export function PlaylistDetailPage() {
 
                 {/* Track Info */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                  <p className={`text-sm font-medium truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                     {track.title}
                   </p>
                   <p className="text-xs text-gray-400 truncate mt-0.5">
@@ -270,7 +270,7 @@ export function PlaylistDetailPage() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     onClick={(e) => handleToggleLike(e, track)}
-                    className={`p-2 rounded-full transition-colors ${liked ? 'text-green-500' : 'text-gray-400 opacity-0 group-hover:opacity-100'}`}
+                    className={`p-2 rounded-full transition-colors ${liked ? 'text-[#A4C4D4]' : 'text-gray-400 opacity-0 group-hover:opacity-100'}`}
                   >
                     <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
                   </button>

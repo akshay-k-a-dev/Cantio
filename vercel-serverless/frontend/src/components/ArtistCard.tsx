@@ -18,7 +18,7 @@ export default function ArtistCard({ artist, index, isSelected, onSelect }: Arti
       whileTap={{ scale: 0.97 }}
       className={`group relative rounded-xl p-3 border transition-all duration-200 cursor-pointer ${
         isSelected
-          ? 'bg-purple-500/20 border-purple-500/50'
+          ? 'bg-[#518EAC]/20 border-[#518EAC]/50'
           : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/5 hover:border-white/10'
       }`}
       onClick={onSelect}
@@ -39,7 +39,7 @@ export default function ArtistCard({ artist, index, isSelected, onSelect }: Arti
 
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="bg-purple-500 rounded-full p-3 shadow-lg shadow-purple-500/30">
+          <div className="bg-[#518EAC] rounded-full p-3 shadow-lg shadow-[#518EAC]/30">
             {isSelected
               ? <ChevronDown size={20} className="text-white" />
               : <Play size={20} fill="white" className="text-white" />}
@@ -48,14 +48,14 @@ export default function ArtistCard({ artist, index, isSelected, onSelect }: Arti
 
         {/* Selected ring */}
         {isSelected && (
-          <div className="absolute inset-0 ring-2 ring-purple-500 rounded-lg" />
+          <div className="absolute inset-0 ring-2 ring-[#518EAC] rounded-lg" />
         )}
       </div>
 
       {/* Artist info */}
       <div>
         <h3 className={`text-sm font-semibold truncate mb-0.5 ${
-          isSelected ? 'text-purple-300' : 'text-white'
+          isSelected ? 'text-[#A4C4D4]' : 'text-white'
         }`}>
           {artist.name}
         </h3>

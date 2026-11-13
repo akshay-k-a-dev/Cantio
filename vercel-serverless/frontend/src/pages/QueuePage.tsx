@@ -154,10 +154,10 @@ export function QueuePage() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handlePlay(track)}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-green-500 flex items-center justify-center transition-colors flex-shrink-0"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#518EAC] flex items-center justify-center transition-colors flex-shrink-0"
               >
                 {isPlaying ? (
-                  <Music size={18} className="text-green-500" />
+                  <Music size={18} className="text-[#518EAC]" />
                 ) : (
                   <Play size={18} fill="white" className="text-white ml-0.5" />
                 )}
@@ -172,7 +172,7 @@ export function QueuePage() {
 
               {/* Track Info */}
               <div className="flex-1 min-w-0">
-                <p className={`font-semibold truncate ${isPlaying ? 'text-green-500' : 'text-white'}`}>
+                <p className={`font-semibold truncate ${isPlaying ? 'text-[#518EAC]' : 'text-white'}`}>
                   {track.title}
                 </p>
                 <p className="text-sm text-gray-400 truncate">{track.artist}</p>

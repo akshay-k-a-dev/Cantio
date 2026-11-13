@@ -30,22 +30,22 @@ export function LandingLayout({ children, title, description, ogImage }: Landing
   }, [title, description, ogImage, location.pathname]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+    <div className="min-h-screen bg-[#010101] text-white">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+      <nav className="sticky top-0 z-50 bg-[#010101]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/landing" className="flex items-center space-x-2 font-bold text-xl hover:text-purple-400 transition">
-              <span className="text-purple-500">♪</span>
+            <Link to="/landing" className="flex items-center space-x-2 font-bold text-xl hover:text-[#518EAC] transition">
+              <span className="text-[#518EAC]">♪</span>
               <span>Cantio</span>
             </Link>
             <div className="hidden md:flex items-center space-x-6 text-sm">
-              <Link to="/landing/features" className="hover:text-purple-400 transition">Features</Link>
-              <Link to="/landing/use-cases" className="hover:text-purple-400 transition">Use Cases</Link>
-              <Link to="/landing/comparison" className="hover:text-purple-400 transition">Comparison</Link>
-              <Link to="/landing/faq" className="hover:text-purple-400 transition">FAQ</Link>
-              <Link to="/landing/docs" className="hover:text-purple-400 transition">Docs</Link>
-              <a href="https://github.com/akshay-k-a-dev/Cantio" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition">GitHub</a>
+              <Link to="/landing/features" className="hover:text-[#518EAC] transition">Features</Link>
+              <Link to="/landing/use-cases" className="hover:text-[#518EAC] transition">Use Cases</Link>
+              <Link to="/landing/comparison" className="hover:text-[#518EAC] transition">Comparison</Link>
+              <Link to="/landing/faq" className="hover:text-[#518EAC] transition">FAQ</Link>
+              <Link to="/landing/docs" className="hover:text-[#518EAC] transition">Docs</Link>
+              <a href="https://github.com/akshay-k-a-dev/Cantio" target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition">GitHub</a>
             </div>
           </div>
         </div>

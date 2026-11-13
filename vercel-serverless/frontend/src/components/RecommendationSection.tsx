@@ -41,7 +41,7 @@ export default function RecommendationSection({
           {onViewAll && tracks.length > 6 && (
             <button
               onClick={onViewAll}
-              className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-1 text-xs text-[#518EAC] hover:text-[#A4C4D4] transition-colors"
             >
               View all
               <ChevronRight size={14} />

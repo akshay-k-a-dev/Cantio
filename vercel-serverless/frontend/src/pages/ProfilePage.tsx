@@ -110,7 +110,7 @@ export default function ProfilePage() {
       >
         <div className="flex items-center justify-between mb-6 sm:mb-8 gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-full bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center">
               <User className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div className="min-w-0">
@@ -138,14 +138,14 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowPasswordChange(!showPasswordChange)}
-              className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-2 text-[#518EAC] hover:text-[#A4C4D4] transition-colors"
             >
               <Lock className="w-5 h-5" />
               <span className="font-medium">Change Password</span>
             </button>
             <Link
               to="/forgot-password"
-              className="text-sm text-gray-400 hover:text-purple-400 transition-colors"
+              className="text-sm text-gray-400 hover:text-[#518EAC] transition-colors"
             >
               Forgot password?
             </Link>
@@ -170,7 +170,7 @@ export default function ProfilePage() {
                     id="currentPassword"
                     value={passwordForm.currentPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 pr-12"
+                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-[#518EAC] pr-12"
                     required
                     disabled={isLoading}
                   />
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                     id="newPassword"
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 pr-12"
+                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-[#518EAC] pr-12"
                     required
                     disabled={isLoading}
                   />
@@ -223,7 +223,7 @@ export default function ProfilePage() {
                     id="confirmPassword"
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500 pr-12"
+                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-[#518EAC] pr-12"
                     required
                     disabled={isLoading}
                   />
@@ -244,7 +244,7 @@ export default function ProfilePage() {
               )}
 
               {passwordSuccess && (
-                <div className="text-green-400 text-sm bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                <div className="text-[#A4C4D4] text-sm bg-[#518EAC]/10 border border-[#518EAC]/20 rounded-lg p-3">
                   {passwordSuccess}
                 </div>
               )}
@@ -287,57 +287,57 @@ export default function ProfilePage() {
               {/* Windows */}
               <a
                 href="https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/Cantio.Setup.1.0.0.exe"
-                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-purple-500/50 rounded-xl transition-all group"
+                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-[#518EAC]/50 rounded-xl transition-all group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center">
                       <MonitorPlay className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold group-hover:text-purple-400 transition-colors">Windows</h3>
+                      <h3 className="font-semibold group-hover:text-[#518EAC] transition-colors">Windows</h3>
                       <p className="text-sm text-gray-400">Cantio Setup 1.0.0.exe</p>
                     </div>
                   </div>
-                  <Download className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                  <Download className="w-5 h-5 text-gray-400 group-hover:text-[#518EAC] transition-colors" />
                 </div>
               </a>
 
               {/* Linux DEB */}
               <a
                 href="https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/cantio-desktop_1.0.0_amd64.deb"
-                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-purple-500/50 rounded-xl transition-all group"
+                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-[#518EAC]/50 rounded-xl transition-all group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0F4C6C] to-[#518EAC] flex items-center justify-center">
                       <MonitorPlay className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold group-hover:text-purple-400 transition-colors">Linux (Debian/Ubuntu)</h3>
+                      <h3 className="font-semibold group-hover:text-[#518EAC] transition-colors">Linux (Debian/Ubuntu)</h3>
                       <p className="text-sm text-gray-400">cantio-desktop_1.0.0_amd64.deb</p>
                     </div>
                   </div>
-                  <Download className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                  <Download className="w-5 h-5 text-gray-400 group-hover:text-[#518EAC] transition-colors" />
                 </div>
               </a>
 
               {/* Linux AppImage */}
               <a
                 href="https://github.com/akshay-k-a-dev/Cantio/releases/download/cantio-initial/Cantio-1.0.0.AppImage"
-                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-purple-500/50 rounded-xl transition-all group"
+                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-[#518EAC]/50 rounded-xl transition-all group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#518EAC] to-[#0F4C6C] flex items-center justify-center">
                       <MonitorPlay className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold group-hover:text-purple-400 transition-colors">Linux (AppImage)</h3>
+                      <h3 className="font-semibold group-hover:text-[#518EAC] transition-colors">Linux (AppImage)</h3>
                       <p className="text-sm text-gray-400">Cantio-1.0.0.AppImage</p>
                     </div>
                   </div>
-                  <Download className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                  <Download className="w-5 h-5 text-gray-400 group-hover:text-[#518EAC] transition-colors" />
                 </div>
               </a>
 
@@ -346,19 +346,19 @@ export default function ProfilePage() {
                 href="https://github.com/akshay-k-a-dev/Cantio_Mobile/releases"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-purple-500/50 rounded-xl transition-all group"
+                className="block p-4 bg-black/30 hover:bg-black/50 border border-white/10 hover:border-[#518EAC]/50 rounded-xl transition-all group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-lime-500 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#518EAC] to-[#619CA9] flex items-center justify-center">
                       <Smartphone className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold group-hover:text-purple-400 transition-colors">Android</h3>
+                      <h3 className="font-semibold group-hover:text-[#518EAC] transition-colors">Android</h3>
                       <p className="text-sm text-gray-400">GitHub Releases</p>
                     </div>
                   </div>
-                  <Download className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                  <Download className="w-5 h-5 text-gray-400 group-hover:text-[#518EAC] transition-colors" />
                 </div>
               </a>
 

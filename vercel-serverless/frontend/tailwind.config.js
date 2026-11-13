@@ -16,16 +16,24 @@ export default {
       },
       colors: {
         primary: {
-          50: '#fdf4ff',
-          100: '#fae8ff',
-          200: '#f5d0fe',
-          300: '#f0abfc',
-          400: '#e879f9',
-          500: '#d946ef',
-          600: '#c026d3',
-          700: '#a21caf',
-          800: '#86198f',
-          900: '#701a75',
+          50: '#e8f4f8',
+          100: '#c5e0ec',
+          200: '#a4c4d4',   // Pale Frost Blue
+          300: '#83aec0',
+          400: '#619ca9',   // Muted Steel Blue
+          500: '#518eac',   // Cerulean Blue (main accent)
+          600: '#0f4c6c',   // Deep Midnight Teal
+          700: '#0a3850',
+          800: '#062030',
+          900: '#010101',   // Pitch Black
+        },
+        dawnfm: {
+          black:   '#010101',
+          teal:    '#0F4C6C',
+          cerulean:'#518EAC',
+          steel:   '#619CA9',
+          frost:   '#A4C4D4',
+          ash:     '#C8C8C8',
         },
       },
       animation: {
